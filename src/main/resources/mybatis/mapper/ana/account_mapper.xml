@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.ana.mapper.AccountMapper">
+  <resultMap id="accountMap" type="com.haihua.hhplms.ana.entity.Account">
+    <id column="sid" property="sid" />
+    <result column="login_name" property="loginName" />
+    <result column="nick_name" property="nickName" />
+    <result column="real_name" property="realName" />
+    <result column="mobile" property="mobile" />
+    <result column="email" property="email" />
+    <result column="password" property="password" />
+    <result column="gender" property="gender" />
+    <result column="head_img_url" property="headImgUrl" />
+    <result column="type" property="type" />
+    <result column="status" property="status" />
+    <result column="company_info_sid" property="companyInfoSid" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, login_name, nick_name, real_name, mobile, email, password, gender, head_img_url, type, status, company_info_sid, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <insert id="create" parameterType="com.haihua.hhplms.ana.entity.Account" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into ana_account
+    (login_name, nick_name, real_name, mobile, email, password, gender, type, status, created_by, created_time, version_num)
+    values
+    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <update id="updateByParams" parameterType="map" statementType="PREPARED">
+    update ana_account
+    <set>
+      <if test="headImgUrl != null">
+        head_img_url = #{headImgUrl},
+      </if>
+      <if test="password != null">
+        password = #{password},
+      </if>
+      <if test="type != null">
+        type = #{type},
+      </if>
+      <if test="status != null">
+        status = #{status},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <update id="updateByExample" parameterType="com.haihua.hhplms.ana.entity.Account" statementType="PREPARED">
+    update ana_account
+    <set>
+      <if test="loginName != null">
+        login_name = #{loginName},
+      </if>
+      <if test="nickName != null">
+        nick_name = #{nickName},
+      </if>
+      <if test="realName != null">
+        real_name = #{realName},
+      </if>
+      <if test="mobile != null">
+        mobile = #{mobile},
+      </if>
+      <if test="email != null">
+        email = #{email},
+      </if>
+      <if test="gender != null">
+        gender = #{gender},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
+    delete from ana_account
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="loginName != null">
+        and login_name = #{loginName}
+      </if>
+      <if test="mobile != null">
+        and mobile = #{mobile}
+      </if>
+      <if test="email != null">
+        and email = #{email}
+      </if>
+    </where>
+  </delete>
+
+  <select id="countByParams" resultType="int" parameterType="map" statementType="PREPARED">
+    select count(1)
+    from ana_account
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="loginName != null">
+        and login_name = #{loginName}
+      </if>
+      <if test="loginNameLike != null">
+        and login_name like concat(#{loginNameLike},'%')
+      </if>
+      <if test="realNameLike != null">
+        and real_name like concat(#{realNameLike},'%')
+      </if>
+      <if test="mobile != null">
+        and mobile = #{mobile}
+      </if>
+      <if test="mobileLike != null">
+        and mobile like concat(#{mobileLike},'%')
+      </if>
+      <if test="email != null">
+        and email = #{email}
+      </if>
+      <if test="gender != null">
+        and gender = #{gender}
+      </if>
+      <if test="type != null">
+        and type = #{type}
+      </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="companyInfoSid != null">
+        and company_info_sid = #{companyInfoSid}
+      </if>
+      <if test="searchingSids != null and searchingSids.size > 0">
+        and sid in
+        (<foreach collection="searchingSids" item="searchingSid" separator="," open="" close="">
+        #{searchingSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+  </select>
+
+  <select id="findByParams" resultMap="accountMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from ana_account
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="loginName != null">
+        and login_name = #{loginName}
+      </if>
+      <if test="loginNameLike != null">
+        and login_name like concat(#{loginNameLike},'%')
+      </if>
+      <if test="realNameLike != null">
+        and real_name like concat(#{realNameLike},'%')
+      </if>
+      <if test="mobile != null">
+        and mobile = #{mobile}
+      </if>
+      <if test="mobileLike != null">
+        and mobile like concat(#{mobileLike},'%')
+      </if>
+      <if test="email != null">
+        and email = #{email}
+      </if>
+      <if test="gender != null">
+        and gender = #{gender}
+      </if>
+      <if test="type != null">
+        and type = #{type}
+      </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="companyInfoSid != null">
+        and company_info_sid = #{companyInfoSid}
+      </if>
+      <if test="searchingSids != null and searchingSids.size > 0">
+        and sid in
+        (<foreach collection="searchingSids" item="searchingSid" separator="," open="" close="">
+        #{searchingSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+    <if test="limit != null and offset != null">
+      limit #{offset}, #{limit}
+    </if>
+  </select>
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.ana.mapper.AccountRoleRelationshipMapper">
+  <resultMap id="accountRoleRelationshipMap" type="com.haihua.hhplms.ana.entity.AccountRoleRelationship">
+    <id column="sid" property="sid" />
+    <result column="account_sid" property="accountSid" />
+    <result column="role_sid" property="roleSid" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, account_sid, role_sid, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <insert id="create" parameterType="com.haihua.hhplms.ana.entity.AccountRoleRelationship" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into ana_account_r2_role
+    (account_sid, role_sid, created_by, created_time, version_num)
+    values
+    (#{accountSid}, #{roleSid}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
+    delete from ana_account_r2_role
+    <where>
+      <if test="accountSid != null">
+        account_sid = #{accountSid}
+      </if>
+      <if test="roleSid != null">
+        and role_sid = #{roleSid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </delete>
+
+  <select id="findByParams" resultMap="accountRoleRelationshipMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from ana_account_r2_role
+    <where>
+      <if test="accountSid != null">
+        account_sid = #{accountSid}
+      </if>
+      <if test="roleSid != null">
+        and role_sid = #{roleSid}
+      </if>
+    </where>
+  </select>
+</mapper>

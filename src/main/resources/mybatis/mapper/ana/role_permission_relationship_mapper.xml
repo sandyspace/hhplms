@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.ana.mapper.RolePermissionRelationshipMapper">
+  <resultMap id="rolePermissionRelationshipMap" type="com.haihua.hhplms.ana.entity.RolePermissionRelationship">
+    <id column="sid" property="sid" />
+    <result column="role_sid" property="roleSid" />
+    <result column="permission_sid" property="permissionSid" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, role_sid, permission_sid, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <insert id="create" parameterType="map" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into ana_role_r2_permission
+    (role_sid, permission_sid, created_by, created_time, version_num)
+    values
+    (#{roleSid}, #{permissionSid}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
+    delete from ana_role_r2_permission
+    <where>
+      <if test="roleSid != null">
+        role_sid = #{roleSid}
+      </if>
+      <if test="permissionSid != null">
+        and permission_sid = #{permissionSid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </delete>
+
+  <select id="findByParams" resultMap="rolePermissionRelationshipMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from ana_role_r2_permission
+    <where>
+      <if test="roleSid != null">
+        role_sid = #{roleSid}
+      </if>
+      <if test="permissionSid != null">
+        and permission_sid = #{permissionSid}
+      </if>
+      <if test="searchingRoleSids != null and searchingRoleSids.size > 0">
+        and role_sid in
+        (<foreach collection="searchingRoleSids" item="searchingRoleSid" separator="," open="" close="">
+        #{searchingRoleSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+  </select>
+</mapper>
