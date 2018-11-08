@@ -124,3 +124,20 @@ CREATE TABLE `ana_role_r2_permission` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `hhplms`.`ana_company_info` (
+  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(64) NULL,
+  `name` VARCHAR(90) NULL,
+  `type` VARCHAR(20) NULL,
+  `address` VARCHAR(150) NULL,
+  `contact_name` VARCHAR(60) NULL,
+  `contact_mobile` VARCHAR(11) NULL,
+  `status` VARCHAR(20) NULL,
+  `created_by` VARCHAR(64) NOT NULL,
+  `created_time` DATETIME NOT NULL,
+  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
+  `updated_time` DATETIME NULL DEFAULT NULL,
+  `version_num` INT(9) NOT NULL,
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC),
+  PRIMARY KEY (`sid`));

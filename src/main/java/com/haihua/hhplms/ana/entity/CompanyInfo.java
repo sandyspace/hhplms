@@ -7,35 +7,44 @@ import java.util.Objects;
 
 
 public class CompanyInfo extends BaseEntity {
-    private String companyCode;
-    private String companyName;
-    private CompanyType companyType;
+    private String code;
+    private String name;
+    private CompanyType type;
+    private String address;
     private String contactName;
     private String contactMobile;
     private Status status;
 
-    public String getCompanyCode() {
-        return companyCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setCompanyCode(String companyCode) {
-        this.companyCode = companyCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getName() {
+        return name;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public CompanyType getCompanyType() {
-        return companyType;
+    public CompanyType getType() {
+        return type;
     }
 
-    public void setCompanyType(CompanyType companyType) {
-        this.companyType = companyType;
+    public void setType(CompanyType type) {
+        this.type = type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getContactName() {
@@ -68,13 +77,13 @@ public class CompanyInfo extends BaseEntity {
         if (!(o instanceof CompanyInfo)) return false;
         if (!super.equals(o)) return false;
         CompanyInfo that = (CompanyInfo) o;
-        return Objects.equals(companyCode, that.companyCode);
+        return Objects.equals(code, that.code);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(super.hashCode(), companyCode);
+        return Objects.hash(super.hashCode(), code);
     }
 
     public enum CompanyType implements BaseEnum {
