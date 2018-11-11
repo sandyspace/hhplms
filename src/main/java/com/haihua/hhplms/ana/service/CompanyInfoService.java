@@ -10,13 +10,14 @@ import com.haihua.hhplms.common.model.PageWrapper;
 import java.util.List;
 
 public interface CompanyInfoService {
-    PageWrapper<List<CompanyInfoVO>> loadCompanyInfoListByPage(String code,
+    PageWrapper<List<CompanyInfoVO>> loadCompanyInfosByPage(String code,
                                                                 String type,
                                                                 String contactNameLike,
                                                                 String contactMobileLike,
                                                                 String status,
                                                                 Integer pageNo,
                                                                 Integer pageSize);
+    List<CompanyInfoVO> getAvailableCompanyInfos();
     CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO);
     void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO);
     void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest);

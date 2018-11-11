@@ -24,7 +24,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     @Autowired
     private CompanyInfoMapper companyInfoMapper;
 
-    public PageWrapper<List<CompanyInfoVO>> loadCompanyInfoListByPage(String code,
+    public PageWrapper<List<CompanyInfoVO>> loadCompanyInfosByPage(String code,
                                                                       String type,
                                                                       String contactNameLike,
                                                                       String contactMobileLike,
@@ -51,10 +51,10 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         if (!StringUtils.isBlank(status)) {
             params.put("status", status);
         }
-        return loadCompanyInfoListByPage(params, pageNo, pageSize);
+        return loadCompanyInfosByPage(params, pageNo, pageSize);
     }
 
-    public PageWrapper<List<CompanyInfoVO>> loadCompanyInfoListByPage(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+    public PageWrapper<List<CompanyInfoVO>> loadCompanyInfosByPage(Map<String, Object> params, Integer pageNo, Integer pageSize) {
         int count = countByParams(params);
         PageWrapper<List<CompanyInfoVO>> pageOfCompanyInfos = new PageWrapper<>(pageNo, pageSize, count);
         if (count > 0) {
@@ -70,6 +70,18 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
             }
         }
         return pageOfCompanyInfos;
+    }
+
+    public List<CompanyInfoVO> getAvailableCompanyInfos() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("status", CompanyInfo.Status.APPROVED.getCode());
+        List<CompanyInfo> availableCompanyInfos = findByParams(params);
+        if (Objects.nonNull(availableCompanyInfos) && !availableCompanyInfos.isEmpty()) {
+            return availableCompanyInfos.stream()
+                    .map(availableCompanyInfo -> new CompanyInfoVO(availableCompanyInfo))
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO) {
@@ -182,6 +194,10 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     public void deleteBySid(Long sid) {
+        CompanyInfo companyInfo = findBySid(sid);
+        if (Objects.isNull(companyInfo)) {
+            throw new ServiceException("Company info does not exist, failed to delete");
+        }
         Map<String, Object> params = new HashMap<>();
         params.put("sid", sid);
         int deletedRows = deleteByParams(params);
