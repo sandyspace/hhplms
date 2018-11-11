@@ -16,7 +16,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan(basePackages = "com.haihua.hhplms.ana.mapper", sqlSessionTemplateRef = "primaryMysqlSqlSessionTemplate")
+@MapperScan(basePackages = "com.haihua.hhplms.*.mapper", sqlSessionTemplateRef = "primaryMysqlSqlSessionTemplate")
 public class PrimaryMysqlDSConfig {
     @Value("${primary.mysql.jdbc.url}")
     private String jdbcUrl;
