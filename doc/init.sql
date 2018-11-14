@@ -134,23 +134,38 @@ CREATE TABLE `hhplms`.`ana_company_info` (
   `contact_name` VARCHAR(60) NULL,
   `contact_mobile` VARCHAR(11) NULL,
   `status` VARCHAR(20) NULL,
-  `created_by` VARCHAR(64) NOT NULL,
+  `created_by` VARCHAR(30) NOT NULL,
   `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
+  `updated_by` VARCHAR(30) NULL DEFAULT NULL,
   `updated_time` DATETIME NULL DEFAULT NULL,
   `version_num` INT(9) NOT NULL,
   UNIQUE INDEX `code_UNIQUE` (`code` ASC),
   PRIMARY KEY (`sid`));
 
-CREATE TABLE `hhplms`.`sys_feeback` (
+CREATE TABLE `hhplms`.`sys_feedback` (
   `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(160) NOT NULL,
   `content` VARCHAR(600) NULL,
   `contact` VARCHAR(60) NOT NULL,
   `contact_mobile` VARCHAR(11) NOT NULL,
-  `created_by` VARCHAR(64) NOT NULL,
+  `created_by` VARCHAR(30) NOT NULL,
   `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
+  `updated_by` VARCHAR(30) NULL DEFAULT NULL,
   `updated_time` DATETIME NULL DEFAULT NULL,
   `version_num` INT(9) NOT NULL,
   PRIMARY KEY (`sid`));
+
+CREATE TABLE `hhplms`.`pm_preferential_msg` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `title` varchar(90) NOT NULL,
+  `content` varchar(1000) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `img_url` varchar(256) DEFAULT NULL,
+  `company_info_sid` bigint(15) DEFAULT NULL,
+  `created_by` varchar(30) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

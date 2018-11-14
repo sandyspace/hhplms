@@ -34,7 +34,7 @@ public class CompanyInfoController {
     }
 
     @GetMapping(path = "/api/ana/companyInfos/available", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<List<CompanyInfoVO>> getAvailableRoles() {
+    public ResultBean.Success<List<CompanyInfoVO>> getAvailableCompanyInfos() {
         return ResultBean.Success.of(companyInfoService.getAvailableCompanyInfos(), "");
     }
 

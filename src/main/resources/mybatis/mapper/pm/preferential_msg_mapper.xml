@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.pm.mapper.PreferentialMsgMapper">
+  <resultMap id="preferentialMsgMap" type="com.haihua.hhplms.pm.entity.PreferentialMsg">
+    <id column="sid" property="sid" />
+    <result column="title" property="title" />
+    <result column="content" property="content" />
+    <result column="status" property="status" />
+    <result column="img_url" property="imgUrl" />
+    <result column="company_info_sid" property="companyInfoSid" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, title, content, status, img_url, company_info_sid, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <select id="countByParams" resultType="int" parameterType="map" statementType="PREPARED">
+    select count(1)
+    from pm_preferential_msg
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="title != null">
+        and title like concat(#{title},'%')
+      </if>
+      <if test="companyInfoSid != null">
+        and company_info_sid = #{companyInfoSid}
+      </if>
+    </where>
+  </select>
+
+  <select id="findByParams" resultMap="preferentialMsgMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from pm_preferential_msg
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="titleLike != null">
+        and title like concat(#{titleLike},'%')
+      </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="companyInfoSid != null">
+        and company_info_sid = #{companyInfoSid}
+      </if>
+    </where>
+    order by coalesce(updated_time, created_time) desc
+    <if test="limit != null and offset != null">
+      limit #{offset}, #{limit}
+    </if>
+  </select>
+
+  <insert id="create" parameterType="com.haihua.hhplms.pm.entity.PreferentialMsg" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into pm_preferential_msg
+    (title, content, status, img_url, company_info_sid, created_by, created_time, version_num)
+    values
+    (#{title}, #{content}, #{status} ,#{imgUrl}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
+    delete from pm_preferential_msg
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+    </where>
+  </delete>
+
+  <update id="updateByExample" parameterType="com.haihua.hhplms.pm.entity.PreferentialMsg" statementType="PREPARED">
+    update pm_preferential_msg
+    <set>
+      <if test="title != null">
+        title = #{title},
+      </if>
+      <if test="content != null">
+        content = #{content},
+      </if>
+      <if test="status != null">
+        status = #{status},
+      </if>
+      <if test="imgUrl != null">
+        img_url = #{imgUrl},
+      </if>
+      <if test="companyInfoSid != null">
+        company_info_sid = #{companyInfoSid},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <update id="updateByParams" parameterType="map" statementType="PREPARED">
+    update pm_preferential_msg
+    <set>
+      <if test="status != null">
+        status = #{status},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+</mapper>

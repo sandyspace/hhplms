@@ -21,6 +21,29 @@ import static springfox.documentation.builders.PathSelectors.regex;
 @Configuration
 @EnableSwagger2
 public class Swagger2Config {
+    @Bean
+    public Docket createPmRestApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("促销管理")
+                //.genericModelSubstitutes(ResultBean.Success.class)
+                .useDefaultResponseMessages(false)
+                .forCodeGeneration(true)
+                .pathMapping("/")
+                .select()
+                .paths(or(regex("/api/pm/.*")))
+                .build()
+                .apiInfo(pmApiInfo())
+                .globalOperationParameters(setHeaderToken());
+    }
+
+    private ApiInfo pmApiInfo() {
+        return new ApiInfoBuilder()
+                .title("促销管理")
+                .description("促销管理")
+                .contact(new Contact("ShanCheng", null, "shanc@133.cn"))
+                .version("1.0")
+                .build();
+    }
 
     @Bean
     public Docket createSysRestApi() {
