@@ -473,7 +473,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .nickName(account.getNickName())
                 .gender(account.getGender().getCode())
                 .headImgUrl(account.getHeadImgUrl())
-                .companyId(account.getCompanyInfoSid())
+                .companyId(Objects.isNull(account.getCompanyInfoSid()) ? -99 : account.getCompanyInfoSid())
                 .build();
     }
 
@@ -502,7 +502,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .nickName(account.getNickName())
                 .gender(account.getGender().getCode())
                 .headImgUrl(account.getHeadImgUrl())
-                .companyId(account.getCompanyInfoSid())
+                .companyId(Objects.isNull(account.getCompanyInfoSid()) ? -99 : account.getCompanyInfoSid())
                 .build();
     }
 
@@ -575,7 +575,11 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public List<GrantedRole> loadGrantedRolesByUserBasicInfo(UserBasicInfo userBasicInfo) {
         final List<Role> roles = roleService.findRolesOfGivenAccount(userBasicInfo.getId());
         if (Objects.isNull(roles) || roles.isEmpty()) {
-            throw new InsufficientAuthenticationException("User has no roles assigned");
+            return Arrays.asList(new GrantedRole.Builder()
+                    .id(GlobalConstant.DEFAULT_ACCOUNT_ROLE_ID)
+                    .code(GlobalConstant.DEFAULT_ACCOUNT_ROLE_CODE)
+                    .name(GlobalConstant.DEFAULT_ACCOUNT_ROLE_NAME)
+                    .build());
         }
         return roles.stream()
                 .filter(role -> Role.Status.ENABLED == role.getStatus())

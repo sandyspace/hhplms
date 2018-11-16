@@ -68,6 +68,11 @@ public class RoleController {
         return ResultBean.Success.of(roleService.getAvailableRoles(), "");
     }
 
+    @GetMapping(path = "/api/ana/companyInfos/{id}/available", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<RoleVO>> getAvailableRolesOfCompany(@PathVariable("id") Long companyInfoSid) {
+        return ResultBean.Success.of(roleService.getAvailableRolesOfCompany(companyInfoSid), "");
+    }
+
     @GetMapping(path = "/api/ana/accounts/{id}/roles", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<List<RoleVO>> getRolesOfAccount(@PathVariable("id") Long accountSid) {
         return ResultBean.Success.of(roleService.getRolesOfGivenAccount(accountSid), "");

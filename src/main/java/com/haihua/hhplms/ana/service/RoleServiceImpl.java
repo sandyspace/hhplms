@@ -104,11 +104,26 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<RoleVO> getAvailableRoles() {
+        if (Role.Category.ACCOUNT.getCode().equals(WebUtils.getUserType())) {
+            throw new ServiceException("You have insufficient right to view these roles");
+        }
+
         Map<String, Object> params = new HashMap<>();
         params.put("status", Role.Status.ENABLED);
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            params.put("category", Role.Category.ACCOUNT.getCode());
+        List<Role> roles = findByParams(params);
+        if (Objects.nonNull(roles) && !roles.isEmpty()) {
+            return roles.stream().map(role -> new RoleVO(role)).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public List<RoleVO> getAvailableRolesOfCompany(Long companyInfoSid) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("status", Role.Status.ENABLED);
+        params.put("category", Role.Category.ACCOUNT.getCode());
+        if (Role.Category.EMPLOYEE.getCode().equals(WebUtils.getUserType())) {
+            params.put("companyInfoSid", companyInfoSid);
+        } else {
             params.put("companyInfoSid", WebUtils.getCompanyId());
         }
         List<Role> roles = findByParams(params);

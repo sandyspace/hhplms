@@ -22,6 +22,7 @@ public interface RoleService {
                                              Integer pageSize);
     RoleVO loadDetail(Long sid);
     List<RoleVO> getAvailableRoles();
+    List<RoleVO> getAvailableRolesOfCompany(Long distributorInfoSid);
     List<RoleVO> getRolesOfGivenEmployee(Long employeeSid);
     List<RoleVO> getRolesOfGivenAccount(Long accountSid);
     Role createRole(RoleCreationVO roleCreationVO);
