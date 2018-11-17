@@ -22,6 +22,30 @@ import static springfox.documentation.builders.PathSelectors.regex;
 @EnableSwagger2
 public class Swagger2Config {
     @Bean
+    public Docket createWfRestApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("工作流")
+                //.genericModelSubstitutes(ResultBean.Success.class)
+                .useDefaultResponseMessages(false)
+                .forCodeGeneration(true)
+                .pathMapping("/")
+                .select()
+                .paths(or(regex("/api/wf/.*")))
+                .build()
+                .apiInfo(wfApiInfo())
+                .globalOperationParameters(setHeaderToken());
+    }
+
+    private ApiInfo wfApiInfo() {
+        return new ApiInfoBuilder()
+                .title("工作流")
+                .description("工作流")
+                .contact(new Contact("ShanCheng", null, "shanc@133.cn"))
+                .version("1.0")
+                .build();
+    }
+
+    @Bean
     public Docket createPmRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("促销管理")

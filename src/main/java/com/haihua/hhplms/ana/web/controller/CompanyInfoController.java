@@ -38,6 +38,11 @@ public class CompanyInfoController {
         return ResultBean.Success.of(companyInfoService.getAvailableCompanyInfos(), "");
     }
 
+    @GetMapping(path = "/api/ana/companyInfos/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<CompanyInfoVO> loadDetail(@PathVariable("id") Long sid) {
+        return ResultBean.Success.of(companyInfoService.loadDetail(sid), "");
+    }
+
     @DeleteMapping(path = "/api/ana/companyInfos/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> deleteCompanyInfo(@PathVariable("id") Long sid) {
         companyInfoService.deleteBySid(sid);

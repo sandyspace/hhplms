@@ -2,6 +2,7 @@ package com.haihua.hhplms.sys.web.controller;
 
 import com.haihua.hhplms.ana.entity.*;
 import com.haihua.hhplms.common.model.ResultBean;
+import com.haihua.hhplms.pm.entity.PreferentialMsg;
 import com.haihua.hhplms.sys.model.DictEntry;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,5 +85,29 @@ public class DictController {
                 .map(roleStatus -> new DictEntry(roleStatus.getCode(), roleStatus.getName()))
                 .collect(Collectors.toList());
         return ResultBean.Success.of(roleStatuses, "");
+    }
+
+    @GetMapping(path = "/api/sys/companyInfo/types", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadCompanyInfoTypes() {
+        List<DictEntry> companyInfoTypes = Arrays.stream(CompanyInfo.Type.values())
+                .map(companyInfoType -> new DictEntry(companyInfoType.getCode(), companyInfoType.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(companyInfoTypes, "");
+    }
+
+    @GetMapping(path = "/api/sys/companyInfo/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadCompanyInfoStatuses() {
+        List<DictEntry> companyInfoStatues = Arrays.stream(CompanyInfo.Status.values())
+                .map(companyInfoStatus -> new DictEntry(companyInfoStatus.getCode(), companyInfoStatus.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(companyInfoStatues, "");
+    }
+
+    @GetMapping(path = "/api/sys/preferentialMsg/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadPreferentialMsgStatuses() {
+        List<DictEntry> preferentialMsgStatues = Arrays.stream(PreferentialMsg.Status.values())
+                .map(preferentialMsgStatus -> new DictEntry(preferentialMsgStatus.getCode(), preferentialMsgStatus.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(preferentialMsgStatues, "");
     }
 }

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.wf.mapper.ProcessExecutionMapper">
+  <resultMap id="processExecutionMap" type="com.haihua.hhplms.wf.entity.ProcessExecution">
+    <id column="sid" property="sid" />
+    <result column="process_sid" property="processSid" />
+    <result column="process_inst_id" property="processInstanceId" />
+    <result column="process_status" property="processStatus" />
+    <result column="current_step_sid" property="currentStepSid" />
+    <result column="assigned_type" property="assignedType" />
+    <result column="assigned_to" property="assignedTo" />
+    <result column="step_status" property="stepStatus" />
+    <result column="active_flag" property="activeFlag" />
+    <result column="checked_by" property="checkedBy" />
+    <result column="checked_time" property="checkedTime" />
+    <result column="init_by" property="initBy" />
+    <result column="init_time" property="initTime" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, process_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, checked_by, checked_time, init_by, init_time, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <insert id="create" parameterType="com.haihua.hhplms.wf.entity.ProcessExecution" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into wf_process_execution
+    (process_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, init_by, init_time, created_by, created_time, version_num)
+    values
+    (#{processSid}, #{processInstanceId}, #{processStatus}, #{currentStepSid}, #{assignedType}, #{assignedTo}, #{stepStatus}, #{activeFlag}, #{initBy}, #{initTime}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <update id="updateByParams" parameterType="map" statementType="PREPARED">
+    update wf_process_execution
+    <set>
+      <if test="processStatus != null">
+        process_status = #{processStatus},
+      </if>
+      <if test="stepStatus != null">
+        step_status = #{stepStatus},
+      </if>
+      <if test="activeFlag != null">
+        active_flag = #{activeFlag},
+      </if>
+      <if test="checkedBy != null">
+        checked_by = #{checkedBy},
+      </if>
+      <if test="checkedTime != null">
+        checked_time = #{checkedTime},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <select id="countByParams" resultType="int" parameterType="map" statementType="PREPARED">
+    select count(1) from
+    (select <include refid="columnClause" />
+    from wf_process_execution
+    <where>
+      assigned_type = 'role'
+      <if test="sid != null">
+        and sid = #{sid}
+      </if>
+      <if test="processSid != null">
+        and process_sid = #{processSid}
+      </if>
+      <if test="processInstanceId != null">
+        and process_inst_id = #{processInstanceId}
+      </if>
+      <if test="processStatus != null">
+        and process_status = #{processStatus}
+      </if>
+      <if test="currentStepSid != null">
+        and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="assignedToRoles != null and assignedToRoles.size > 0">
+        and assigned_to in
+        (<foreach collection="assignedToRoles" item="assignedToRole" separator="," open="" close="">
+        #{assignedToRole, jdbcType=VARCHAR}
+      </foreach>)
+      </if>
+      <if test="activeFlag != null">
+        and active_flag = #{activeFlag}
+      </if>
+      <if test="checkedBy != null">
+        and checked_by = #{checkedBy}
+      </if>
+      <if test="checkedTimeFrom != null">
+        <![CDATA[ and checked_time >= #{checkedTimeFrom} ]]>
+      </if>
+      <if test="checkedTimeTo != null">
+        <![CDATA[ and checked_time <= #{checkedTimeTo} ]]>
+      </if>
+      <if test="initTimeFrom != null">
+        <![CDATA[ and init_time >= #{initTimeFrom} ]]>
+      </if>
+      <if test="initTimeTo != null">
+        <![CDATA[ and init_time <= #{initTimeTo} ]]>
+      </if>
+    </where>
+    union all
+    select <include refid="columnClause" />
+    from wf_process_execution
+    <where>
+      assigned_type = 'individual'
+      <if test="sid != null">
+        and sid = #{sid}
+      </if>
+      <if test="processSid != null">
+        and process_sid = #{processSid}
+      </if>
+      <if test="processInstanceId != null">
+        and process_inst_id = #{processInstanceId}
+      </if>
+      <if test="processStatus != null">
+        and process_status = #{processStatus}
+      </if>
+      <if test="currentStepSid != null">
+        and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="assignedToIndividual != null">
+        and assigned_to = #{assignedToIndividual}
+      </if>
+      <if test="activeFlag != null">
+        and active_flag = #{activeFlag}
+      </if>
+      <if test="checkedBy != null">
+        and checked_by = #{checkedBy}
+      </if>
+      <if test="checkedTimeFrom != null">
+        <![CDATA[ and checked_time >= #{checkedTimeFrom} ]]>
+      </if>
+      <if test="checkedTimeTo != null">
+        <![CDATA[ and checked_time <= #{checkedTimeTo} ]]>
+      </if>
+      <if test="initTimeFrom != null">
+        <![CDATA[ and init_time >= #{initTimeFrom} ]]>
+      </if>
+      <if test="initTimeTo != null">
+        <![CDATA[ and init_time <= #{initTimeTo} ]]>
+      </if>
+    </where>) as tdl
+  </select>
+
+  <select id="findByParams" resultMap="processExecutionMap" parameterType="map" statementType="PREPARED">
+    select * from
+    (select <include refid="columnClause" />
+    from wf_process_execution
+    <where>
+      assigned_type = 'role'
+      <if test="sid != null">
+        and sid = #{sid}
+      </if>
+      <if test="processSid != null">
+        and process_sid = #{processSid}
+      </if>
+      <if test="processInstanceId != null">
+        and process_inst_id = #{processInstanceId}
+      </if>
+      <if test="processStatus != null">
+        and process_status = #{processStatus}
+      </if>
+      <if test="currentStepSid != null">
+        and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="assignedToRoles != null and assignedToRoles.size > 0">
+        and assigned_to in
+        (<foreach collection="assignedToRoles" item="assignedToRole" separator="," open="" close="">
+        #{assignedToRole, jdbcType=VARCHAR}
+      </foreach>)
+      </if>
+      <if test="activeFlag != null">
+        and active_flag = #{activeFlag}
+      </if>
+      <if test="checkedBy != null">
+        and checked_by = #{checkedBy}
+      </if>
+      <if test="checkedTimeFrom != null">
+        <![CDATA[ and checked_time >= #{checkedTimeFrom} ]]>
+      </if>
+      <if test="checkedTimeTo != null">
+        <![CDATA[ and checked_time <= #{checkedTimeTo} ]]>
+      </if>
+      <if test="initTimeFrom != null">
+        <![CDATA[ and init_time >= #{initTimeFrom} ]]>
+      </if>
+      <if test="initTimeTo != null">
+        <![CDATA[ and init_time <= #{initTimeTo} ]]>
+      </if>
+    </where>
+    union all
+    select <include refid="columnClause" />
+    from wf_process_execution
+    <where>
+      assigned_type = 'individual'
+      <if test="sid != null">
+        and sid = #{sid}
+      </if>
+      <if test="processSid != null">
+        and process_sid = #{processSid}
+      </if>
+      <if test="processInstanceId != null">
+        and process_inst_id = #{processInstanceId}
+      </if>
+      <if test="processStatus != null">
+        and process_status = #{processStatus}
+      </if>
+      <if test="currentStepSid != null">
+        and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="assignedToIndividual != null">
+        and assigned_to = #{assignedToIndividual}
+      </if>
+      <if test="activeFlag != null">
+        and active_flag = #{activeFlag}
+      </if>
+      <if test="checkedBy != null">
+        and checked_by = #{checkedBy}
+      </if>
+      <if test="checkedTimeFrom != null">
+        <![CDATA[ and checked_time >= #{checkedTimeFrom} ]]>
+      </if>
+      <if test="checkedTimeTo != null">
+        <![CDATA[ and checked_time <= #{checkedTimeTo} ]]>
+      </if>
+      <if test="initTimeFrom != null">
+        <![CDATA[ and init_time >= #{initTimeFrom} ]]>
+      </if>
+      <if test="initTimeTo != null">
+        <![CDATA[ and init_time <= #{initTimeTo} ]]>
+      </if>
+    </where>) as tdl
+    order by tdl.checked_time desc
+    <if test="limit != null and offset != null">
+      limit #{offset}, #{limit}
+    </if>
+  </select>
+</mapper>

@@ -6,6 +6,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class WebUtils {
     private static final String XML_HTTP_REQUEST = "XMLHttpRequest";
@@ -48,5 +50,14 @@ public class WebUtils {
     public static Long getCompanyId() {
         UserContext userContext = getUserContext();
         return userContext.getUserProfile().getBasicInfo().getCompanyId();
+    }
+
+    public static List<String> getGrantedRoles() {
+        return getUserContext()
+                .getUserProfile()
+                .getRoles()
+                .stream()
+                .map(role -> role.getCode())
+                .collect(Collectors.toList());
     }
 }

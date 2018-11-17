@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.wf.mapper.StepMapper">
+  <resultMap id="stepMap" type="com.haihua.hhplms.wf.entity.Step">
+    <id column="sid" property="sid" />
+    <result column="code" property="code" />
+    <result column="name" property="name" />
+    <result column="desc" property="desc" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, code, name, `desc`, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <select id="findByParams" resultMap="stepMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from wf_step
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="code != null">
+        and code = #{code}
+      </if>
+      <if test="searchingSids != null and searchingSids.size > 0">
+        and sid in
+        (<foreach collection="searchingSids" item="searchingSid" separator="," open="" close="">
+        #{searchingSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+  </select>
+</mapper>

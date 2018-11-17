@@ -9,7 +9,7 @@ import java.util.Objects;
 public class CompanyInfo extends BaseEntity {
     private String code;
     private String name;
-    private CompanyType type;
+    private Type type;
     private String address;
     private String contactName;
     private String contactMobile;
@@ -31,11 +31,11 @@ public class CompanyInfo extends BaseEntity {
         this.name = name;
     }
 
-    public CompanyType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(CompanyType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -86,7 +86,7 @@ public class CompanyInfo extends BaseEntity {
         return Objects.hash(super.hashCode(), code);
     }
 
-    public enum CompanyType implements BaseEnum {
+    public enum Type implements BaseEnum {
         /*llc(Limited Liability Company): 有限责任公司,
           jsc(Joint Stock (limited) Company): 股份有限公司,
           soe(state-owned enterprises): 国有企业,
@@ -108,7 +108,7 @@ public class CompanyInfo extends BaseEntity {
         OTHER("other", "其他");
         private String code;
         private String name;
-        CompanyType(String code, String name) {
+        Type(String code, String name) {
             this.code = code;
             this.name = name;
         }

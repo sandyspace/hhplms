@@ -169,3 +169,73 @@ CREATE TABLE `hhplms`.`pm_preferential_msg` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wf_process` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `code` varchar(30)   DEFAULT NULL,
+  `name` varchar(90)   DEFAULT NULL,
+  `desc` varchar(300)   DEFAULT NULL,
+  `created_by` varchar(64)   NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wf_step` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `code` varchar(30)   DEFAULT NULL,
+  `name` varchar(90)   DEFAULT NULL,
+  `desc` varchar(300)   DEFAULT NULL,
+  `created_by` varchar(64)   NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wf_route` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `process_sid` bigint(15) DEFAULT NULL,
+  `from_step_sid` bigint(15) DEFAULT NULL,
+  `to_step_sid` bigint(15) DEFAULT NULL,
+  `assigned_type` varchar(20)   DEFAULT NULL,
+  `assigned_to` varchar(30)   DEFAULT NULL,
+  `start_flag` char(1)   DEFAULT NULL,
+  `related_view` varchar(128)   DEFAULT NULL,
+  `created_by` varchar(64)   NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `proc_step_unique` (`process_sid`,`from_step_sid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wf_process_execution` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `process_sid` bigint(15) NOT NULL,
+  `process_inst_id` varchar(64)  NOT NULL,
+  `process_status` varchar(20)  DEFAULT NULL,
+  `current_step_sid` bigint(15) NOT NULL,
+  `assigned_type` varchar(20)  DEFAULT NULL,
+  `assigned_to` varchar(30)  DEFAULT NULL,
+  `step_status` varchar(20)  DEFAULT NULL,
+  `active_flag` char(1)  DEFAULT NULL,
+  `checked_by` varchar(30)  DEFAULT NULL,
+  `checked_time` datetime DEFAULT NULL,
+  `init_by` varchar(30)  DEFAULT NULL,
+  `init_time` datetime DEFAULT NULL,
+  `created_by` varchar(64)  NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64)  DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `UNIQUE_row` (`process_sid`,`process_inst_id`,`current_step_sid`),
+  KEY `IDX_assigned_type` (`assigned_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

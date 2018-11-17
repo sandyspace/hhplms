@@ -37,7 +37,7 @@ public class PreferentialMsgController {
     }
 
     @PostMapping(path = "/api/pm/preferentialMsgs", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> createdPreferentialMsg(@RequestBody PreferentialMsgCreationVO preferentialMsgCreationVO) {
+    public ResultBean.Success<Long> createPreferentialMsg(@RequestBody PreferentialMsgCreationVO preferentialMsgCreationVO) {
         PreferentialMsg preferentialMsg = preferentialMsgService.createdPreferentialMsg(preferentialMsgCreationVO);
         return ResultBean.Success.of(preferentialMsg.getSid(), "");
     }

@@ -9,7 +9,6 @@ public class UserBasicInfo {
     private String loginName;
     private String email;
     private String mobile;
-    @JsonIgnore
     private String type;
     @JsonIgnore
     private String password;

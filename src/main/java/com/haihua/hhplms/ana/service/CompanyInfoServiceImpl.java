@@ -84,6 +84,14 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         return null;
     }
 
+    public CompanyInfoVO loadDetail(Long sid) {
+        CompanyInfo companyInfo = findBySid(sid);
+        if (Objects.isNull(companyInfo)) {
+            throw new ServiceException("Company Info with id:[" + sid + "] does not exist");
+        }
+        return new CompanyInfoVO(companyInfo);
+    }
+
     public void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO) {
         String userType = WebUtils.getUserType();
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
@@ -99,7 +107,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         companyInfo.setSid(sid);
         companyInfo.setCode(companyInfoUpdateVO.getCode());
         companyInfo.setName(companyInfoUpdateVO.getName());
-        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.CompanyType.class, companyInfoUpdateVO.getType()));
+        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.Type.class, companyInfoUpdateVO.getType()));
         companyInfo.setContactName(companyInfoUpdateVO.getContactName());
         companyInfo.setContactMobile(companyInfoUpdateVO.getContactMobile());
         companyInfo.setUpdatedBy(WebUtils.getLoginName());
@@ -170,7 +178,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
             companyInfo.setCode(companyInfoCreationVO.getCode());
         }
         companyInfo.setName(companyInfoCreationVO.getName());
-        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.CompanyType.class, companyInfoCreationVO.getType()));
+        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.Type.class, companyInfoCreationVO.getType()));
         companyInfo.setAddress(companyInfoCreationVO.getAddress());
         companyInfo.setContactName(companyInfoCreationVO.getContactName());
         companyInfo.setContactMobile(companyInfoCreationVO.getContactMobile());

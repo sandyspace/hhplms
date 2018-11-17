@@ -18,6 +18,7 @@ public interface CompanyInfoService {
                                                                 Integer pageNo,
                                                                 Integer pageSize);
     List<CompanyInfoVO> getAvailableCompanyInfos();
+    CompanyInfoVO loadDetail(Long sid);
     CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO);
     void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO);
     void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest);
