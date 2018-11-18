@@ -20,7 +20,7 @@ CREATE TABLE `ana_account` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `mobile_UNIQUE` (`mobile`),
   UNIQUE KEY `login_name_UNIQUE` (`login_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `ana_account_r2_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE `ana_account_r2_role` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `UNIQUE` (`account_sid`,`role_sid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE `ana_employee` (
@@ -58,7 +58,7 @@ CREATE TABLE `ana_employee` (
   UNIQUE KEY `login_name_UNIQUE` (`login_name`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `mobile_UNIQUE` (`mobile`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `ana_employee_r2_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -70,7 +70,7 @@ CREATE TABLE `ana_employee_r2_role` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `ana_permission` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -94,7 +94,7 @@ CREATE TABLE `ana_permission` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `ana_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -111,7 +111,7 @@ CREATE TABLE `ana_role` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `ana_role_r2_permission` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -123,9 +123,9 @@ CREATE TABLE `ana_role_r2_permission` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
-CREATE TABLE `hhplms`.`ana_company_info` (
+CREATE TABLE `ana_company_info` (
   `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(64) NULL,
   `name` VARCHAR(90) NULL,
@@ -142,7 +142,7 @@ CREATE TABLE `hhplms`.`ana_company_info` (
   UNIQUE INDEX `code_UNIQUE` (`code` ASC),
   PRIMARY KEY (`sid`));
 
-CREATE TABLE `hhplms`.`sys_feedback` (
+CREATE TABLE `sys_feedback` (
   `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(160) NOT NULL,
   `content` VARCHAR(600) NULL,
@@ -155,7 +155,7 @@ CREATE TABLE `hhplms`.`sys_feedback` (
   `version_num` INT(9) NOT NULL,
   PRIMARY KEY (`sid`));
 
-CREATE TABLE `hhplms`.`pm_preferential_msg` (
+CREATE TABLE `pm_preferential_msg` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
   `title` varchar(90) NOT NULL,
   `content` varchar(1000) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE `hhplms`.`pm_preferential_msg` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `wf_process` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -182,7 +182,7 @@ CREATE TABLE `wf_process` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `wf_step` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -196,7 +196,7 @@ CREATE TABLE `wf_step` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `wf_route` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -214,7 +214,7 @@ CREATE TABLE `wf_route` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `proc_step_unique` (`process_sid`,`from_step_sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 CREATE TABLE `wf_process_execution` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -238,4 +238,4 @@ CREATE TABLE `wf_process_execution` (
   PRIMARY KEY (`sid`),
   UNIQUE KEY `UNIQUE_row` (`process_sid`,`process_inst_id`,`current_step_sid`),
   KEY `IDX_assigned_type` (`assigned_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;

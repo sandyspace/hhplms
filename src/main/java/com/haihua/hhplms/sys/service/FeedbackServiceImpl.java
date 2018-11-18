@@ -27,10 +27,6 @@ public class FeedbackServiceImpl implements FeedbackService {
                                                              String contactMobileLike,
                                                              Integer pageNo,
                                                              Integer pageSize) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view feedbacks");
-        }
         Map<String, Object> params = new HashMap<>();
         if (Objects.nonNull(createdTimeFrom)) {
             params.put("createdTimeFrom", new Date(createdTimeFrom));

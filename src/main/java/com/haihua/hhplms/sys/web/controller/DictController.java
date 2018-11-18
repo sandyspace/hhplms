@@ -4,6 +4,7 @@ import com.haihua.hhplms.ana.entity.*;
 import com.haihua.hhplms.common.model.ResultBean;
 import com.haihua.hhplms.pm.entity.PreferentialMsg;
 import com.haihua.hhplms.sys.model.DictEntry;
+import com.haihua.hhplms.wf.entity.ProcessExecution;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,6 +86,22 @@ public class DictController {
                 .map(roleStatus -> new DictEntry(roleStatus.getCode(), roleStatus.getName()))
                 .collect(Collectors.toList());
         return ResultBean.Success.of(roleStatuses, "");
+    }
+
+    @GetMapping(path = "/api/sys/process/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadProcessStatuses() {
+        List<DictEntry> processStatuses = Arrays.stream(ProcessExecution.ProcessStatus.values())
+                .map(processStatus -> new DictEntry(processStatus.getCode(), processStatus.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(processStatuses, "");
+    }
+
+    @GetMapping(path = "/api/sys/step/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadStepStatuses() {
+        List<DictEntry> stepStatuses = Arrays.stream(ProcessExecution.StepStatus.values())
+                .map(stepStatus -> new DictEntry(stepStatus.getCode(), stepStatus.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(stepStatuses, "");
     }
 
     @GetMapping(path = "/api/sys/companyInfo/types", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

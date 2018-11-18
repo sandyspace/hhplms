@@ -4,7 +4,7 @@
   <contextName>logback</contextName>
 
   <!-- 项目名称 -->
-  <property name="PROJECT_NAME" value="dms" />
+  <property name="PROJECT_NAME" value="hhplms" />
 
   <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
   <springProperty scope="context" name="LOG_PATH" source="log.path" defaultValue="/var/log"/>
@@ -21,9 +21,9 @@
   </appender>
 
   <appender name="rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${LOG_PATH}/${PROJECT_NAME}/dms-backend.log</file>
+    <file>${LOG_PATH}/${PROJECT_NAME}/backend.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_PATH}/${PROJECT_NAME}/dms-backend.%d{yyyy-MM-dd}.zip</fileNamePattern>
+      <fileNamePattern>${LOG_PATH}/${PROJECT_NAME}/backend.%d{yyyy-MM-dd}.zip</fileNamePattern>
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <encoder>
