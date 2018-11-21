@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,13 +22,13 @@ public class PermissionController {
     private PermissionService permissionService;
 
     @GetMapping(path = "/api/ana/permissions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<List<PermissionVO>> loadPermissions() {
-        return ResultBean.Success.of(permissionService.loadPermissions(), "");
+    public ResultBean.Success<List<PermissionVO>> permissionsAvailableToAssign(@RequestParam("refRoleId") Long refRoleSid) {
+        return ResultBean.Success.of(permissionService.permissionsAvailableToAssign(refRoleSid), "");
     }
 
     @GetMapping(path = "/api/ana/apis", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<List<PermissionVO>> loadApiList() {
-        return ResultBean.Success.of(permissionService.loadApiList(), "");
+    public ResultBean.Success<List<PermissionVO>> apisAvailableToAssign(@RequestParam("refRoleId") Long refRoleSid) {
+        return ResultBean.Success.of(permissionService.apisAvailableToAssign(refRoleSid), "");
     }
 
     @GetMapping(path = "/api/ana/roles/{id}/permissions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

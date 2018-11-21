@@ -274,7 +274,7 @@ public class RoleServiceImpl implements RoleService {
             if (!companyId.equals(role.getCompanyInfoSid())) {
                 throw new ServiceException("You have insufficient right to edit this role");
             }
-            Role preassignedRole = getPreassignedRole();
+            Role preassignedRole = getPreassignedRole(WebUtils.getCompanyId());
             if (Objects.isNull(preassignedRole)) {
                 throw new ServiceException("You have no right to operation role, please contact system admin");
             }
@@ -324,6 +324,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public Role findBySid(Long sid) {
+        if (Objects.isNull(sid)) {
+            return null;
+        }
         return findSingle("sid", sid);
     }
 
@@ -356,11 +359,14 @@ public class RoleServiceImpl implements RoleService {
         return matchedRoles;
     }
 
-    public Role getPreassignedRole() {
+    public Role getPreassignedRole(Long companyInfoSid) {
+        if (Objects.isNull(companyInfoSid)) {
+            return null;
+        }
         Map<String, Object> params = new HashMap<>();
         params.put("category", Role.Category.ACCOUNT.getCode());
         params.put("type", Role.Type.PRE_ASSIGNED.getCode());
-        params.put("companyInfoSid", WebUtils.getCompanyId());
+        params.put("companyInfoSid", companyInfoSid);
         List<Role> matchedRoles = findByParams(params);
         if (Objects.nonNull(matchedRoles) && !matchedRoles.isEmpty()) {
             return matchedRoles.get(0);

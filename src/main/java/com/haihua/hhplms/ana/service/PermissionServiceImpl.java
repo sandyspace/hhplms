@@ -28,45 +28,52 @@ public class PermissionServiceImpl implements PermissionService {
     @Qualifier("rolePermissionRelationshipService")
     private RolePermissionRelationshipService rolePermissionRelationshipService;
 
-    public List<PermissionVO> loadPermissions() {
-        List<Permission> permissions;
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Role preassignedRole = roleService.getPreassignedRole();
-            if (Objects.isNull(preassignedRole)) {
-                throw new ServiceException("You have no right to operate permissions, please contact system admin");
-            }
-            permissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), Permission.Type.PAGE);
-        } else {
-            permissions = findByType(Permission.Type.PAGE);
-        }
-        final Map<Long, PermissionVO> permissionMap = new HashMap<>();
-        permissions.forEach(permission -> permissionMap.put(permission.getSid(), new PermissionVO(permission)));
-        permissionMap.values().forEach(permission -> {
+    public List<PermissionVO> permissionsAvailableToAssign(Long refRoleSid) {
+        final List<Permission> availablePermissions = availablePermissions(refRoleSid, Permission.Type.PAGE);
+        final Map<Long, PermissionVO> availablePermissionMap = new HashMap<>();
+        availablePermissions.forEach(availablePermission -> availablePermissionMap.put(availablePermission.getSid(), new PermissionVO(availablePermission)));
+        availablePermissionMap.values().forEach(permission -> {
             if (Objects.nonNull(permission.getPid())) {
-                permissionMap.get(permission.getPid()).addSubPermission(permission);
+                availablePermissionMap.get(permission.getPid()).addSubPermission(permission);
             }
         });
-        return permissionMap.values().stream()
-                    .filter(grantedPermission -> Permission.LEVEL_TOP == grantedPermission.getLevel())
-                    .collect(Collectors.toList());
+        return availablePermissionMap.values().stream()
+                .filter(availablePermission -> Permission.LEVEL_TOP == availablePermission.getLevel())
+                .collect(Collectors.toList());
     }
 
-    public List<PermissionVO> loadApiList() {
-        List<Permission> apiList;
+    public List<PermissionVO> apisAvailableToAssign(Long refRoleSid) {
+        final List<Permission> availableApis = availablePermissions(refRoleSid, Permission.Type.API);
+        return availableApis.stream()
+                .map(api -> new PermissionVO(api))
+                .collect(Collectors.toList());
+    }
+
+    private List<Permission> availablePermissions(Long refRoleSid, Permission.Type type) {
+        List<Permission> availablePermissions;
         String userType = WebUtils.getUserType();
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Role preassignedRole = roleService.getPreassignedRole();
+            Role preassignedRole = roleService.getPreassignedRole(WebUtils.getCompanyId());
             if (Objects.isNull(preassignedRole)) {
-                throw new ServiceException("You have no right to operate api list, please contact system admin");
+                throw new ServiceException("Please contact system admin to create a role of type pre-assigned for you");
             }
-            apiList = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), Permission.Type.API);
+            availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
         } else {
-            apiList = findByType(Permission.Type.API);
+            Role refRole = roleService.findBySid(refRoleSid);
+            if (Objects.isNull(refRole)) {
+                throw new ServiceException("Cannot determine available permissions without a reference role");
+            }
+            if (Role.Category.ACCOUNT == refRole.getCategory() && Role.Type.CREATED == refRole.getType()) {
+                Role preassignedRole = roleService.getPreassignedRole(refRole.getCompanyInfoSid());
+                if (Objects.isNull(preassignedRole)) {
+                    throw new ServiceException("Company with id: [" + refRole.getCompanyInfoSid() + "] does not have a role of type pre-assigned, please create it");
+                }
+                availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
+            } else {
+                availablePermissions = findByType(type);
+            }
         }
-        return apiList.stream()
-                    .map(api -> new PermissionVO(api))
-                    .collect(Collectors.toList());
+        return availablePermissions;
     }
 
     public List<PermissionVO> getPermissionsOfGivenRole(Long roleSid) {

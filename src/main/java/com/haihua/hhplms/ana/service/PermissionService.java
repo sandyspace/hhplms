@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface PermissionService {
-    List<PermissionVO> loadPermissions();
-    List<PermissionVO> loadApiList();
+    List<PermissionVO> permissionsAvailableToAssign(Long refRoleSid);
+    List<PermissionVO> apisAvailableToAssign(Long refRoleSid);
     List<PermissionVO> getPermissionsOfGivenRole(Long roleSid);
     List<PermissionVO> getApiListOfGivenRole(Long roleSid);
     List<Permission> findPermissionsOfGivenRoles(List<Long> roleSids, Permission.Type type);

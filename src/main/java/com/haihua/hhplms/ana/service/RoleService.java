@@ -39,5 +39,5 @@ public interface RoleService {
     List<Role> findRolesOfGivenPermission(Long permissionSid);
     List<Role> findRolesOfGivenEmployee(Long employeeSid);
     List<Role> findRolesOfGivenAccount(Long accountSid);
-    Role getPreassignedRole();
+    Role getPreassignedRole(Long companyInfoSid);
 }
