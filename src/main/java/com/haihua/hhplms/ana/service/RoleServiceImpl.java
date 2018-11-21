@@ -154,6 +154,7 @@ public class RoleServiceImpl implements RoleService {
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
             roleCreationVO.setCategory(Role.Category.ACCOUNT.getCode());
             roleCreationVO.setType(Role.Type.CREATED.getCode());
+            roleCreationVO.setCompanyId(WebUtils.getCompanyId());
         }
         Role role = new Role();
         role.setCode(roleCreationVO.getCode());
@@ -163,6 +164,7 @@ public class RoleServiceImpl implements RoleService {
         Long companyId = WebUtils.getCompanyId();
         role.setCompanyInfoSid(companyId);
         role.setStatus(Role.Status.ENABLED);
+        role.setCompanyInfoSid(roleCreationVO.getCompanyId());
         role.setCreatedBy(WebUtils.getLoginName());
         role.setCreatedTime(new Date(System.currentTimeMillis()));
         role.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);

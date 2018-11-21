@@ -5,6 +5,7 @@ public class RoleCreationVO {
     private String name;
     private String category;
     private String type;
+    private Long companyId;
 
     public String getCode() {
         return code;
@@ -36,5 +37,13 @@ public class RoleCreationVO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 }

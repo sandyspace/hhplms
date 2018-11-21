@@ -156,6 +156,11 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public Account createAccount(AccountCreationVO accountCreationVO) {
         String userType = WebUtils.getUserType();
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+            Long id = WebUtils.getUserId();
+            Account selfAccount = findBySid(id);
+            if(Account.Type.COMPANY != selfAccount.getType()) {
+                throw new ServiceException("You have insufficient right to create account");
+            }
             accountCreationVO.setType(Account.Type.COMPANY.getCode());
             Long companyId = WebUtils.getCompanyId();
             accountCreationVO.setCompanyId(companyId);
