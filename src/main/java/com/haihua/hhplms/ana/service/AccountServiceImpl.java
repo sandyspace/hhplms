@@ -473,6 +473,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .loginName(account.getLoginName())
                 .mobile(account.getMobile())
                 .email(account.getEmail())
+                .type(Role.Category.ACCOUNT.getCode())
                 .password(account.getPassword())
                 .status(account.getStatus().getCode())
                 .realName(account.getRealName())
