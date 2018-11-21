@@ -405,6 +405,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new DisabledException("Authentication Failed. Your account was in " + employee.getStatus().getCode() + " status");
         }
         return new UserBasicInfo.Builder()
+                .id(employee.getSid())
                 .loginName(employee.getLoginName())
                 .mobile(employee.getMobile())
                 .email(employee.getEmail())

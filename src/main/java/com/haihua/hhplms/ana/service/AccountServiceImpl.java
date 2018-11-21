@@ -464,6 +464,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             throw new UsernameNotFoundException("Username[" + mobile + "] does not exist");
         }
         return new UserBasicInfo.Builder()
+                .id(account.getSid())
                 .loginName(account.getLoginName())
                 .mobile(account.getMobile())
                 .email(account.getEmail())
@@ -492,6 +493,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             throw new DisabledException("Authentication Failed. Your account was in " + account.getStatus().getCode() + " status");
         }
         return new UserBasicInfo.Builder()
+                .id(account.getSid())
                 .loginName(account.getLoginName())
                 .mobile(account.getMobile())
                 .email(account.getEmail())
