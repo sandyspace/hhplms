@@ -13,6 +13,8 @@ public class Route extends BaseEntity {
     private String assignedTo;
     private String startFlag;
     private String relatedView;
+    private String viewOnChecking;
+    private BizCode attachedBiz;
 
     public Long getProcessSid() {
         return processSid;
@@ -70,6 +72,22 @@ public class Route extends BaseEntity {
         this.relatedView = relatedView;
     }
 
+    public String getViewOnChecking() {
+        return viewOnChecking;
+    }
+
+    public void setViewOnChecking(String viewOnChecking) {
+        this.viewOnChecking = viewOnChecking;
+    }
+
+    public BizCode getAttachedBiz() {
+        return attachedBiz;
+    }
+
+    public void setAttachedBiz(BizCode attachedBiz) {
+        this.attachedBiz = attachedBiz;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -93,6 +111,24 @@ public class Route extends BaseEntity {
         private String code;
         private String name;
         AssignedType(String code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+        public String getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    public enum BizCode implements BaseEnum {
+        COMPLETE_COMPANY_INFO_CREATION("ccic", "完成企业信息创建");
+
+        private String code;
+        private String name;
+        BizCode(String code, String name) {
             this.code = code;
             this.name = name;
         }

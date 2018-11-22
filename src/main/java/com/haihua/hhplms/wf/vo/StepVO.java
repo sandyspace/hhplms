@@ -13,8 +13,12 @@ public class StepVO {
     private String assignedTo;
     private String relatedView;
 
+    public StepVO(Long id) {
+        this.id = id;
+    }
+
     public StepVO(Step step) {
-        this.id = step.getSid();
+        this(step.getSid());
         this.code = step.getCode();
         this.name = step.getName();
         this.desc = step.getDesc();

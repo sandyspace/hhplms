@@ -8,6 +8,7 @@ import com.haihua.hhplms.wf.entity.Route;
 import com.haihua.hhplms.wf.entity.ProcessInfo;
 import com.haihua.hhplms.wf.entity.Step;
 import com.haihua.hhplms.wf.mapper.ProcessInfoMapper;
+import com.haihua.hhplms.wf.vo.ProcessExecutionVO;
 import com.haihua.hhplms.wf.vo.ProcessInfoVO;
 import com.haihua.hhplms.wf.vo.StepVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,10 @@ public class ProcessInfoServiceImpl implements ProcessInfoService {
     @Autowired
     @Qualifier("routeService")
     private RouteService routeService;
+
+    @Autowired
+    @Qualifier("processExecutionService")
+    private ProcessExecutionService processExecutionService;
 
     public List<ProcessInfoVO> getAvailableProcesses() {
         String userType = WebUtils.getUserType();
@@ -80,11 +85,18 @@ public class ProcessInfoServiceImpl implements ProcessInfoService {
             processInfoVO.setSteps(processSteps);
         }
 
+        final List<ProcessExecutionVO> processExecutionsLaunchedByAccount = processExecutionService.getProcessExecutionsLaunchedByAccount(processInfo.getSid());
+        processInfoVO.setProcessExecutions(processExecutionsLaunchedByAccount);
+
         return processInfoVO;
     }
 
     public ProcessInfo findByCode(String code) {
         return findSingle("code", code);
+    }
+
+    public ProcessInfo findBySid(Long sid) {
+        return findSingle("sid", sid);
     }
 
     public List<ProcessInfo> findBySids(List<Long> searchingSids) {

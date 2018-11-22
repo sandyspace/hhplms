@@ -67,4 +67,10 @@ public class CompanyInfoController {
         companyInfoService.updateCompanyInfoStatus(sid, updateStatusRequest);
         return ResultBean.Success.of(sid, "");
     }
+
+    @PostMapping(path = "/api/ana/account/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> uploadCompanyInfo(@RequestParam("process") String processCode, @RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
+        CompanyInfo companyInfo = companyInfoService.uploadCompanyInfo(processCode, companyInfoCreationVO);
+        return ResultBean.Success.of(companyInfo.getSid(), "");
+    }
 }

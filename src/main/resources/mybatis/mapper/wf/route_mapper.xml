@@ -12,6 +12,8 @@
     <result column="assigned_to" property="assignedTo" />
     <result column="start_flag" property="startFlag" />
     <result column="related_view" property="relatedView" />
+    <result column="view_on_checking" property="viewOnChecking" />
+    <result column="attached_biz" property="attachedBiz" />
     <result column="created_by" property="createdBy" />
     <result column="created_time" property="createdTime" />
     <result column="updated_by" property="updatedBy" />
@@ -20,7 +22,7 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, process_sid, from_step_sid, to_step_sid, assigned_type, assigned_to, start_flag, related_view, created_by, created_time, updated_by, updated_time, version_num
+    sid, process_sid, from_step_sid, to_step_sid, assigned_type, assigned_to, start_flag, related_view, view_on_checking, attached_biz, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <select id="findByParams" resultMap="routeMap" parameterType="map" statementType="PREPARED">

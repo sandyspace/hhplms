@@ -49,6 +49,9 @@
       <if test="status != null">
         status = #{status},
       </if>
+      <if test="companyInfoSid != null">
+        company_info_sid = #{companyInfoSid},
+      </if>
       <if test="updatedBy != null">
         updated_by = #{updatedBy},
       </if>

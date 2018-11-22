@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +36,10 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
     @Autowired
     @Qualifier("routeService")
     private RouteService routeService;
+
+    @Autowired
+    @Qualifier("defaultBizProcessHandler")
+    private BizProcessHandler bizProcessHandler;
 
     public PageWrapper<List<ProcessExecutionVO>> loadProcessExecutionsByPage(Long processSid,
                                                                              String processStatus,
@@ -119,6 +124,50 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         return pageOfProcessExecutions;
     }
 
+    public List<ProcessExecutionVO> getProcessExecutionsLaunchedByAccount(Long processSid) {
+        String processInstanceId = null;
+        final ProcessExecution currentStepOfExecutingProcess = getCurrentStepOfExecutingProcess(processSid);
+        if (Objects.nonNull(currentStepOfExecutingProcess)) {
+            processInstanceId = currentStepOfExecutingProcess.getProcessInstanceId();
+        } else {
+            final ProcessExecution lastStepOfLatestCompletedProcess = getLastStepOfLatestCompletedProcess(processSid);
+            if (Objects.nonNull(lastStepOfLatestCompletedProcess)) {
+                processInstanceId = lastStepOfLatestCompletedProcess.getProcessInstanceId();
+            }
+        }
+        if (Objects.isNull(processInstanceId)) {
+            return null;
+        }
+        return getProcessExecutionsByProcessInstanceId(processInstanceId)
+                .stream().map(processExecution -> new ProcessExecutionVO(processExecution))
+                .collect(Collectors.toList());
+    }
+
+    private List<ProcessExecution> getProcessExecutionsByProcessInstanceId(String processInstanceId) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("processInstanceId", processInstanceId);
+        return getByParams(params);
+    }
+
+    private ProcessExecution getCurrentStepOfExecutingProcess(Long processSid) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("processSid", processSid);
+        params.put("processStatus", ProcessExecution.ProcessStatus.PROCESSING.getCode());
+        params.put("activeFlag", GlobalConstant.FLAG_YES_VALUE);
+        params.put("initBy", WebUtils.getLoginName());
+        return findSingle(params);
+    }
+
+    private ProcessExecution getLastStepOfLatestCompletedProcess(Long processSid) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("processSid", processSid);
+        params.put("processStatus", ProcessExecution.ProcessStatus.COMPLETED.getCode());
+        params.put("activeFlag", GlobalConstant.FLAG_NO_VALUE);
+        params.put("initBy", WebUtils.getLoginName());
+        return findSingle(params);
+    }
+
+    @Transactional
     public void checkProcessExecution(Long processExecutionSid) {
         String userType = WebUtils.getUserType();
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
@@ -136,6 +185,11 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         final Long processSid = processExecution.getProcessSid();
         final Long currentStepSid = processExecution.getCurrentStepSid();
         Route currentRouteFragment = routeService.findRouteFragment(processSid, currentStepSid);
+
+        if (Objects.nonNull(currentRouteFragment.getAttachedBiz())) {
+            bizProcessHandler.handleBizProcess(currentRouteFragment.getAttachedBiz(), processExecution);
+        }
+
         if (lastStep(currentRouteFragment)) {
             completeProcess(processExecution);
         } else {
@@ -158,7 +212,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         firstStepOfProcess.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
 
         firstStepOfProcess.setProcessSid(process.getSid());
-        firstStepOfProcess.setProcessInstanceId(UUID.fromString(processCode + "." + firstStepOfProcess.getInitBy() + "." + System.nanoTime()).toString());
+        firstStepOfProcess.setProcessInstanceId(UUID.nameUUIDFromBytes((processCode + "." + firstStepOfProcess.getInitBy() + "." + System.nanoTime()).getBytes()).toString());
         firstStepOfProcess.setProcessStatus(ProcessExecution.ProcessStatus.PROCESSING);
         firstStepOfProcess.setCurrentStepSid(firstRouteFragment.getFromStepSid());
         firstStepOfProcess.setAssignedType(firstRouteFragment.getAssignedType());
@@ -256,14 +310,28 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         return findSingle("sid", sid);
     }
 
-    private ProcessExecution findSingle(String paramName, Object paramValue) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(paramName, paramValue);
-        List<ProcessExecution> matchedProcessExecutions = findByParams(params);
+    private ProcessExecution findSingle(Map<String, Object> params) {
+        List<ProcessExecution> matchedProcessExecutions = getByParams(params);
         if (Objects.nonNull(matchedProcessExecutions) && !matchedProcessExecutions.isEmpty()) {
             return matchedProcessExecutions.get(0);
         }
         return null;
+    }
+
+    private ProcessExecution findSingle(String paramName, Object paramValue) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(paramName, paramValue);
+        return findSingle(params);
+    }
+
+    public List<ProcessExecution> getByParams(Map<String, Object> params) {
+        List<ProcessExecution> processExecutions;
+        try {
+            processExecutions = processExecutionMapper.getByParams(params);
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
+        return processExecutions;
     }
 
     public int countByParams(Map<String, Object> params) {

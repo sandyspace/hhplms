@@ -198,6 +198,24 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return insertedRows;
     }
 
+    public void associateWithCompanyInfo(Long companyInfoSid) {
+        Account selfAccount = findBySid(WebUtils.getUserId());
+        if (Objects.isNull(selfAccount)) {
+            throw new ServiceException("account does not exist, failed to associate with company info");
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("companyInfoSid", companyInfoSid);
+        params.put("updatedBy", WebUtils.getLoginName());
+        params.put("updatedTime", new Date(System.currentTimeMillis()));
+        params.put("versionNum", selfAccount.getVersionNum());
+        params.put("sid", selfAccount.getSid());
+
+        int updatedRows = updateAccount(params);
+        if (updatedRows == 0) {
+            throw new ServiceException("Account is being edited by others, please try again later");
+        }
+    }
+
     public void updateAccount(Long accountSid, AccountUpdateVO accountUpdateVO) {
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
@@ -305,6 +323,13 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (updatedRows == 0) {
             throw new ServiceException("Account is being edited by others, please try again later");
         }
+    }
+
+    public void updateAccountType(Long accountSid, String type) {
+        final UpdateTypeRequest updateStatusType = new UpdateTypeRequest();
+        updateStatusType.setType(type);
+
+        updateAccountType(accountSid, updateStatusType);
     }
 
     public void updateAccountType(Long accountSid, UpdateTypeRequest updateTypeRequest) {

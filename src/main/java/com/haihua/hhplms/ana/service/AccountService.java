@@ -21,9 +21,11 @@ public interface AccountService {
     AccountVO loadDetail(Long sid);
     Account createAccount(AccountCreationVO accountCreationVO);
     int createAccount(Account account);
+    void associateWithCompanyInfo(Long companyInfoSid);
     void updateAccount(Long accountSid, AccountUpdateVO accountUpdateVO);
     void resetPassword(Long accountSid);
     void changePassword(ChangePasswordRequest changePasswordRequest);
+    void updateAccountType(Long accountSid, String type);
     void updateAccountType(Long accountSid, UpdateTypeRequest updateTypeRequest);
     void updateAccountStatus(Long accountSid, UpdateStatusRequest updateStatusRequest);
     int updateAccount(Account account);

@@ -19,6 +19,19 @@ public class ProcessExecutionVO {
     private String initBy;
     private Long initTime;
 
+    public ProcessExecutionVO(ProcessExecution processExecution) {
+        this.id = processExecution.getSid();
+        this.process = new ProcessInfoVO(processExecution.getSid());
+        this.processStatus = processExecution.getProcessStatus().getCode();
+        this.currentStep = new StepVO(processExecution.getCurrentStepSid());
+        this.stepStatus = processExecution.getStepStatus().getCode();
+        this.activeFlag = processExecution.getActiveFlag();
+        this.checkedBy = processExecution.getCheckedBy();
+        this.checkedTime = Objects.isNull(processExecution.getCheckedTime()) ? null : processExecution.getCheckedTime().getTime();
+        this.initBy = processExecution.getInitBy();
+        this.initTime = Objects.isNull(processExecution.getInitTime()) ? null : processExecution.getInitTime().getTime();
+    }
+
     public ProcessExecutionVO(ProcessExecution processExecution, ProcessInfo processInfo, Step step) {
         this.id = processExecution.getSid();
         this.process = new ProcessInfoVO(processInfo);

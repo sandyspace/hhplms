@@ -207,6 +207,8 @@ CREATE TABLE `wf_route` (
   `assigned_to` varchar(30)   DEFAULT NULL,
   `start_flag` char(1)   DEFAULT NULL,
   `related_view` varchar(128)   DEFAULT NULL,
+  `view_on_checking` varchar(128) DEFAULT NULL,
+  `attached_biz` varchar(20) DEFAULT NULL,
   `created_by` varchar(64)   NOT NULL,
   `created_time` datetime NOT NULL,
   `updated_by` varchar(64)   DEFAULT NULL,

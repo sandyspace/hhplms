@@ -9,10 +9,15 @@ public class ProcessInfoVO {
     private String code;
     private String name;
     private String desc;
-    List<StepVO> steps;
+    private List<StepVO> steps;
+    private List<ProcessExecutionVO> processExecutions;
+
+    public ProcessInfoVO(Long id) {
+        this.id = id;
+    }
 
     public ProcessInfoVO(ProcessInfo processInfo) {
-        this.id = processInfo.getSid();
+        this(processInfo.getSid());
         this.code = processInfo.getCode();
         this.name = processInfo.getName();
         this.desc = processInfo.getDesc();
@@ -56,5 +61,13 @@ public class ProcessInfoVO {
 
     public void setSteps(List<StepVO> steps) {
         this.steps = steps;
+    }
+
+    public List<ProcessExecutionVO> getProcessExecutions() {
+        return processExecutions;
+    }
+
+    public void setProcessExecutions(List<ProcessExecutionVO> processExecutions) {
+        this.processExecutions = processExecutions;
     }
 }

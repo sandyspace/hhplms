@@ -9,5 +9,6 @@ public interface ProcessInfoService {
     List<ProcessInfoVO> getAvailableProcesses();
     ProcessInfoVO loadDetail(String code);
     ProcessInfo findByCode(String code);
+    ProcessInfo findBySid(Long sid);
     List<ProcessInfo> findBySids(List<Long> searchingSids);
 }

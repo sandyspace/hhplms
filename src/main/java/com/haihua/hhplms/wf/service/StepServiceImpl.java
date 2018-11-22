@@ -50,6 +50,20 @@ public class StepServiceImpl implements StepService {
                 .collect(Collectors.toList()));
     }
 
+    public Step findBySid(Long sid) {
+        return findSingle("sid", sid);
+    }
+
+    private Step findSingle(String paramName, Object paramValue) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(paramName, paramValue);
+        List<Step> matchedSteps = findByParams(params);
+        if (Objects.nonNull(matchedSteps) && !matchedSteps.isEmpty()) {
+            return matchedSteps.get(0);
+        }
+        return null;
+    }
+
     public List<Step> findBySids(List<Long> searchingSids) {
         Map<String, Object> params = new HashMap<>();
         params.put("searchingSids", searchingSids);

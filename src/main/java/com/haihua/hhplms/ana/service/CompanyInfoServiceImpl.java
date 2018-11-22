@@ -12,9 +12,12 @@ import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.utils.EnumUtil;
 import com.haihua.hhplms.common.utils.WebUtils;
+import com.haihua.hhplms.wf.service.ProcessExecutionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +26,14 @@ import java.util.stream.Collectors;
 public class CompanyInfoServiceImpl implements CompanyInfoService {
     @Autowired
     private CompanyInfoMapper companyInfoMapper;
+
+    @Autowired
+    @Qualifier("accountService")
+    private AccountService accountService;
+
+    @Autowired
+    @Qualifier("processExecutionService")
+    private ProcessExecutionService processExecutionService;
 
     public PageWrapper<List<CompanyInfoVO>> loadCompanyInfosByPage(String code,
                                                                       String type,
@@ -130,6 +141,13 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         return updatedRows;
     }
 
+    public void updateCompanyInfoStatus(Long sid, String status) {
+        UpdateStatusRequest updateStatusRequest = new UpdateStatusRequest();
+        updateStatusRequest.setStatus(status);
+
+        updateCompanyInfoStatus(sid, updateStatusRequest);
+    }
+
     public void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest) {
         String userType = WebUtils.getUserType();
         if (Role.Category.ACCOUNT.getCode().equals(userType)) {
@@ -164,6 +182,18 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
             throw new ServiceException(e);
         }
         return updatedRows;
+    }
+
+    @Transactional
+    public CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO) {
+        String userType = WebUtils.getUserType();
+        if (Role.Category.EMPLOYEE.getCode().equals(userType)) {
+            throw new ServiceException("Only account has right to upload company info");
+        }
+        CompanyInfo companyInfo = createCompanyInfo(companyInfoCreationVO);
+        accountService.associateWithCompanyInfo(companyInfo.getSid());
+        processExecutionService.initProcess(processCode);
+        return companyInfo;
     }
 
     public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO) {

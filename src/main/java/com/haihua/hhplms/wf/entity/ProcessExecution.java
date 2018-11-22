@@ -134,10 +134,10 @@ public class ProcessExecution extends BaseEntity {
     }
 
     public enum StepStatus implements BaseEnum {
-        WAITING("waiting", "等待"),
+        WAIT("wait", "等待"),
         PROCESS("process", "处理中"),
         FINISH("finish", "完成"),
-        FAILED("failed", "失败");
+        ERROR("error", "失败");
 
         private String code;
         private String name;

@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface StepService {
     List<StepVO> getStepsOfProcess(Long processSid);
+    Step findBySid(Long sid);
     List<Step> findBySids(List<Long> searchingSids);
 }
