@@ -1,5 +1,7 @@
 package com.haihua.hhplms.common.utils;
 
+import com.haihua.hhplms.ana.entity.Account;
+import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.security.model.UserContext;
 import com.haihua.hhplms.security.model.UserContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,9 +49,28 @@ public class WebUtils {
         return userContext.getUserProfile().getBasicInfo().getType();
     }
 
+    public static String getSubType() {
+        UserContext userContext = getUserContext();
+        return userContext.getUserProfile().getBasicInfo().getSubType();
+    }
+
     public static Long getCompanyId() {
         UserContext userContext = getUserContext();
         return userContext.getUserProfile().getBasicInfo().getCompanyId();
+    }
+
+    public static boolean isEmployee() {
+        return Role.Category.EMPLOYEE == EnumUtil.codeOf(Role.Category.class, getUserType());
+    }
+
+    public static boolean isMember() {
+        return Role.Category.ACCOUNT == EnumUtil.codeOf(Role.Category.class, getUserType())
+                && Account.Type.MEMBER == EnumUtil.codeOf(Account.Type.class, getSubType());
+    }
+
+    public static boolean isCompany() {
+        return Role.Category.ACCOUNT == EnumUtil.codeOf(Role.Category.class, getUserType())
+                && Account.Type.COMPANY == EnumUtil.codeOf(Account.Type.class, getSubType());
     }
 
     public static List<String> getGrantedRoles() {

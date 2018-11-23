@@ -1,5 +1,6 @@
 package com.haihua.hhplms.sys.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
@@ -76,15 +77,19 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     public void deleteBySid(Long sid) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+
         Feedback feedback = findBySid(sid);
         if (Objects.isNull(feedback)) {
-            throw new ServiceException("Feedback does not exist, failed to delete");
+            throw new ServiceException("ID为[" + sid + "]的访客留言不存在");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("sid", sid);
         int deletedRows = deleteByParams(params);
         if (deletedRows == 0) {
-            throw new ServiceException("Feedback with id:[" + sid + "] has been deleted by others");
+            throw new ServiceException("ID为[" + sid + "]的访客留言已经被其他人删除");
         }
     }
 

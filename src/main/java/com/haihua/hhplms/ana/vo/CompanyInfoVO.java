@@ -12,6 +12,11 @@ public class CompanyInfoVO {
     private String contactMobile;
     private String status;
 
+    public CompanyInfoVO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public CompanyInfoVO(CompanyInfo companyInfo) {
         this.id = companyInfo.getSid();
         this.code = companyInfo.getCode();

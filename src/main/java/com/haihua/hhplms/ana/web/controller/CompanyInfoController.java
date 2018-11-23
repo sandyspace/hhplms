@@ -51,7 +51,7 @@ public class CompanyInfoController {
 
     @PostMapping(path = "/api/ana/companyInfos", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> createCompanyInfo(@RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
-        CompanyInfo companyInfo = companyInfoService.createCompanyInfo(companyInfoCreationVO);
+        CompanyInfo companyInfo = companyInfoService.createCompanyInfo(companyInfoCreationVO, true);
         return ResultBean.Success.of(companyInfo.getSid(), "");
     }
 
@@ -72,5 +72,15 @@ public class CompanyInfoController {
     public ResultBean.Success<Long> uploadCompanyInfo(@RequestParam("process") String processCode, @RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
         CompanyInfo companyInfo = companyInfoService.uploadCompanyInfo(processCode, companyInfoCreationVO);
         return ResultBean.Success.of(companyInfo.getSid(), "");
+    }
+
+    @GetMapping(path = "/api/ana/accounts/{loginName}/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<CompanyInfoVO> getCompanyInfoOfAccount(@PathVariable("loginName") String loginName) {
+        return ResultBean.Success.of(companyInfoService.getCompanyInfo(loginName), "");
+    }
+
+    @GetMapping(path = "/api/ana/account/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<CompanyInfoVO> getCompanyInfoOfSelf() {
+        return ResultBean.Success.of(companyInfoService.getCompanyInfoOfAccount(), "");
     }
 }

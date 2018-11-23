@@ -1,5 +1,6 @@
 package com.haihua.hhplms.ana.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.vo.PermissionVO;
 import com.haihua.hhplms.ana.entity.Permission;
 import com.haihua.hhplms.ana.entity.Role;
@@ -29,6 +30,9 @@ public class PermissionServiceImpl implements PermissionService {
     private RolePermissionRelationshipService rolePermissionRelationshipService;
 
     public List<PermissionVO> permissionsAvailableToAssign(Long refRoleSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         final List<Permission> availablePermissions = availablePermissions(refRoleSid, Permission.Type.PAGE);
         final Map<Long, PermissionVO> availablePermissionMap = new HashMap<>();
         availablePermissions.forEach(availablePermission -> availablePermissionMap.put(availablePermission.getSid(), new PermissionVO(availablePermission)));
@@ -43,6 +47,9 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     public List<PermissionVO> apisAvailableToAssign(Long refRoleSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         final List<Permission> availableApis = availablePermissions(refRoleSid, Permission.Type.API);
         return availableApis.stream()
                 .map(api -> new PermissionVO(api))
@@ -51,22 +58,21 @@ public class PermissionServiceImpl implements PermissionService {
 
     private List<Permission> availablePermissions(Long refRoleSid, Permission.Type type) {
         List<Permission> availablePermissions;
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isCompany()) {
             Role preassignedRole = roleService.getPreassignedRole(WebUtils.getCompanyId());
             if (Objects.isNull(preassignedRole)) {
-                throw new ServiceException("Please contact system admin to create a role of type pre-assigned for you");
+                throw new ServiceException("请联系系统管理员创建" + Role.Type.PRE_ASSIGNED.getName() + "类型角色");
             }
             availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
         } else {
             Role refRole = roleService.findBySid(refRoleSid);
             if (Objects.isNull(refRole)) {
-                throw new ServiceException("Cannot determine available permissions without a reference role");
+                throw new ServiceException("无法获取可分配菜单或API");
             }
             if (Role.Category.ACCOUNT == refRole.getCategory() && Role.Type.CREATED == refRole.getType()) {
                 Role preassignedRole = roleService.getPreassignedRole(refRole.getCompanyInfoSid());
                 if (Objects.isNull(preassignedRole)) {
-                    throw new ServiceException("Company with id: [" + refRole.getCompanyInfoSid() + "] does not have a role of type pre-assigned, please create it");
+                    throw new ServiceException("ID为[" + refRole.getCompanyInfoSid() + "]企业没有对应的" + Role.Type.PRE_ASSIGNED.getName() + "类型角色，请先创建");
                 }
                 availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
             } else {
@@ -77,6 +83,19 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     public List<PermissionVO> getPermissionsOfGivenRole(Long roleSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
+        Role role = roleService.findBySid(roleSid);
+        if (Objects.isNull(role)) {
+            throw new ServiceException("ID为[" + roleSid + "]的角色不存在");
+        }
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(role.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限获取其他" + Account.Type.COMPANY.getName() + "的角色已分配菜单");
+            }
+        }
+
         List<Permission> permissions = findPermissionsOfGivenRoles(Arrays.asList(roleSid), Permission.Type.PAGE);
         if (Objects.nonNull(permissions) && !permissions.isEmpty()) {
             final Map<Long, PermissionVO> permissionMap = new HashMap<>();
@@ -94,6 +113,19 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     public List<PermissionVO> getApiListOfGivenRole(Long roleSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
+        Role role = roleService.findBySid(roleSid);
+        if (Objects.isNull(role)) {
+            throw new ServiceException("ID为[" + roleSid + "]的角色不存在");
+        }
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(role.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限获取其他" + Account.Type.COMPANY.getName() + "的角色已分配API");
+            }
+        }
+
         List<Permission> apiList = findPermissionsOfGivenRoles(Arrays.asList(roleSid), Permission.Type.API);
         if (Objects.nonNull(apiList) && !apiList.isEmpty()) {
             return apiList.stream()

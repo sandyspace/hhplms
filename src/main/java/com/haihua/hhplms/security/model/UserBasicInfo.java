@@ -10,6 +10,7 @@ public class UserBasicInfo {
     private String email;
     private String mobile;
     private String type;
+    private String subType;
     @JsonIgnore
     private String password;
     @JsonIgnore
@@ -28,6 +29,7 @@ public class UserBasicInfo {
         this.email = userBasicInfoBuilder.email;
         this.mobile = userBasicInfoBuilder.mobile;
         this.type = userBasicInfoBuilder.type;
+        this.subType = userBasicInfoBuilder.subType;
         this.password = userBasicInfoBuilder.password;
         this.status = userBasicInfoBuilder.status;
         this.realName = userBasicInfoBuilder.realName;
@@ -56,6 +58,10 @@ public class UserBasicInfo {
 
     public String getType() {
         return type;
+    }
+
+    public String getSubType() {
+        return subType;
     }
 
     public String getPassword() {
@@ -100,6 +106,7 @@ public class UserBasicInfo {
         private String email;
         private String mobile;
         private String type;
+        private String subType;
         private String password;
         private String status;
         private String realName;
@@ -131,6 +138,11 @@ public class UserBasicInfo {
 
         public Builder type(String type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder subType(String subType) {
+            this.subType = subType;
             return this;
         }
 

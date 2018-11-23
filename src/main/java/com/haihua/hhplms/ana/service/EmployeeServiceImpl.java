@@ -51,9 +51,8 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
                                                              String status,
                                                              Integer pageNo,
                                                              Integer pageSize) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view employees");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isBlank(realNameLike)) {
@@ -90,13 +89,12 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     }
 
     public EmployeeVO loadDetail(Long sid) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view the detail of this employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
         Employee matchedEmployee = findBySid(sid);
         if (Objects.isNull(matchedEmployee)) {
-            throw new ServiceException("Employee with id: [" + sid + "] does not exist");
+            throw new ServiceException("ID为[" + sid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
         }
         EmployeeVO employDetail = new EmployeeVO(matchedEmployee);
 
@@ -134,9 +132,8 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     }
 
     public Employee createEmployee(EmployeeCreationVO employeeCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to create employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         Employee employee = new Employee();
@@ -170,14 +167,13 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     }
 
     public void updateEmployee(Long employeeSid, EmployeeUpdateVO employeeUpdateVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to update employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         Employee editingEmployee = findBySid(employeeSid);
         if (Objects.isNull(editingEmployee)) {
-            throw new ServiceException("Employee with id: [" + employeeSid + "] does not exist");
+            throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
         }
 
         Employee employee = new Employee();
@@ -197,7 +193,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
 
         int updatedRows = updateEmployee(employee);
         if (updatedRows == 0) {
-            throw new ServiceException("Employee is being edited by others, please try again later");
+            throw new ServiceException("此" + Role.Category.EMPLOYEE.getName() + "正在被其他人修改，请稍后再试");
         }
     }
 
@@ -222,14 +218,13 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     }
 
     public void resetPassword(Long employeeSid) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to reset password of this employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         Employee employee = findBySid(employeeSid);
         if (Objects.isNull(employee)) {
-            throw new ServiceException("Employee does not exist, failed to reset password");
+            throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -241,27 +236,31 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
 
         int updatedRows = updateEmployee(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Employee is being edited by others, please try again later");
+            throw new ServiceException("此" + Role.Category.EMPLOYEE.getName() + "正在被其他人修改，请稍后再试");
         }
     }
 
     public void changePassword(ChangePasswordRequest changePasswordRequest) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+
         Long employeeId = WebUtils.getUserId();
         Employee employee = findBySid(employeeId);
         if (Objects.isNull(employee)) {
-            throw new ServiceException("employee does not exist, failed to change password");
+            throw new ServiceException(Role.Category.EMPLOYEE.getName() + "不存在，修改密码失败");
         }
 
         if (StringUtils.isBlank(changePasswordRequest.getOriginPwd())) {
-            throw new ServiceException("origin password can not be blank");
+            throw new ServiceException("原始密码不能为空");
         }
 
         if (!encoder.matches(changePasswordRequest.getOriginPwd(), employee.getPassword())) {
-            throw new ServiceException("origin password is not correct");
+            throw new ServiceException("原始密码输入不正确");
         }
 
         if (StringUtils.isBlank(changePasswordRequest.getNewPwd())) {
-            throw new ServiceException("new password can not be blank");
+            throw new ServiceException("新密码不能为空");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -273,19 +272,18 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
 
         int updatedRows = updateEmployee(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Employee is being edited by others, please try again later");
+            throw new ServiceException("此" + Role.Category.EMPLOYEE.getName() + "正在被其他人修改，请稍后再试");
         }
     }
 
     public void updateEmployeeStatus(Long employeeSid, UpdateStatusRequest updateStatusRequest) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to change status of this employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         Employee employee = findBySid(employeeSid);
         if (Objects.isNull(employee)) {
-            throw new ServiceException("Employee does not exist, failed to change status");
+            throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -297,18 +295,17 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
 
         int updatedRows = updateEmployee(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Employee is being edited by others, please try again later");
+            throw new ServiceException("此" + Role.Category.EMPLOYEE.getName() + "正在被其他人修改，请稍后再试");
         }
     }
 
     public void addRolesToGivenEmployee(Long employeeSid, List<Long> roleSids) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to add roles to employee");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
         List<Role> rolesToAdd = roleService.findBySids(roleSids);
         if (Objects.isNull(rolesToAdd) || rolesToAdd.isEmpty() || rolesToAdd.size() != roleSids.size()) {
-            throw new ServiceException("some roles to be added to this account do not exist");
+            throw new ServiceException("分配给" + Role.Category.EMPLOYEE.getName() + "的某些角色不存在，分配失败");
         }
         List<EmployeeRoleRelationship> originEmployeeRoleRelationships = employeeRoleRelationshipService.findByEmployeeSid(employeeSid);
         List<Long> originRoleSids = originEmployeeRoleRelationships.stream()
@@ -322,7 +319,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
         for(Long removedRoleSid : removedRoleSids) {
             int deletedRows = employeeRoleRelationshipService.deleteByEmployeeSidAndRoleSid(employeeSid, removedRoleSid);
             if (deletedRows == 0) {
-                throw new ServiceException("Employee is being edited by others, please try again later");
+                throw new ServiceException("其他人正在给此" + Role.Category.EMPLOYEE.getName() + "分配角色，请稍后再试");
             }
         }
 
@@ -338,7 +335,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             try {
                 employeeRoleRelationshipService.createEmployeeRoleRelationship(employeeRoleRelationship);
             } catch (ServiceException e) {
-                throw new ServiceException("Employee is being edited by others, please try again later", e);
+                throw new ServiceException("其他人正在给此" + Role.Category.EMPLOYEE.getName() + "分配角色，请稍后再试", e);
             }
         }
     }
@@ -399,10 +396,10 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             employee = findByEmail(username);
         }
         if (Objects.isNull(employee)) {
-            throw new UsernameNotFoundException("Username[" + username + "] does not exist");
+            throw new UsernameNotFoundException("用户名[" + username + "]不存在");
         }
         if (Employee.Status.ACTIVE != employee.getStatus()) {
-            throw new DisabledException("Authentication Failed. Your account was in " + employee.getStatus().getCode() + " status");
+            throw new DisabledException("此" + Role.Category.EMPLOYEE.getName() + "处于" + employee.getStatus().getName() + "状态，认证失败");
         }
         return new UserBasicInfo.Builder()
                 .id(employee.getSid())
@@ -490,7 +487,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     public List<GrantedRole> loadGrantedRolesByUserBasicInfo(UserBasicInfo userBasicInfo) {
         final List<Role> roles = roleService.findRolesOfGivenEmployee(userBasicInfo.getId());
         if (Objects.isNull(roles) || roles.isEmpty()) {
-            throw new InsufficientAuthenticationException("User has no roles assigned");
+            throw new InsufficientAuthenticationException("此" + Role.Category.EMPLOYEE.getName() + "没有分配任何的角色");
         }
         return roles.stream()
                 .filter(role -> Role.Status.ENABLED == role.getStatus())
@@ -518,7 +515,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     public UserBasicInfo login(String username, String password) {
         UserBasicInfo userBasicInfo = loadUserBasicInfoByUserName(username);
         if (!encoder.matches(password, userBasicInfo.getPassword())) {
-            throw new BadCredentialsException("Authentication Failed. Username or Password not valid.");
+            throw new BadCredentialsException("认证失败，用户名或密码不正确");
         }
         return userBasicInfo;
     }

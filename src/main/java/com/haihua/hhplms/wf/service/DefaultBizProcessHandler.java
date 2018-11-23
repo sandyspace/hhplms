@@ -6,7 +6,6 @@ import com.haihua.hhplms.ana.service.AccountService;
 import com.haihua.hhplms.ana.service.CompanyInfoService;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.wf.entity.ProcessExecution;
-import com.haihua.hhplms.wf.entity.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,8 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
     @Qualifier("accountService")
     private AccountService accountService;
 
-    public void handleBizProcess(Route.BizCode bizCode, ProcessExecution processExecution) {
-        if (bizCode == Route.BizCode.COMPLETE_COMPANY_INFO_CREATION) {
+    public void handleBizProcess(BizCode bizCode, ProcessExecution processExecution) {
+        if (bizCode == BizCode.COMPLETE_COMPANY_INFO_CREATION) {
             Account initBy = accountService.findByLoginName(processExecution.getInitBy());
             if (Objects.isNull(initBy)) {
                 throw new ServiceException("启动流程用户名为:[" + processExecution.getInitBy() + "]的账号不存在，" + bizCode.getName() + "失败");

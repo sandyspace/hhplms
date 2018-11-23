@@ -19,8 +19,10 @@ public interface CompanyInfoService {
                                                                 Integer pageSize);
     List<CompanyInfoVO> getAvailableCompanyInfos();
     CompanyInfoVO loadDetail(Long sid);
+    CompanyInfoVO getCompanyInfo(String loginName);
+    CompanyInfoVO getCompanyInfoOfAccount();
     CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO);
-    CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO);
+    CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO, boolean isDirect);
     void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO);
     void updateCompanyInfoStatus(Long sid, String status);
     void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest);

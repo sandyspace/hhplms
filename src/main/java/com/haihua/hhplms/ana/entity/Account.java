@@ -124,7 +124,7 @@ public class Account extends BaseEntity {
     public enum Type implements BaseEnum {
         //member: 普通用户, company: 企业
         MEMBER("member", "普通用户"),
-        COMPANY("company", "企业");
+        COMPANY("company", "企业用户");
 
         private String code;
         private String name;

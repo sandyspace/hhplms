@@ -28,6 +28,10 @@ public class RoleServiceImpl implements RoleService {
     private RoleMapper roleMapper;
 
     @Autowired
+    @Qualifier("accountService")
+    private AccountService accountService;
+
+    @Autowired
     @Qualifier("employeeRoleRelationshipService")
     private EmployeeRoleRelationshipService employeeRoleRelationshipService;
 
@@ -46,19 +50,11 @@ public class RoleServiceImpl implements RoleService {
                                                     Long companyInfoSid,
                                                     Integer pageNo,
                                                     Integer pageSize) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         Map<String, Object> params = new HashMap<>();
-        if (!StringUtils.isBlank(codeLike)) {
-            params.put("codeLike", codeLike);
-        }
-        if (!StringUtils.isBlank(nameLike)) {
-            params.put("nameLike", nameLike);
-        }
-        if (!StringUtils.isBlank(type)) {
-            params.put("type", type);
-        }
-
-        String userType = WebUtils.getUserType();
-        if (Role.Category.EMPLOYEE.getCode().equals(userType)) {
+        if (WebUtils.isEmployee()) {
             if (!StringUtils.isBlank(category)) {
                 params.put("category", category);
             }
@@ -68,6 +64,15 @@ public class RoleServiceImpl implements RoleService {
         } else {
             params.put("category", Role.Category.ACCOUNT.getCode());
             params.put("companyInfoSid", WebUtils.getCompanyId());
+        }
+        if (!StringUtils.isBlank(codeLike)) {
+            params.put("codeLike", codeLike);
+        }
+        if (!StringUtils.isBlank(nameLike)) {
+            params.put("nameLike", nameLike);
+        }
+        if (!StringUtils.isBlank(type)) {
+            params.put("type", type);
         }
         return listRoleByPage(params, pageNo, pageSize);
     }
@@ -89,23 +94,24 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public RoleVO loadDetail(Long sid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         Role role = findBySid(sid);
         if (Objects.isNull(role)) {
-            throw new ServiceException("Role with id: [" + sid + "] does not exist");
+            throw new ServiceException("ID为[" + sid + "]的角色不存在");
         }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(role.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to view this role");
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(role.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限查看其他" + Account.Type.COMPANY.getName() + "的角色信息");
             }
         }
         return new RoleVO(role);
     }
 
     public List<RoleVO> getAvailableRoles() {
-        if (Role.Category.ACCOUNT.getCode().equals(WebUtils.getUserType())) {
-            throw new ServiceException("You have insufficient right to view these roles");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -118,10 +124,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<RoleVO> getAvailableRolesOfCompany(Long companyInfoSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限获取");
+        }
         Map<String, Object> params = new HashMap<>();
         params.put("status", Role.Status.ENABLED);
         params.put("category", Role.Category.ACCOUNT.getCode());
-        if (Role.Category.EMPLOYEE.getCode().equals(WebUtils.getUserType())) {
+        if (WebUtils.isEmployee()) {
             params.put("companyInfoSid", companyInfoSid);
         } else {
             params.put("companyInfoSid", WebUtils.getCompanyId());
@@ -134,6 +143,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<RoleVO> getRolesOfGivenEmployee(Long employeeSid) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
         List<Role> roles = findRolesOfGivenEmployee(employeeSid);
         if (Objects.nonNull(roles) && !roles.isEmpty()) {
             return roles.stream().map(role -> new RoleVO(role)).collect(Collectors.toList());
@@ -142,6 +154,19 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<RoleVO> getRolesOfGivenAccount(Long accountSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限获取");
+        }
+        if (WebUtils.isCompany()) {
+            Account account = accountService.findBySid(accountSid);
+            if (Objects.isNull(account)) {
+                throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
+            }
+            if (!WebUtils.getCompanyId().equals(account.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限查看其他" + Account.Type.COMPANY.getName() + "账号的角色信息");
+            }
+        }
+
         List<Role> roles = findRolesOfGivenAccount(accountSid);
         if (Objects.nonNull(roles) && !roles.isEmpty()) {
             return roles.stream().map(role -> new RoleVO(role)).collect(Collectors.toList());
@@ -150,12 +175,15 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public Role createRole(RoleCreationVO roleCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限创建");
+        }
+        if (WebUtils.isCompany()) {
             roleCreationVO.setCategory(Role.Category.ACCOUNT.getCode());
             roleCreationVO.setType(Role.Type.CREATED.getCode());
             roleCreationVO.setCompanyId(WebUtils.getCompanyId());
         }
+
         Role role = new Role();
         role.setCode(roleCreationVO.getCode());
         role.setName(roleCreationVO.getName());
@@ -183,22 +211,22 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public void updateRole(Long roleSid, RoleUpdateVO roleUpdateVO) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限更新");
+        }
+
         Role editingRole = findBySid(roleSid);
         //校验待修改的role是否存在
         if (Objects.isNull(editingRole)) {
-            throw new ServiceException("Role with id: [" + roleSid + "] does not exist");
+            throw new ServiceException("ID为[" + roleSid + "]的角色不存在");
         }
 
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isCompany()) {
             if (Role.Type.PRE_ASSIGNED == editingRole.getType()) {
-                throw new ServiceException("Pre-assigned role cannot be edited");
+                throw new ServiceException("不能修改" + Role.Type.PRE_ASSIGNED.getName() + "类型角色");
             }
-
-            //校验待修改的role是否属于当前用户
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(editingRole.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to edit this role");
+            if (!WebUtils.getCompanyId().equals(editingRole.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "的角色信息");
             }
 
             roleUpdateVO.setCategory(null);
@@ -229,7 +257,7 @@ public class RoleServiceImpl implements RoleService {
         role.setVersionNum(editingRole.getVersionNum());
         int updatedRows = updateRole(role);
         if (updatedRows == 0) {
-            throw new ServiceException("Role is being edited by others, please try again later");
+            throw new ServiceException("此角色正在被其他人修改，请稍后再试");
         }
     }
 
@@ -260,33 +288,33 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public void addPermissionsToRole(Long roleSid, List<Long> permissionSids) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给角色分配菜单或者API");
+        }
         if (Objects.isNull(permissionSids) || permissionSids.isEmpty()) {
             return;
         }
         Role role = findBySid(roleSid);
         if (Objects.isNull(role)) {
-            throw new ServiceException("Role with id: [" + roleSid + "] does not exist");
+            throw new ServiceException("ID为[" + roleSid + "]的角色不存在");
         }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isCompany()) {
             if (Role.Type.PRE_ASSIGNED == role.getType()) {
-                throw new ServiceException("Pre-assigned role cannot be edited");
+                throw new ServiceException("不能给" + Role.Type.PRE_ASSIGNED.getName() + "类型角色分配菜单或者API");
             }
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(role.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to edit this role");
+            if (!WebUtils.getCompanyId().equals(role.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限给其他" + Account.Type.COMPANY.getName() + "的角色分配菜单或者API");
             }
             Role preassignedRole = getPreassignedRole(WebUtils.getCompanyId());
             if (Objects.isNull(preassignedRole)) {
-                throw new ServiceException("You have no right to operation role, please contact system admin");
+                throw new ServiceException("请联系系统管理员创建" + Role.Type.PRE_ASSIGNED.getName() + "类型角色");
             }
-
             List<RolePermissionRelationship> preassignedRolePermissionRelationships = rolePermissionRelationshipService.findByRoleSid(preassignedRole.getSid());
             List<Long> preassignedPermissionSids = preassignedRolePermissionRelationships.stream()
                     .map(preassignedRolePermissionRelationship -> preassignedRolePermissionRelationship.getPermissionSid())
                     .collect(Collectors.toList());
             if (!preassignedPermissionSids.containsAll(permissionSids)) {
-                throw new ServiceException("You have insufficient right to add these permissions to the role");
+                throw new ServiceException("待分配的菜单或者API已经超出授权给你们的范围");
             }
         }
         addPermissionsToGivenRole(roleSid, permissionSids);
@@ -304,7 +332,7 @@ public class RoleServiceImpl implements RoleService {
         for (Long removedPermissionSid : removedPermissionSids) {
             int deletedRows = rolePermissionRelationshipService.deleteByRoleSidAndPermissionSid(roleSid, removedPermissionSid);
             if (deletedRows == 0) {
-                throw new ServiceException("Role is being edited by others, please try again later");
+                throw new ServiceException("其他人正在给该角色分配菜单或者API，请稍后再试");
             }
         }
 
@@ -320,7 +348,7 @@ public class RoleServiceImpl implements RoleService {
             try {
                 rolePermissionRelationshipService.createRolePermissionRelationship(rolePermissionRelationship);
             } catch (Exception e) {
-                throw new ServiceException("Role is being edited by others, please try again later");
+                throw new ServiceException("其他人正在给该角色分配菜单或者API，请稍后再试");
             }
         }
     }

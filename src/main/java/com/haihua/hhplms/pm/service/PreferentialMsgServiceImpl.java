@@ -1,5 +1,6 @@
 package com.haihua.hhplms.pm.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.ana.vo.UpdateStatusRequest;
 import com.haihua.hhplms.common.constant.GlobalConstant;
@@ -52,20 +53,22 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
                                                                            Long companyInfoSid,
                                                                            Integer pageNo,
                                                                            Integer pageSize) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         Map<String, Object> params = new HashMap<>();
-        if (!StringUtils.isBlank(title)) {
-            params.put("title", title);
-        }
-        if(!StringUtils.isBlank(status)) {
-            params.put("status",status);
-        }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isCompany()) {
             params.put("companyInfoSid", WebUtils.getCompanyId());
         } else {
             if (Objects.nonNull(companyInfoSid)) {
                 params.put("companyInfoSid",companyInfoSid);
             }
+        }
+        if (!StringUtils.isBlank(title)) {
+            params.put("title", title);
+        }
+        if(!StringUtils.isBlank(status)) {
+            params.put("status",status);
         }
         return loadPreferentialMsgsByPage(params, pageNo, pageSize);
     }
@@ -123,8 +126,10 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
     }
 
     public PreferentialMsg createdPreferentialMsg(PreferentialMsgCreationVO preferentialMsgCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限创建");
+        }
+        if (WebUtils.isCompany()) {
             preferentialMsgCreationVO.setCompanyId(WebUtils.getCompanyId());
         }
         PreferentialMsg preferentialMsg = new PreferentialMsg();
@@ -153,13 +158,17 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
     }
 
     public void updatePreferentialMsg(Long preferentialMsgSid, PreferentialMsgUpdateVO preferentialMsgUpdateVO) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限更新");
+        }
+
         PreferentialMsg editingPreferentialMsg = findBySid(preferentialMsgSid);
         if (Objects.isNull(editingPreferentialMsg)) {
-            throw new ServiceException("PreferentialMsg with id: [" + preferentialMsgSid + "] does not exist");
+            throw new ServiceException("ID为[" + preferentialMsgSid + "]的优惠信息不存在");
         }
-        if (Role.Category.ACCOUNT.getCode().equals(WebUtils.getUserType())) {
+        if (WebUtils.isCompany()) {
             if (!WebUtils.getCompanyId().equals(editingPreferentialMsg.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to edit this PreferentialMsg");
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "的优惠信息");
             }
             preferentialMsgUpdateVO.setCompanyId(null);
         }
@@ -177,7 +186,7 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
 
         int updatedRows = updatePreferentialMsg(preferentialMsg);
         if (updatedRows == 0) {
-            throw new ServiceException("PreferentialMsg is being edited by others, please try again later");
+            throw new ServiceException("此优惠信息正在被其他人修改，请稍后再试");
         }
     }
 
@@ -192,13 +201,17 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
     }
 
     public void updatePreferentialMsgStatus(Long preferentialMsgSid, UpdateStatusRequest updateStatusRequest) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限更新优惠信息状态");
+        }
+
         PreferentialMsg preferentialMsg = findBySid(preferentialMsgSid);
         if (Objects.isNull(preferentialMsg)) {
-            throw new ServiceException("PreferentialMsg with id: [" + preferentialMsgSid + "] does not exist, failed to change status");
+            throw new ServiceException("ID为[" + preferentialMsgSid + "]的优惠信息不存在");
         }
-        if (Role.Category.ACCOUNT.getCode().equals(WebUtils.getUserType())) {
+        if (WebUtils.isCompany()) {
             if (!WebUtils.getCompanyId().equals(preferentialMsg.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to change status of this PreferentialMsg");
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限更新其他" + Account.Type.COMPANY.getName() + "的优惠信息的状态");
             }
         }
 
@@ -211,7 +224,7 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
 
         int updatedRows = updatePreferentialMsg(params);
         if (updatedRows == 0) {
-            throw new ServiceException("PreferentialMsg is being edited by others, please try again later");
+            throw new ServiceException("此优惠信息正在被其他人修改，请稍后再试");
         }
     }
 
@@ -226,13 +239,17 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
     }
 
     public void deleteBySid(Long sid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限删除优惠信息");
+        }
+
         PreferentialMsg preferentialMsg = findBySid(sid);
         if (Objects.isNull(preferentialMsg)) {
-            throw new ServiceException("PreferentialMsg does not exist, failed to delete");
+            throw new ServiceException("ID为[" + sid + "]的优惠信息不存在");
         }
-        if (Role.Category.ACCOUNT.getCode().equals(WebUtils.getUserType())) {
+        if (WebUtils.isCompany()) {
             if (!WebUtils.getCompanyId().equals(preferentialMsg.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to delete this PreferentialMsg");
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限删除其他" + Account.Type.COMPANY.getName() + "的优惠信息");
             }
         }
 
@@ -240,7 +257,7 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
         params.put("sid", sid);
         int deletedRows = deleteByParams(params);
         if (deletedRows == 0) {
-            throw new ServiceException("PreferentialMsg with id:[" + sid + "] has been deleted by others");
+            throw new ServiceException("ID为[" + sid + "]的优惠信息已经被其他人删除");
         }
     }
 

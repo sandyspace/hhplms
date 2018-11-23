@@ -1,9 +1,12 @@
 package com.haihua.hhplms.wf.service;
 
+import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
+import com.haihua.hhplms.common.utils.WebUtils;
 import com.haihua.hhplms.wf.entity.Route;
 import com.haihua.hhplms.wf.mapper.RouteMapper;
+import com.haihua.hhplms.wf.vo.RouteVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,15 @@ import java.util.Objects;
 public class RouteServiceImpl implements RouteService {
     @Autowired
     private RouteMapper routeMapper;
+
+    public RouteVO getRouteFragment(Long processSid, Long fromStepSid) {
+        String userType = WebUtils.getUserType();
+        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+            throw new ServiceException("You have insufficient right to get info of route");
+        }
+        Route routeFragment = findRouteFragment(processSid, fromStepSid);
+        return new RouteVO(routeFragment);
+    }
 
     public Route findFirstRouteFragment(Long processSid) {
         Map<String, Object> params = new HashMap<>();

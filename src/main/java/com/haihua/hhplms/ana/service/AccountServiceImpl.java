@@ -57,8 +57,21 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                                                            Long companyInfoSid,
                                                            Integer pageNo,
                                                            Integer pageSize) {
-
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
         Map<String, Object> params = new HashMap<>();
+        if (WebUtils.isEmployee()) {
+            if (!StringUtils.isBlank(type)) {
+                params.put("type", type);
+            }
+            if (Objects.nonNull(companyInfoSid)) {
+                params.put("companyInfoSid", companyInfoSid);
+            }
+        } else {
+            params.put("type", Account.Type.COMPANY.getCode());
+            params.put("companyInfoSid", WebUtils.getCompanyId());
+        }
         if (!StringUtils.isBlank(loginNameLike)) {
             params.put("loginNameLike", loginNameLike);
         }
@@ -73,19 +86,6 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         }
         if (!StringUtils.isBlank(status)) {
             params.put("status", status);
-        }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            params.put("type", Account.Type.COMPANY.getCode());
-            Long companyId = WebUtils.getCompanyId();
-            params.put("companyInfoSid", companyId);
-        } else {
-            if (!StringUtils.isBlank(type)) {
-                params.put("type", type);
-            }
-            if (Objects.nonNull(companyInfoSid)) {
-                params.put("companyInfoSid", companyInfoSid);
-            }
         }
         return loadAccountsByPage(params, pageNo, pageSize);
     }
@@ -109,15 +109,18 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public AccountVO loadDetail(Long sid) {
+        if (WebUtils.isMember()) {
+            if (!WebUtils.getUserId().equals(sid)) {
+                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看其他人的账户详细信息");
+            }
+        }
         Account matchedAccount = findBySid(sid);
         if (Objects.isNull(matchedAccount)) {
-            throw new ServiceException("Account with id: [" + sid + "] does not exist");
+            throw new ServiceException("ID为[" + sid + "]的账号不存在");
         }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(matchedAccount.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to view the detail of this account");
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(matchedAccount.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限查看其他" + Account.Type.COMPANY.getName() + "的账户详情");
             }
         }
         AccountVO accountDetail = new AccountVO(matchedAccount);
@@ -154,16 +157,12 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public Account createAccount(AccountCreationVO accountCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long id = WebUtils.getUserId();
-            Account selfAccount = findBySid(id);
-            if(Account.Type.COMPANY != selfAccount.getType()) {
-                throw new ServiceException("You have insufficient right to create account");
-            }
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限创建账户");
+        }
+        if (WebUtils.isCompany()) {
             accountCreationVO.setType(Account.Type.COMPANY.getCode());
-            Long companyId = WebUtils.getCompanyId();
-            accountCreationVO.setCompanyId(companyId);
+            accountCreationVO.setCompanyId(WebUtils.getCompanyId());
         }
 
         Account account = new Account();
@@ -201,8 +200,9 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public void associateWithCompanyInfo(Long companyInfoSid) {
         Account selfAccount = findBySid(WebUtils.getUserId());
         if (Objects.isNull(selfAccount)) {
-            throw new ServiceException("account does not exist, failed to associate with company info");
+            throw new ServiceException("账号不存在，关联企业信息失败");
         }
+
         Map<String, Object> params = new HashMap<>();
         params.put("companyInfoSid", companyInfoSid);
         params.put("updatedBy", WebUtils.getLoginName());
@@ -212,20 +212,23 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
         int updatedRows = updateAccount(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
     public void updateAccount(Long accountSid, AccountUpdateVO accountUpdateVO) {
+        if (WebUtils.isMember()) {
+            if (!WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改他人的账号信息");
+            }
+        }
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
-            throw new ServiceException("Account with id: [" + accountSid + "] does not exist");
+            throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
         }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(editingAccount.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to edit this account");
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(editingAccount.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "的账号信息");
             }
         }
         Account account = new Account();
@@ -242,7 +245,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         account.setVersionNum(editingAccount.getVersionNum());
         int updatedRows = updateAccount(account);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
@@ -267,16 +270,16 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public void resetPassword(Long accountSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限重置密码");
+        }
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
-            throw new ServiceException("account does not exist, failed to reset password");
+            throw new ServiceException("账号不存在，重置密码失败");
         }
-
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(account.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to reset password of this account");
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(account.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限重置其他" + Account.Type.COMPANY.getName() + "账号的密码");
             }
         }
 
@@ -289,27 +292,30 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
         int updatedRows = updateAccount(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
     public void changePassword(ChangePasswordRequest changePasswordRequest) {
+        if (WebUtils.isEmployee()) {
+            throw new ServiceException("没有权限修改非雇员的密码");
+        }
         Long accountId = WebUtils.getUserId();
         Account account = findBySid(accountId);
         if (Objects.isNull(account)) {
-            throw new ServiceException("account does not exist, failed to change password");
+            throw new ServiceException("账号不存在，修改密码失败");
         }
 
         if (StringUtils.isBlank(changePasswordRequest.getOriginPwd())) {
-            throw new ServiceException("origin password can not be blank");
+            throw new ServiceException("原始密码不能为空");
         }
 
         if (!encoder.matches(changePasswordRequest.getOriginPwd(), account.getPassword())) {
-            throw new ServiceException("origin password is not correct");
+            throw new ServiceException("原始密码输入不正确");
         }
 
         if (StringUtils.isBlank(changePasswordRequest.getNewPwd())) {
-            throw new ServiceException("new password can not be blank");
+            throw new ServiceException("新密码不能为空");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -321,7 +327,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
         int updatedRows = updateAccount(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
@@ -333,16 +339,12 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public void updateAccountType(Long accountSid, UpdateTypeRequest updateTypeRequest) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限修改账号的类型");
+        }
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
-            throw new ServiceException("account does not exist, failed to change type");
-        }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(account.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to update type of this account");
-            }
+            throw new ServiceException("账号不存在，更新账号类型失败");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -354,20 +356,21 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
         int updatedRows = updateAccount(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
     public void updateAccountStatus(Long accountSid, UpdateStatusRequest updateStatusRequest) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限更新账号状态");
+        }
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
-            throw new ServiceException("account does not exist, failed to change status");
+            throw new ServiceException("ID为[" + accountSid + "]的账号不存在，更新状态失败");
         }
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(account.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to update type of this account");
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(account.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "账号的状态");
             }
         }
 
@@ -380,31 +383,32 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
         int updatedRows = updateAccount(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Account is being edited by others, please try again later");
+            throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
     }
 
     public void addRolesToGivenAccount(Long accountSid, List<Long> roleSids) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给账号分配角色");
+        }
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
-            throw new ServiceException("Account with id: [" + accountSid + "] does not exit");
+            throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
         }
 
         List<Role> rolesToAdd = roleService.findBySids(roleSids);
         if (Objects.isNull(rolesToAdd) || rolesToAdd.isEmpty() || rolesToAdd.size() != roleSids.size()) {
-            throw new ServiceException("some roles to be added to this account do not exist");
+            throw new ServiceException("分配给账号的某些角色不存在，分配失败");
         }
 
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            Long companyId = WebUtils.getCompanyId();
-            if (!companyId.equals(editingAccount.getCompanyInfoSid())) {
-                throw new ServiceException("You have insufficient right to add roles to this account");
+        if (WebUtils.isCompany()) {
+            final Long companyInfoSid = WebUtils.getCompanyId();
+            if (!companyInfoSid.equals(editingAccount.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限给其他" + Account.Type.COMPANY.getName() + "的账号分配角色");
             }
-
             for (Role roleToAdd : rolesToAdd) {
-                if (!companyId.equals(roleToAdd.getCompanyInfoSid())) {
-                    throw new ServiceException("You have insufficient right to add these roles to this account");
+                if (!companyInfoSid.equals(roleToAdd.getCompanyInfoSid())) {
+                    throw new ServiceException("分配给账号的某些角色不属于该" + Account.Type.COMPANY.getName() + "，分配失败");
                 }
             }
         }
@@ -421,7 +425,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         for(Long removedRoleSid : removedRoleSids) {
             int deletedRows = accountRoleRelationshipService.deleteByAccountSidAndRoleSid(accountSid, removedRoleSid);
             if (deletedRows == 0) {
-                throw new ServiceException("Account is being edited by others, please try again later");
+                throw new ServiceException("其他人正在给此账号分配角色，请稍后再试");
             }
         }
 
@@ -437,7 +441,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             try {
                 accountRoleRelationshipService.createAccountRoleRelationship(accountRoleRelationship);
             } catch (ServiceException e) {
-                throw new ServiceException("Account is being edited by others, please try again later", e);
+                throw new ServiceException("其他人正在给此账号分配角色，请稍后再试", e);
             }
         }
     }
@@ -488,17 +492,14 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return matchedAccounts;
     }
 
-    public UserBasicInfo loadUserBasicInfoByMobile(String mobile) {
-        Account account = findByMobile(mobile);
-        if (Objects.isNull(account)) {
-            throw new UsernameNotFoundException("Username[" + mobile + "] does not exist");
-        }
+    private UserBasicInfo toUserBasicInfo(Account account) {
         return new UserBasicInfo.Builder()
                 .id(account.getSid())
                 .loginName(account.getLoginName())
                 .mobile(account.getMobile())
                 .email(account.getEmail())
                 .type(Role.Category.ACCOUNT.getCode())
+                .subType(account.getType().getCode())
                 .password(account.getPassword())
                 .status(account.getStatus().getCode())
                 .realName(account.getRealName())
@@ -507,6 +508,14 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .headImgUrl(account.getHeadImgUrl())
                 .companyId(Objects.isNull(account.getCompanyInfoSid()) ? -99 : account.getCompanyInfoSid())
                 .build();
+    }
+
+    public UserBasicInfo loadUserBasicInfoByMobile(String mobile) {
+        Account account = findByMobile(mobile);
+        if (Objects.isNull(account)) {
+            throw new UsernameNotFoundException("手机号[" + mobile + "]不存在");
+        }
+        return toUserBasicInfo(account);
     }
 
     public UserBasicInfo loadUserBasicInfoByUserName(String username) {
@@ -518,25 +527,12 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             account = findByEmail(username);
         }
         if (Objects.isNull(account)) {
-            throw new UsernameNotFoundException("Username[" + username + "] does not exist");
+            throw new UsernameNotFoundException("用户名[" + username + "]不存在");
         }
         if (Account.Status.ACTIVE != account.getStatus()) {
-            throw new DisabledException("Authentication Failed. Your account was in " + account.getStatus().getCode() + " status");
+            throw new DisabledException("账号处于" + account.getStatus().getName() + "状态，认证失败");
         }
-        return new UserBasicInfo.Builder()
-                .id(account.getSid())
-                .loginName(account.getLoginName())
-                .mobile(account.getMobile())
-                .email(account.getEmail())
-                .type(Role.Category.ACCOUNT.getCode())
-                .password(account.getPassword())
-                .status(account.getStatus().getCode())
-                .realName(account.getRealName())
-                .nickName(account.getNickName())
-                .gender(account.getGender().getCode())
-                .headImgUrl(account.getHeadImgUrl())
-                .companyId(Objects.isNull(account.getCompanyInfoSid()) ? -99 : account.getCompanyInfoSid())
-                .build();
+        return toUserBasicInfo(account);
     }
 
     public List<GrantedPermission> loadGrantedApiListByGrantedRoles(List<GrantedRole> grantedRoles) {
@@ -641,7 +637,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public UserBasicInfo login(String username, String password) {
         UserBasicInfo userBasicInfo = loadUserBasicInfoByUserName(username);
         if (!encoder.matches(password, userBasicInfo.getPassword())) {
-            throw new BadCredentialsException("Authentication Failed. Username or Password not valid.");
+            throw new BadCredentialsException("认证失败，用户名或密码不正确");
         }
         return userBasicInfo;
     }

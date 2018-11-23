@@ -1,5 +1,6 @@
 package com.haihua.hhplms.ana.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.CompanyInfo;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.ana.mapper.CompanyInfoMapper;
@@ -42,9 +43,8 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
                                                                       String status,
                                                                       Integer pageNo,
                                                                       Integer pageSize) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view the information of companies");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isBlank(code)) {
@@ -89,30 +89,62 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         List<CompanyInfo> availableCompanyInfos = findByParams(params);
         if (Objects.nonNull(availableCompanyInfos) && !availableCompanyInfos.isEmpty()) {
             return availableCompanyInfos.stream()
-                    .map(availableCompanyInfo -> new CompanyInfoVO(availableCompanyInfo))
+                    .map(availableCompanyInfo -> new CompanyInfoVO(availableCompanyInfo.getSid(), availableCompanyInfo.getName()))
                     .collect(Collectors.toList());
         }
         return null;
     }
 
+    public CompanyInfoVO getCompanyInfo(String loginName) {
+        if (!WebUtils.isEmployee()) {
+            if (!WebUtils.getLoginName().equals(loginName)) {
+                throw new ServiceException("无法获取其他企业的信息");
+            }
+        }
+        Account account = accountService.findByLoginName(loginName);
+        if (Objects.isNull(account)) {
+            throw new ServiceException("登录名为[" + loginName + "]的账号不存在");
+        }
+        return loadDetail(account.getCompanyInfoSid());
+    }
+
+    public CompanyInfoVO getCompanyInfoOfAccount() {
+        if (WebUtils.isEmployee()) {
+            throw new ServiceException("雇员没有企业信息");
+        }
+        Long companyInfoSid = WebUtils.getCompanyId();
+        if (Objects.isNull(companyInfoSid) || companyInfoSid < 0) {
+            return null;
+        }
+        return loadDetail(companyInfoSid);
+    }
+
     public CompanyInfoVO loadDetail(Long sid) {
+        if (!WebUtils.isEmployee()) {
+            if (!WebUtils.getCompanyId().equals(sid)) {
+                throw new ServiceException("无法获取其他企业的信息");
+            }
+        }
         CompanyInfo companyInfo = findBySid(sid);
         if (Objects.isNull(companyInfo)) {
-            throw new ServiceException("Company Info with id:[" + sid + "] does not exist");
+            throw new ServiceException("ID为[" + sid + "]的企业信息不存在");
         }
         return new CompanyInfoVO(companyInfo);
     }
 
     public void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+        if (WebUtils.isMember()) {
             if (!WebUtils.getCompanyId().equals(sid)) {
-                throw new ServiceException("You have insufficient right to edit company info");
+                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改他人的企业信息");
+            }
+        } else {
+            if (WebUtils.isCompany()) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "暂时无法更新数据");
             }
         }
         CompanyInfo editingCompanyInfo = findBySid(sid);
         if (Objects.isNull(editingCompanyInfo)) {
-            throw new ServiceException("Company Info with id:[" + sid + "] does not exist");
+            throw new ServiceException("ID为[" + sid + "]的企业信息不存在");
         }
         CompanyInfo companyInfo = new CompanyInfo();
         companyInfo.setSid(sid);
@@ -127,7 +159,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
 
         int updatedRows = updateCompanyInfo(companyInfo);
         if (updatedRows == 0) {
-            throw new ServiceException("Company info is being edited by others, please try again later");
+            throw new ServiceException("此企业信息正在被其他人修改，请稍后再试");
         }
     }
 
@@ -149,16 +181,13 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     public void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            if (!WebUtils.getCompanyId().equals(sid)) {
-                throw new ServiceException("You have insufficient right to update status of company info");
-            }
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         CompanyInfo companyInfo = findBySid(sid);
         if (Objects.isNull(companyInfo)) {
-            throw new ServiceException("Company info does not exist, failed to change status");
+            throw new ServiceException("ID为[" + sid + "]的企业信息不存在");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -170,7 +199,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
 
         int updatedRows = updateCompanyInfo(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Company info is being edited by others, please try again later");
+            throw new ServiceException("此企业信息正在被其他人修改，请稍后再试");
         }
     }
 
@@ -186,19 +215,22 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
 
     @Transactional
     public CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.EMPLOYEE.getCode().equals(userType)) {
-            throw new ServiceException("Only account has right to upload company info");
+        if (!WebUtils.isMember()) {
+            throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传经销商信息");
         }
-        CompanyInfo companyInfo = createCompanyInfo(companyInfoCreationVO);
+        CompanyInfo companyInfo = createCompanyInfo(companyInfoCreationVO, false);
         accountService.associateWithCompanyInfo(companyInfo.getSid());
         processExecutionService.initProcess(processCode);
         return companyInfo;
     }
 
-    public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
+    public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO, boolean isDirect) {
+        if (isDirect) {
+            if (!WebUtils.isEmployee()) {
+                throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限创建经销商信息");
+            }
+        }
+        if (WebUtils.isMember()) {
             companyInfoCreationVO.setStatus(CompanyInfo.Status.VERIFYING.getCode());
         }
         CompanyInfo companyInfo = new CompanyInfo();
@@ -232,15 +264,19 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     public void deleteBySid(Long sid) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+
         CompanyInfo companyInfo = findBySid(sid);
         if (Objects.isNull(companyInfo)) {
-            throw new ServiceException("Company info does not exist, failed to delete");
+            throw new ServiceException("ID为[" + sid + "]的企业信息不存在");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("sid", sid);
         int deletedRows = deleteByParams(params);
         if (deletedRows == 0) {
-            throw new ServiceException("Company Info with id:[" + sid + "] has been deleted by others");
+            throw new ServiceException("ID为[" + sid + "]的企业信息已经被其他人删除");
         }
     }
 

@@ -14,7 +14,7 @@ public class Route extends BaseEntity {
     private String startFlag;
     private String relatedView;
     private String viewOnChecking;
-    private BizCode attachedBiz;
+    private String attachedBiz;
 
     public Long getProcessSid() {
         return processSid;
@@ -80,11 +80,11 @@ public class Route extends BaseEntity {
         this.viewOnChecking = viewOnChecking;
     }
 
-    public BizCode getAttachedBiz() {
+    public String getAttachedBiz() {
         return attachedBiz;
     }
 
-    public void setAttachedBiz(BizCode attachedBiz) {
+    public void setAttachedBiz(String attachedBiz) {
         this.attachedBiz = attachedBiz;
     }
 
@@ -111,24 +111,6 @@ public class Route extends BaseEntity {
         private String code;
         private String name;
         AssignedType(String code, String name) {
-            this.code = code;
-            this.name = name;
-        }
-        public String getCode() {
-            return code;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    public enum BizCode implements BaseEnum {
-        COMPLETE_COMPANY_INFO_CREATION("ccic", "完成企业信息创建");
-
-        private String code;
-        private String name;
-        BizCode(String code, String name) {
             this.code = code;
             this.name = name;
         }

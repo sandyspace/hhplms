@@ -4,6 +4,7 @@ import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.model.PageWrapper;
+import com.haihua.hhplms.common.utils.EnumUtil;
 import com.haihua.hhplms.common.utils.WebUtils;
 import com.haihua.hhplms.wf.entity.Route;
 import com.haihua.hhplms.wf.entity.ProcessExecution;
@@ -187,7 +188,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         Route currentRouteFragment = routeService.findRouteFragment(processSid, currentStepSid);
 
         if (Objects.nonNull(currentRouteFragment.getAttachedBiz())) {
-            bizProcessHandler.handleBizProcess(currentRouteFragment.getAttachedBiz(), processExecution);
+            bizProcessHandler.handleBizProcess(EnumUtil.codeOf(BizCode.class, currentRouteFragment.getAttachedBiz()), processExecution);
         }
 
         if (lastStep(currentRouteFragment)) {
