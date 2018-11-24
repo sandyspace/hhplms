@@ -12,6 +12,7 @@ import com.haihua.hhplms.security.model.UserContext;
 import java.util.List;
 
 public interface AjaxAuthenticationService {
+    UserBasicInfo register(RegisterRequest registerRequest);
     UserBasicInfo login(String username, String password);
     UserBasicInfo loadUserBasicInfoByUserName(String username);
     List<GrantedRole> loadGrantedRolesByUserBasicInfo(UserBasicInfo userBasicInfo);

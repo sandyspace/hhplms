@@ -11,6 +11,7 @@ import com.haihua.hhplms.common.utils.EnumUtil;
 import com.haihua.hhplms.common.utils.ListUtils;
 import com.haihua.hhplms.common.utils.WebUtils;
 import com.haihua.hhplms.security.auth.ajax.AjaxAuthenticationService;
+import com.haihua.hhplms.security.auth.ajax.RegisterRequest;
 import com.haihua.hhplms.security.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -510,6 +511,10 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
                 .grantedApiList(grantedApiList)
                 .build();
         return new UserContext(username, userProfile);
+    }
+
+    public UserBasicInfo register(RegisterRequest registerRequest) {
+        throw new ServiceException("注册暂时未开放");
     }
 
     public UserBasicInfo login(String username, String password) {

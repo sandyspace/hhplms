@@ -30,6 +30,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String ACCOUNT_FAST_AUTHENTICATION_URL = "/api/auth/account/fastLogin";
     public static final String REFRESH_TOKEN_URL = "/api/auth/token";
     public static final String FEEDBACK_CREATION_URL = "/api/sys/feedbacks";
+    public static final String ACCOUNT_REGISTER_URL = "/api/auth/account/register";
+    public static final String LATEST_PREFERENTIAL_MSG_URL = "/api/pm/preferentialMsgs/latest";
     public static final String API_ROOT_URL = "/api/**";
 
     @Autowired
@@ -64,7 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, "/console");
+        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, ACCOUNT_REGISTER_URL, LATEST_PREFERENTIAL_MSG_URL, "/console");
 
         http.csrf().disable() // We don't need CSRF for JWT based authentication
                 .exceptionHandling()

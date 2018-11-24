@@ -13,6 +13,7 @@ import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.utils.EnumUtil;
 import com.haihua.hhplms.common.utils.ListUtils;
 import com.haihua.hhplms.common.utils.WebUtils;
+import com.haihua.hhplms.security.auth.ajax.RegisterRequest;
 import com.haihua.hhplms.security.auth.ajax.WebBasedAjaxAuthenticationService;
 import com.haihua.hhplms.security.model.*;
 import org.apache.commons.lang3.StringUtils;
@@ -632,6 +633,48 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .grantedApiList(grantedApiList)
                 .build();
         return new UserContext(username, userProfile);
+    }
+
+    public UserBasicInfo register(RegisterRequest registerRequest) {
+        if (StringUtils.isBlank(registerRequest.getEmail())) {
+            throw new ServiceException("邮箱不能为空");
+        }
+        if (StringUtils.isBlank(registerRequest.getMobile())) {
+            throw new ServiceException("手机不能为空");
+        }
+        if (StringUtils.isBlank(registerRequest.getPassword())) {
+            throw new ServiceException("密码不能为空");
+        }
+        if (emailExist(registerRequest.getEmail())) {
+            throw new ServiceException("邮箱已经被占用，请使用其他邮箱注册");
+        }
+        if (mobileExist(registerRequest.getMobile())) {
+            throw new ServiceException("手机号已经被占用，请使用其他手机号注册");
+        }
+        Account account = new Account();
+        account.setLoginName(registerRequest.getMobile());
+        account.setMobile(registerRequest.getMobile());
+        account.setEmail(registerRequest.getMobile());
+        account.setGender(Gender.UNKNOWN);
+        account.setType(Account.Type.MEMBER);
+        account.setStatus(Account.Status.ACTIVE);
+        account.setPassword(encoder.encode(registerRequest.getPassword()));
+        account.setCreatedBy("default");
+        account.setCreatedTime(new Date(System.currentTimeMillis()));
+        account.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
+        createAccount(account);
+
+        return toUserBasicInfo(account);
+    }
+
+    private boolean emailExist(String email) {
+        Account account = findByEmail(email);
+        return Objects.nonNull(account);
+    }
+
+    private boolean mobileExist(String mobile) {
+        Account account = findByMobile(mobile);
+        return Objects.nonNull(account);
     }
 
     public UserBasicInfo login(String username, String password) {
