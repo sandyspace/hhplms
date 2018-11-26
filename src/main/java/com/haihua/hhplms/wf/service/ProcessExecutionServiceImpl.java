@@ -97,7 +97,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             final List<ProcessExecution> matchedProcessExecutions = findByParams(params);
             if (Objects.nonNull(matchedProcessExecutions) && !matchedProcessExecutions.isEmpty()) {
                 final Set<Long> processSidSet = new HashSet<>();

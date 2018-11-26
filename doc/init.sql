@@ -128,9 +128,9 @@ CREATE TABLE `ana_role_r2_permission` (
 CREATE TABLE `ana_company_info` (
   `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(64) NULL,
-  `name` VARCHAR(90) NULL,
+  `name` VARCHAR(100) NULL,
   `type` VARCHAR(20) NULL,
-  `address` VARCHAR(150) NULL,
+  `address` VARCHAR(400) NULL,
   `contact_name` VARCHAR(60) NULL,
   `contact_mobile` VARCHAR(11) NULL,
   `status` VARCHAR(20) NULL,

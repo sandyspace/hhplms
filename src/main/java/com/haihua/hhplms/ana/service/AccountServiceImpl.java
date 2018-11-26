@@ -98,7 +98,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             List<Account> matchedAccounts = findByParams(params);
             if (Objects.nonNull(matchedAccounts) && !matchedAccounts.isEmpty()) {
                 pageOfAccounts.setResult(matchedAccounts.stream()

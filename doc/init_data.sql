@@ -94,6 +94,22 @@ values
 (1, 28, 'default', now(), '1');
 
 
+insert into hhplms.wf_process
+(code, name, `desc`, created_by, created_time, version_num)
+values
+('P-QYXXSQ', '企业信息上传流程', '企业信息上传流程', 'default', now(), 1);
+
+insert into hhplms.wf_step
+(code, name, `desc`, created_by, created_time, version_num)
+values
+('S-CJQYXX', '创建企业信息', '创建企业信息', 'default', now(), 1);
+
+insert into hhplms.wf_route
+(process_sid, from_step_sid, to_step_sid, assigned_type, assigned_to, start_flag, related_view, view_on_checking, attached_biz, created_by, created_time, version_num)
+values
+(1, 1, null, 'role', 'admin', 'Y', 'company-info-display', 'check-company-info', 'ccic', 'default', now(), 1);
+
+
 
 
 

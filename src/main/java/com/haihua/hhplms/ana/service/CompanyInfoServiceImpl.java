@@ -72,7 +72,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             List<CompanyInfo> matchedCompanyInfoList = findByParams(params);
             if (Objects.nonNull(matchedCompanyInfoList) && !matchedCompanyInfoList.isEmpty()) {
                 pageOfCompanyInfos.setResult(matchedCompanyInfoList.stream()

@@ -84,7 +84,7 @@ public class RoleServiceImpl implements RoleService {
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             List<Role> matchedRoles = findByParams(params);
             pageOfRoles.setResult(matchedRoles.stream()
                     .map(matchedRole -> new RoleVO(matchedRole))

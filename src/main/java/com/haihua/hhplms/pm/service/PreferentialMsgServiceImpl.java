@@ -80,7 +80,7 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             List<PreferentialMsg> matchedPreferentialMsgs = findByParams(params);
             if (Objects.nonNull(matchedPreferentialMsgs) && !matchedPreferentialMsgs.isEmpty()) {
                 pageOfPreferentialMsgs.setResult(matchedPreferentialMsgs.stream()

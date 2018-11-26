@@ -78,7 +78,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             pageNo = Objects.isNull(pageNo) ? GlobalConstant.DEFAULT_PAGE_NO : pageNo;
             pageSize = Objects.isNull(pageSize) ? GlobalConstant.DEFAULT_PAGE_SIZE : pageSize;
             params.put("offset", (pageNo - 1) * pageSize);
-            params.put("limit", pageNo * pageSize);
+            params.put("limit", pageSize);
             List<Employee> matchedEmployees = findByParams(params);
             if (Objects.nonNull(matchedEmployees) && !matchedEmployees.isEmpty()) {
                 pageOfEmployees.setResult(matchedEmployees.stream()
