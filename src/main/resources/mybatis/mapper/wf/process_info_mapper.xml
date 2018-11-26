@@ -8,6 +8,7 @@
     <result column="code" property="code" />
     <result column="name" property="name" />
     <result column="desc" property="desc" />
+    <result column="owner" property="owner" />
     <result column="created_by" property="createdBy" />
     <result column="created_time" property="createdTime" />
     <result column="updated_by" property="updatedBy" />
@@ -16,7 +17,7 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, code, name, `desc`, created_by, created_time, updated_by, updated_time, version_num
+    sid, code, name, `desc`, owner, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <select id="findByParams" resultMap="processMap" parameterType="map" statementType="PREPARED">
@@ -28,6 +29,9 @@
       </if>
       <if test="code != null">
         and code = #{code}
+      </if>
+      <if test="owner != null">
+        and owner = #{owner}
       </if>
       <if test="searchingSids != null and searchingSids.size > 0">
         and sid in

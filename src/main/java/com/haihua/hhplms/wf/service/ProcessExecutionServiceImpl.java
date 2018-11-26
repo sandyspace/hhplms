@@ -1,5 +1,6 @@
 package com.haihua.hhplms.wf.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
@@ -53,11 +54,16 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
                                                                              Long initTimeTo,
                                                                              Integer pageNo,
                                                                              Integer pageSize) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view process executions");
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看，请立刻停止非法操作");
         }
         Map<String, Object> params = new HashMap<>();
+        if (WebUtils.isCompany()) {
+            params.put("processOwner", Role.Category.ACCOUNT.getCode());
+            params.put("ownerSid", WebUtils.getCompanyId());
+        } else {
+            params.put("processOwner", Role.Category.EMPLOYEE.getCode());
+        }
         params.put("assignedToRoles", WebUtils.getGrantedRoles());
         params.put("assignedToIndividual", WebUtils.getLoginName());
         if (Objects.nonNull(processSid)) {
@@ -170,17 +176,16 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
 
     @Transactional
     public void checkProcessExecution(Long processExecutionSid) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to check pending item");
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
         ProcessExecution processExecution = findBySid(processExecutionSid);
         if (Objects.isNull(processExecution)) {
-            throw new ServiceException("Current pending item does not exist, failed to check");
+            throw new ServiceException("该待办事项不存在");
         }
         if (!GlobalConstant.FLAG_YES_VALUE.equals(processExecution.getActiveFlag())) {
-            throw new ServiceException("Current pending item has been checked by others");
+            throw new ServiceException("该待办事项已经被审核");
         }
 
         final Long processSid = processExecution.getProcessSid();
@@ -199,10 +204,10 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         }
     }
 
-    public ProcessExecution initProcess(String processCode) {
+    public ProcessExecution initProcess(String processCode, Long ownerSid) {
         ProcessInfo process = processInfoService.findByCode(processCode);
         if (Objects.isNull(process)) {
-            throw new ServiceException("Process with code: [" + processCode + "] does not exit, failed to init");
+            throw new ServiceException("编码为[" + processCode + "]的流程不存在，启动失败");
         }
         Route firstRouteFragment = routeService.findFirstRouteFragment(process.getSid());
         ProcessExecution firstStepOfProcess = new ProcessExecution();
@@ -213,6 +218,9 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         firstStepOfProcess.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
 
         firstStepOfProcess.setProcessSid(process.getSid());
+        firstStepOfProcess.setProcessOwner(process.getOwner());
+        firstStepOfProcess.setOwnerSid(ownerSid);
+
         firstStepOfProcess.setProcessInstanceId(UUID.nameUUIDFromBytes((processCode + "." + firstStepOfProcess.getInitBy() + "." + System.nanoTime()).getBytes()).toString());
         firstStepOfProcess.setProcessStatus(ProcessExecution.ProcessStatus.PROCESSING);
         firstStepOfProcess.setCurrentStepSid(firstRouteFragment.getFromStepSid());
@@ -239,7 +247,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
 
         int updatedRows = updateProcessExecution(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Pending item is being checked by others, please try again later");
+            throw new ServiceException("此待办事项正在被其他人审核，请稍后在试");
         }
     }
 
@@ -256,13 +264,16 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
 
         int updatedRows = updateProcessExecution(params);
         if (updatedRows == 0) {
-            throw new ServiceException("Pending item is being checked by others, please try again later");
+            throw new ServiceException("此待办事项正在被其他人审核，请稍后在试");
         }
     }
 
     private void processNextStepOfProcess(ProcessExecution currentStepOfProcess, Route currentRouteFragment) {
         ProcessExecution nextStepOfProcess = new ProcessExecution();
         nextStepOfProcess.setProcessSid(currentStepOfProcess.getProcessSid());
+        nextStepOfProcess.setProcessOwner(currentStepOfProcess.getProcessOwner());
+        nextStepOfProcess.setOwnerSid(currentStepOfProcess.getOwnerSid());
+
         nextStepOfProcess.setProcessInstanceId(currentStepOfProcess.getProcessInstanceId());
         nextStepOfProcess.setProcessStatus(currentStepOfProcess.getProcessStatus());
         nextStepOfProcess.setCurrentStepSid(currentRouteFragment.getToStepSid());

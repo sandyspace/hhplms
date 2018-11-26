@@ -1,5 +1,6 @@
 package com.haihua.hhplms.wf.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
@@ -36,11 +37,16 @@ public class ProcessInfoServiceImpl implements ProcessInfoService {
     private ProcessExecutionService processExecutionService;
 
     public List<ProcessInfoVO> getAvailableProcesses() {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to view process infos");
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看，请立刻停止非法操作");
         }
-        List<ProcessInfo> availableProcessInfos = findByParams(null);
+        Map<String, Object> params = new HashMap<>();
+        if (WebUtils.isEmployee()) {
+            params.put("owner", Role.Category.EMPLOYEE.getCode());
+        } else {
+            params.put("owner", Role.Category.ACCOUNT.getCode());
+        }
+        List<ProcessInfo> availableProcessInfos = findByParams(params);
         if (Objects.isNull(availableProcessInfos) || availableProcessInfos.isEmpty()) {
             return null;
         }

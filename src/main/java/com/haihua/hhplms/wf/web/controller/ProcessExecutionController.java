@@ -42,10 +42,4 @@ public class ProcessExecutionController {
         processExecutionService.checkProcessExecution(processExecutionSid);
         return ResultBean.Success.of(processExecutionSid, "");
     }
-
-    @PostMapping(path = "/api/wf/processes/{code}/init", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> initProcessExecution(@PathVariable("code") String processCode) {
-        ProcessExecution processExecution = processExecutionService.initProcess(processCode);
-        return ResultBean.Success.of(processExecution.getSid(), "");
-    }
 }

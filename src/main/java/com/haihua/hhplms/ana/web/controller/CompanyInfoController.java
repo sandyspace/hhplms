@@ -2,10 +2,7 @@ package com.haihua.hhplms.ana.web.controller;
 
 import com.haihua.hhplms.ana.entity.CompanyInfo;
 import com.haihua.hhplms.ana.service.CompanyInfoService;
-import com.haihua.hhplms.ana.vo.CompanyInfoCreationVO;
-import com.haihua.hhplms.ana.vo.CompanyInfoUpdateVO;
-import com.haihua.hhplms.ana.vo.CompanyInfoVO;
-import com.haihua.hhplms.ana.vo.UpdateStatusRequest;
+import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.model.ResultBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +69,12 @@ public class CompanyInfoController {
     public ResultBean.Success<Long> uploadCompanyInfo(@RequestParam("process") String processCode, @RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
         CompanyInfo companyInfo = companyInfoService.uploadCompanyInfo(processCode, companyInfoCreationVO);
         return ResultBean.Success.of(companyInfo.getSid(), "");
+    }
+
+    @PostMapping(path = "/api/ana/account/joinCompany", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> joinCompany(@RequestParam("process") String processCode, @RequestBody JoinCompanyRequest joinCompanyRequest) {
+        companyInfoService.joinCompany(processCode, joinCompanyRequest);
+        return ResultBean.Success.of(joinCompanyRequest.getCompanyId(), "");
     }
 
     @GetMapping(path = "/api/ana/accounts/{loginName}/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

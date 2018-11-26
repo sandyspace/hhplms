@@ -6,6 +6,8 @@
   <resultMap id="processExecutionMap" type="com.haihua.hhplms.wf.entity.ProcessExecution">
     <id column="sid" property="sid" />
     <result column="process_sid" property="processSid" />
+    <result column="process_owner" property="processOwner" />
+    <result column="owner_sid" property="ownerSid" />
     <result column="process_inst_id" property="processInstanceId" />
     <result column="process_status" property="processStatus" />
     <result column="current_step_sid" property="currentStepSid" />
@@ -25,14 +27,14 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, process_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, checked_by, checked_time, init_by, init_time, created_by, created_time, updated_by, updated_time, version_num
+    sid, process_sid, process_owner, owner_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, checked_by, checked_time, init_by, init_time, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <insert id="create" parameterType="com.haihua.hhplms.wf.entity.ProcessExecution" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
     insert into wf_process_execution
-    (process_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, init_by, init_time, created_by, created_time, version_num)
+    (process_sid, process_owner, owner_sid, process_inst_id, process_status, current_step_sid, assigned_type, assigned_to, step_status, active_flag, init_by, init_time, created_by, created_time, version_num)
     values
-    (#{processSid}, #{processInstanceId}, #{processStatus}, #{currentStepSid}, #{assignedType}, #{assignedTo}, #{stepStatus}, #{activeFlag}, #{initBy}, #{initTime}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{processSid}, #{processOwner}, #{ownerSid}, #{processInstanceId}, #{processStatus}, #{currentStepSid}, #{assignedType}, #{assignedTo}, #{stepStatus}, #{activeFlag}, #{initBy}, #{initTime}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
@@ -73,6 +75,35 @@
     </where>
   </update>
 
+  <select id="getByParams" resultMap="processExecutionMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from wf_process_execution
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="processSid != null">
+        and process_sid = #{processSid}
+      </if>
+      <if test="processInstanceId != null">
+        and process_inst_id = #{processInstanceId}
+      </if>
+      <if test="processStatus != null">
+        and process_status = #{processStatus}
+      </if>
+      <if test="currentStepSid != null">
+        and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="activeFlag != null">
+        and active_flag = #{activeFlag}
+      </if>
+      <if test="initBy != null">
+        and init_by = #{initBy}
+      </if>
+    </where>
+    order by init_time desc
+  </select>
+
   <select id="countByParams" resultType="int" parameterType="map" statementType="PREPARED">
     select count(1) from
     (select <include refid="columnClause" />
@@ -81,6 +112,12 @@
       assigned_type = 'role'
       <if test="sid != null">
         and sid = #{sid}
+      </if>
+      <if test="processOwner != null">
+        and process_owner = #{processOwner}
+      </if>
+      <if test="ownerSid != null">
+        and owner_sid = #{ownerSid}
       </if>
       <if test="processSid != null">
         and process_sid = #{processSid}
@@ -126,6 +163,12 @@
       assigned_type = 'individual'
       <if test="sid != null">
         and sid = #{sid}
+      </if>
+      <if test="processOwner != null">
+        and process_owner = #{processOwner}
+      </if>
+      <if test="ownerSid != null">
+        and owner_sid = #{ownerSid}
       </if>
       <if test="processSid != null">
         and process_sid = #{processSid}
@@ -172,8 +215,14 @@
       <if test="sid != null">
         and sid = #{sid}
       </if>
-      <if test="processSid != null">
-        and process_sid = #{processSid}
+      <if test="processOwner != null">
+        and process_owner = #{processOwner}
+      </if>
+      <if test="ownerSid != null">
+        and owner_sid = #{ownerSid}
+      </if>
+      <if test="companyInfoSid != null">
+        and company_info_sid = #{companyInfoSid}
       </if>
       <if test="processInstanceId != null">
         and process_inst_id = #{processInstanceId}
@@ -219,6 +268,12 @@
       </if>
       <if test="processSid != null">
         and process_sid = #{processSid}
+      </if>
+      <if test="processOwner != null">
+        and process_owner = #{processOwner}
+      </if>
+      <if test="ownerSid != null">
+        and owner_sid = #{ownerSid}
       </if>
       <if test="processInstanceId != null">
         and process_inst_id = #{processInstanceId}

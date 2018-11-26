@@ -25,6 +25,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -388,6 +389,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         }
     }
 
+    @Transactional
     public void addRolesToGivenAccount(Long accountSid, List<Long> roleSids) {
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给账号分配角色");

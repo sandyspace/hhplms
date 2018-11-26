@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -287,6 +288,7 @@ public class RoleServiceImpl implements RoleService {
         return deletedRows;
     }
 
+    @Transactional
     public void addPermissionsToRole(Long roleSid, List<Long> permissionSids) {
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给角色分配菜单或者API");

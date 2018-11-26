@@ -22,6 +22,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -300,6 +301,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
         }
     }
 
+    @Transactional
     public void addRolesToGivenEmployee(Long employeeSid, List<Long> roleSids) {
         if (!WebUtils.isEmployee()) {
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");

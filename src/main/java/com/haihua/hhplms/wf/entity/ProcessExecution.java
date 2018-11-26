@@ -1,5 +1,6 @@
 package com.haihua.hhplms.wf.entity;
 
+import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.entity.BaseEntity;
 import com.haihua.hhplms.common.entity.BaseEnum;
 
@@ -8,6 +9,8 @@ import java.util.Objects;
 
 public class ProcessExecution extends BaseEntity {
     private Long processSid;
+    private Role.Category processOwner;
+    private Long ownerSid;
     private String processInstanceId;
     private ProcessStatus processStatus;
     private Long currentStepSid;
@@ -26,6 +29,22 @@ public class ProcessExecution extends BaseEntity {
 
     public void setProcessSid(Long processSid) {
         this.processSid = processSid;
+    }
+
+    public Role.Category getProcessOwner() {
+        return processOwner;
+    }
+
+    public void setProcessOwner(Role.Category processOwner) {
+        this.processOwner = processOwner;
+    }
+
+    public Long getOwnerSid() {
+        return ownerSid;
+    }
+
+    public void setOwnerSid(Long ownerSid) {
+        this.ownerSid = ownerSid;
     }
 
     public String getProcessInstanceId() {

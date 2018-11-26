@@ -4,10 +4,7 @@ import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.CompanyInfo;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.ana.mapper.CompanyInfoMapper;
-import com.haihua.hhplms.ana.vo.CompanyInfoCreationVO;
-import com.haihua.hhplms.ana.vo.CompanyInfoUpdateVO;
-import com.haihua.hhplms.ana.vo.CompanyInfoVO;
-import com.haihua.hhplms.ana.vo.UpdateStatusRequest;
+import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.model.PageWrapper;
@@ -214,20 +211,33 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     @Transactional
+    public void joinCompany(String processCode, JoinCompanyRequest joinCompanyRequest) {
+        if (WebUtils.isEmployee()) {
+            throw new ServiceException(Role.Category.EMPLOYEE.getName() + "不能够加入企业");
+        }
+        CompanyInfo companyInfo = findBySid(joinCompanyRequest.getCompanyId());
+        if (Objects.isNull(companyInfo)) {
+            throw new ServiceException("要加入的企业不存在");
+        }
+        accountService.associateWithCompanyInfo(companyInfo.getSid());
+        processExecutionService.initProcess(processCode, companyInfo.getSid());
+    }
+
+    @Transactional
     public CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO) {
         if (!WebUtils.isMember()) {
-            throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传经销商信息");
+            throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传企业信息");
         }
         CompanyInfo companyInfo = createCompanyInfo(companyInfoCreationVO, false);
         accountService.associateWithCompanyInfo(companyInfo.getSid());
-        processExecutionService.initProcess(processCode);
+        processExecutionService.initProcess(processCode, null);
         return companyInfo;
     }
 
     public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO, boolean isDirect) {
         if (isDirect) {
             if (!WebUtils.isEmployee()) {
-                throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限创建经销商信息");
+                throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限创建企业信息");
             }
         }
         if (WebUtils.isMember()) {

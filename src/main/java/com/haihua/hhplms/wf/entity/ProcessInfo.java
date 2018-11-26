@@ -1,5 +1,6 @@
 package com.haihua.hhplms.wf.entity;
 
+import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.entity.BaseEntity;
 
 import java.util.Objects;
@@ -8,6 +9,7 @@ public class ProcessInfo extends BaseEntity {
     private String code;
     private String name;
     private String desc;
+    private Role.Category owner;
 
     public String getCode() {
         return code;
@@ -31,6 +33,14 @@ public class ProcessInfo extends BaseEntity {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public Role.Category getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Role.Category owner) {
+        this.owner = owner;
     }
 
     @Override
