@@ -8,10 +8,10 @@ import com.haihua.hhplms.ana.service.EmployeeService;
 import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.model.ResultBean;
+import com.haihua.hhplms.common.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +44,12 @@ public class EmployeeController {
     public ResultBean.Success<Long> createEmployee(@RequestBody EmployeeCreationVO employeeCreationVO) {
         Employee createdEmployee = employeeService.createEmployee(employeeCreationVO);
         return ResultBean.Success.of(createdEmployee.getSid(), "");
+    }
+
+    @PutMapping(path = "/api/ana/employee/update", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> updateSelfInfo(@RequestBody EmployeeUpdateVO employeeUpdateVO) {
+        employeeService.updateEmployee(WebUtils.getUserId(), employeeUpdateVO);
+        return ResultBean.Success.of(null, "");
     }
 
     @PutMapping(path = "/api/ana/employees/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

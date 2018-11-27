@@ -7,11 +7,13 @@ import com.haihua.hhplms.ana.service.AccountService;
 import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.model.ResultBean;
+import com.haihua.hhplms.common.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.transform.Result;
 import java.util.*;
 
 @RestController
@@ -44,6 +46,12 @@ public class AccountController {
     public ResultBean.Success<Long> createAccount(@RequestBody AccountCreationVO accountCreationVO) {
         Account createdAccount = accountService.createAccount(accountCreationVO);
         return ResultBean.Success.of(createdAccount.getSid(), "");
+    }
+
+    @PutMapping(path = "/api/ana/account/update", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> updateSelfInfo(@RequestBody AccountUpdateVO accountUpdateVO) {
+        accountService.updateAccount(WebUtils.getUserId(), accountUpdateVO);
+        return ResultBean.Success.of(null, "");
     }
 
     @PutMapping(path = "/api/ana/accounts/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
