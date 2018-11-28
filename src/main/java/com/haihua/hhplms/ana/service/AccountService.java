@@ -29,6 +29,7 @@ public interface AccountService {
     void updateAccountType(Long accountSid, UpdateTypeRequest updateTypeRequest);
     void updateAccountStatus(Long accountSid, UpdateStatusRequest updateStatusRequest);
     int updateAccount(Account account);
+    void addRolesToAccount(Long accountSid, List<Long> roleSids);
     void addRolesToGivenAccount(Long accountSid, List<Long> roleSids);
     Account findBySid(Long sid);
     Account findByLoginName(String loginName);

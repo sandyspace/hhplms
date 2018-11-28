@@ -391,6 +391,10 @@ public class RoleServiceImpl implements RoleService {
         return matchedRoles;
     }
 
+    public Role getCompanyTempRole() {
+        return findSingle("type", Role.Type.COMPANY_TEMP.getCode());
+    }
+
     public Role getPreassignedRole(Long companyInfoSid) {
         if (Objects.isNull(companyInfoSid)) {
             return null;

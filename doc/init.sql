@@ -99,7 +99,7 @@ CREATE TABLE `ana_permission` (
 CREATE TABLE `ana_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
   `code` varchar(30) NOT NULL,
-  `name` varchar(60) DEFAULT NULL,
+  `name` varchar(150) DEFAULT NULL,
   `category` varchar(20) DEFAULT NULL,
   `type` varchar(20) DEFAULT NULL,
   `company_info_sid` bigint(15) DEFAULT NULL,

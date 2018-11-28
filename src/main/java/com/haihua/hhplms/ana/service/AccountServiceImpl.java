@@ -390,7 +390,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     @Transactional
-    public void addRolesToGivenAccount(Long accountSid, List<Long> roleSids) {
+    public void addRolesToAccount(Long accountSid, List<Long> roleSids) {
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给账号分配角色");
         }
@@ -415,7 +415,10 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 }
             }
         }
+        addRolesToGivenAccount(accountSid, roleSids);
+    }
 
+    public void addRolesToGivenAccount(Long accountSid, List<Long> roleSids) {
         List<AccountRoleRelationship> originAccountRoleRelationships = accountRoleRelationshipService.findByAccountSid(accountSid);
         List<Long> originRoleSids = originAccountRoleRelationships.stream()
                 .map(originAccountRoleRelationship -> originAccountRoleRelationship.getRoleSid())

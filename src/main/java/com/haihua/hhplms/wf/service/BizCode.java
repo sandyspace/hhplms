@@ -3,6 +3,7 @@ package com.haihua.hhplms.wf.service;
 import com.haihua.hhplms.common.entity.BaseEnum;
 
 public enum BizCode implements BaseEnum {
+    COMPLETE_COMPANY_JOINING("ccj", "完成加入企业"),
     COMPLETE_COMPANY_INFO_CREATION("ccic", "完成企业信息创建");
 
     private String code;

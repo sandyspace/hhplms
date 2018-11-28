@@ -64,7 +64,7 @@ public class AccountController {
     @PostMapping(path = "/api/ana/accounts/{id}/roles", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> addRolesToAccount(@PathVariable("id") Long accountSid,
                                                       @RequestBody List<Long> roleSids) {
-        accountService.addRolesToGivenAccount(accountSid, roleSids);
+        accountService.addRolesToAccount(accountSid, roleSids);
         return ResultBean.Success.of(accountSid, "");
     }
 

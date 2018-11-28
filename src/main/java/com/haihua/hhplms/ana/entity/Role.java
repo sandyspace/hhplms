@@ -95,6 +95,7 @@ public class Role extends BaseEntity {
     }
 
     public enum Type implements BaseEnum {
+        COMPANY_TEMP("company-temp", "企业模板"),
         PRE_ASSIGNED("pre-assigned", "预分配"),
         CREATED("created", "创建");
         private String code;
