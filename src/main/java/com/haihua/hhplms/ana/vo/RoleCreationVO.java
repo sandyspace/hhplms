@@ -6,6 +6,7 @@ public class RoleCreationVO {
     private String category;
     private String type;
     private Long companyId;
+    private String memo;
 
     public String getCode() {
         return code;
@@ -45,5 +46,13 @@ public class RoleCreationVO {
 
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 }

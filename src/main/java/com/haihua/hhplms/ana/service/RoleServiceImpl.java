@@ -194,6 +194,7 @@ public class RoleServiceImpl implements RoleService {
         role.setCompanyInfoSid(companyId);
         role.setStatus(Role.Status.ENABLED);
         role.setCompanyInfoSid(roleCreationVO.getCompanyId());
+        role.setMemo(roleCreationVO.getMemo());
         role.setCreatedBy(WebUtils.getLoginName());
         role.setCreatedTime(new Date(System.currentTimeMillis()));
         role.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
@@ -252,8 +253,8 @@ public class RoleServiceImpl implements RoleService {
         if (Objects.nonNull(roleUpdateVO.getCompanyId())) {
             role.setCompanyInfoSid(roleUpdateVO.getCompanyId());
         }
-        String loginName = WebUtils.getLoginName();
-        role.setUpdatedBy(loginName);
+        role.setMemo(roleUpdateVO.getMemo());
+        role.setUpdatedBy(WebUtils.getLoginName());
         role.setUpdatedTime(new Date(System.currentTimeMillis()));
         role.setVersionNum(editingRole.getVersionNum());
         int updatedRows = updateRole(role);

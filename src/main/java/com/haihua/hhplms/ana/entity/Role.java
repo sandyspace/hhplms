@@ -12,6 +12,7 @@ public class Role extends BaseEntity {
     private Type type;
     private Long companyInfoSid;
     private Status status;
+    private String memo;
 
     public String getCode() {
         return code;
@@ -59,6 +60,14 @@ public class Role extends BaseEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 
     @Override

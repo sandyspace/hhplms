@@ -11,6 +11,7 @@
     <result column="type" property="type" />
     <result column="company_info_sid" property="companyInfoSid" />
     <result column="status" property="status" />
+    <result column="memo" property="memo" />
     <result column="created_by" property="createdBy" />
     <result column="created_time" property="createdTime" />
     <result column="updated_by" property="updatedBy" />
@@ -19,14 +20,14 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, code, name, category, type, company_info_sid, status, created_by, created_time, updated_by, updated_time, version_num
+    sid, code, name, category, type, company_info_sid, status, memo, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <insert id="create" parameterType="com.haihua.hhplms.ana.entity.Role" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
     insert into ana_role
-    (code, name, category, type, company_info_sid, status, created_by, created_time, version_num)
+    (code, name, category, type, company_info_sid, status, memo, created_by, created_time, version_num)
     values
-    (#{code}, #{name}, #{category}, #{type}, #{companyInfoSid}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{code}, #{name}, #{category}, #{type}, #{companyInfoSid}, #{status}, #{memo}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
@@ -72,6 +73,9 @@
       </if>
       <if test="companyInfoSid != null">
         company_info_sid = #{companyInfoSid},
+      </if>
+      <if test="memo != null">
+        memo = #{memo},
       </if>
       <if test="updatedBy != null">
         updated_by = #{updatedBy},

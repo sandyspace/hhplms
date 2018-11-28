@@ -11,6 +11,7 @@ public class RoleVO {
     private String type;
     private Long companyId;
     private String status;
+    private String memo;
     private Integer versionNum;
 
     public RoleVO(Role role) {
@@ -21,6 +22,7 @@ public class RoleVO {
         this.type = role.getType().getCode();
         this.companyId = role.getCompanyInfoSid();
         this.status = role.getStatus().getCode();
+        this.memo = role.getMemo();
         this.versionNum = role.getVersionNum();
     }
 
@@ -78,6 +80,14 @@ public class RoleVO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 
     public Integer getVersionNum() {
