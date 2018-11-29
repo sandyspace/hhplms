@@ -19,6 +19,7 @@ public interface AccountService {
                                                     Integer pageNo,
                                                     Integer pageSize);
     AccountVO loadDetail(Long sid);
+    AccountVO getAccount(String loginName);
     Account createAccount(AccountCreationVO accountCreationVO);
     int createAccount(Account account);
     void associateWithCompanyInfo(Long companyInfoSid);

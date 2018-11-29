@@ -110,6 +110,24 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return pageOfAccounts;
     }
 
+    public AccountVO getAccount(String loginName) {
+        if (WebUtils.isMember()) {
+            if (!WebUtils.getLoginName().equals(loginName)) {
+                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看其他人的账户详细信息");
+            }
+        }
+        Account account = findByLoginName(loginName);
+        if (Objects.isNull(account)) {
+            throw new ServiceException("用户名为[" + loginName + "]的账号不存在");
+        }
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(account.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限查看其他" + Account.Type.COMPANY.getName() + "的账户信息");
+            }
+        }
+        return new AccountVO(account);
+    }
+
     public AccountVO loadDetail(Long sid) {
         if (WebUtils.isMember()) {
             if (!WebUtils.getUserId().equals(sid)) {

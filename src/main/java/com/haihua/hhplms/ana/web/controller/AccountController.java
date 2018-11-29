@@ -42,6 +42,11 @@ public class AccountController {
         return ResultBean.Success.of(accountDetail, "");
     }
 
+    @GetMapping(path = "/api/ana/accounts/{loginName}/basicInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<AccountVO> getAccount(@PathVariable("loginName") String loginName) {
+        return ResultBean.Success.of(accountService.getAccount(loginName), "");
+    }
+
     @PostMapping(path = "/api/ana/accounts", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> createAccount(@RequestBody AccountCreationVO accountCreationVO) {
         Account createdAccount = accountService.createAccount(accountCreationVO);
