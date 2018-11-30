@@ -35,7 +35,7 @@ public class AjaxLoginEndpoint {
     @PostMapping(path = "/api/auth/login", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
-            throw new AuthenticationServiceException("Username or Password not provided");
+            throw new AuthenticationServiceException("用户名密码不能为空");
         }
         UserBasicInfo basicInfo = ajaxAuthenticationService.login(loginRequest.getUsername(), loginRequest.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(loginRequest.getUsername(), basicInfo.getType()));
@@ -44,7 +44,7 @@ public class AjaxLoginEndpoint {
     @PostMapping(path = "/api/auth/account/login", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Object>> accountLogin(@RequestBody LoginRequest loginRequest) {
         if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
-            throw new AuthenticationServiceException("Username or Password not provided");
+            throw new AuthenticationServiceException("用户名密码不能为空");
         }
         UserBasicInfo basicInfo = webBasedAjaxAuthenticationService.login(loginRequest.getUsername(), loginRequest.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(loginRequest.getUsername(), basicInfo.getType()));
@@ -53,7 +53,7 @@ public class AjaxLoginEndpoint {
     @PostMapping(path = "/api/auth/account/fastLogin", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Object>> fastLogin(@RequestBody FastLoginRequest fastLoginRequest) {
         if (StringUtils.isBlank(fastLoginRequest.getMobile()) || StringUtils.isBlank(fastLoginRequest.getDynamicCode())) {
-            throw new AuthenticationServiceException("mobile or dynamic code not provided");
+            throw new AuthenticationServiceException("手机号验证码不能为空");
         }
         //check dynamic code
 

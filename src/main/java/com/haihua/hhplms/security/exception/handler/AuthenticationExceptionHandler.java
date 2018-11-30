@@ -24,14 +24,14 @@ public class AuthenticationExceptionHandler {
 
         ErrorResponse errorResponse;
         if (e instanceof BadCredentialsException) {
-            errorResponse = ErrorResponse.of("Invalid username or password", ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof JwtExpiredTokenException) {
-            errorResponse = ErrorResponse.of("Token has expired", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
+            errorResponse = ErrorResponse.of("Token已过期", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof UsernameNotFoundException) {
-            errorResponse = ErrorResponse.of("User does not exist", ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof DisabledException) {
-            errorResponse = ErrorResponse.of("User is not in active status", ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED);
-        }  else {
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED);
+        } else {
             errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);

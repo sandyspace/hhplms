@@ -113,7 +113,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public AccountVO getAccount(String loginName) {
         if (WebUtils.isMember()) {
             if (!WebUtils.getLoginName().equals(loginName)) {
-                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看其他人的账户详细信息");
+                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看其他人的账户信息");
             }
         }
         Account account = findByLoginName(loginName);
@@ -180,6 +180,19 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限创建账户");
         }
+
+        if (loginNameExist(accountCreationVO.getLoginName())) {
+            throw new ServiceException("用户名[" + accountCreationVO.getLoginName() + "]已被占用");
+        }
+
+        if (mobileExist(accountCreationVO.getMobile())) {
+            throw new ServiceException("手机[" + accountCreationVO.getMobile() + "]已被占用");
+        }
+
+        if (emailExist(accountCreationVO.getMobile())) {
+            throw new ServiceException("邮箱[" + accountCreationVO.getEmail() + "]已被占用");
+        }
+
         if (WebUtils.isCompany()) {
             accountCreationVO.setType(Account.Type.COMPANY.getCode());
             accountCreationVO.setCompanyId(WebUtils.getCompanyId());
@@ -236,12 +249,54 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         }
     }
 
+    public void supplementSelfInfo(AccountUpdateVO accountUpdateVO) {
+        if (WebUtils.isEmployee()) {
+            throw new ServiceException(Role.Category.EMPLOYEE.getName() + "没有权限完善非" + Role.Category.EMPLOYEE.getName() + "的个人信息");
+        }
+        Account self = findBySid(WebUtils.getUserId());
+        if (Objects.isNull(self)) {
+            throw new ServiceException("你的个人信息不存在，完善信息失败");
+        }
+
+        Account example = new Account();
+        example.setSid(self.getSid());
+        example.setRealName(accountUpdateVO.getRealName());
+        example.setNickName(accountUpdateVO.getNickName());
+        example.setGender(EnumUtil.codeOf(Gender.class, accountUpdateVO.getGender()));
+
+        example.setUpdatedBy(WebUtils.getLoginName());
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(self.getVersionNum());
+
+        int updatedRows = updateAccount(example);
+        if (updatedRows == 0) {
+            throw new ServiceException("你的个人信息正在被其他人修改，请稍后再试");
+        }
+    }
+
     public void updateAccount(Long accountSid, AccountUpdateVO accountUpdateVO) {
         if (WebUtils.isMember()) {
-            if (!WebUtils.getUserId().equals(accountSid)) {
-                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改他人的账号信息");
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改账户");
+        }
+
+        if (WebUtils.isCompany()) {
+            if (WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能修改自己的" + Account.Type.COMPANY.getName() + "信息");
             }
         }
+
+        if (loginNameExist(accountUpdateVO.getLoginName())) {
+            throw new ServiceException("用户名[" + accountUpdateVO.getLoginName() + "]已被占用");
+        }
+
+        if (mobileExist(accountUpdateVO.getMobile())) {
+            throw new ServiceException("手机[" + accountUpdateVO.getMobile() + "]已被占用");
+        }
+
+        if (emailExist(accountUpdateVO.getMobile())) {
+            throw new ServiceException("邮箱[" + accountUpdateVO.getEmail() + "]已被占用");
+        }
+
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
             throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
@@ -293,6 +348,13 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限重置密码");
         }
+
+        if (WebUtils.isCompany()) {
+            if (WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能重置自己的密码");
+            }
+        }
+
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
             throw new ServiceException("账号不存在，重置密码失败");
@@ -384,6 +446,13 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限更新账号状态");
         }
+
+        if (WebUtils.isCompany()) {
+            if (WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能修改自己的状态");
+            }
+        }
+
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
             throw new ServiceException("ID为[" + accountSid + "]的账号不存在，更新状态失败");
@@ -412,6 +481,13 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给账号分配角色");
         }
+
+        if (WebUtils.isCompany()) {
+            if (WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能给自己分配角色");
+            }
+        }
+
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
             throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
@@ -697,6 +773,11 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
 
     private boolean mobileExist(String mobile) {
         Account account = findByMobile(mobile);
+        return Objects.nonNull(account);
+    }
+
+    private boolean loginNameExist(String loginName) {
+        Account account = findByLoginName(loginName);
         return Objects.nonNull(account);
     }
 

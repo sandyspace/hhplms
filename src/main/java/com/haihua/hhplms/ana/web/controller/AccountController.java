@@ -54,8 +54,8 @@ public class AccountController {
     }
 
     @PutMapping(path = "/api/ana/account/update", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> updateSelfInfo(@RequestBody AccountUpdateVO accountUpdateVO) {
-        accountService.updateAccount(WebUtils.getUserId(), accountUpdateVO);
+    public ResultBean.Success<Long> supplementSelfInfo(@RequestBody AccountUpdateVO accountUpdateVO) {
+        accountService.supplementSelfInfo(accountUpdateVO);
         return ResultBean.Success.of(null, "");
     }
 

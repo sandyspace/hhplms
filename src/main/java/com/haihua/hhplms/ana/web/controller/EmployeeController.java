@@ -47,8 +47,8 @@ public class EmployeeController {
     }
 
     @PutMapping(path = "/api/ana/employee/update", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> updateSelfInfo(@RequestBody EmployeeUpdateVO employeeUpdateVO) {
-        employeeService.updateEmployee(WebUtils.getUserId(), employeeUpdateVO);
+    public ResultBean.Success<Long> supplementSelfInfo(@RequestBody EmployeeUpdateVO employeeUpdateVO) {
+        employeeService.supplementSelfInfo(employeeUpdateVO);
         return ResultBean.Success.of(null, "");
     }
 
@@ -62,7 +62,7 @@ public class EmployeeController {
     @PostMapping(path = "/api/ana/employees/{id}/roles", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> addRolesToEmployee(@PathVariable("id") Long employeeSid,
                                                        @RequestBody List<Long> roleSids) {
-        employeeService.addRolesToGivenEmployee(employeeSid, roleSids);
+        employeeService.addRolesToEmployee(employeeSid, roleSids);
         return ResultBean.Success.of(employeeSid, "");
     }
 

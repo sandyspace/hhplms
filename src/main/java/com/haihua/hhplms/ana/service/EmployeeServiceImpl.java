@@ -138,6 +138,18 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
+        if (loginNameExist(employeeCreationVO.getLoginName())) {
+            throw new ServiceException("用户名[" + employeeCreationVO.getLoginName() + "]已被占用");
+        }
+
+        if (mobileExist(employeeCreationVO.getMobile())) {
+            throw new ServiceException("手机[" + employeeCreationVO.getMobile() + "]已被占用");
+        }
+
+        if (emailExist(employeeCreationVO.getMobile())) {
+            throw new ServiceException("邮箱[" + employeeCreationVO.getEmail() + "]已被占用");
+        }
+
         Employee employee = new Employee();
         employee.setLoginName(employeeCreationVO.getLoginName());
         employee.setRealName(employeeCreationVO.getRealName());
@@ -168,14 +180,55 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
         return insertedRows;
     }
 
+    public void supplementSelfInfo(EmployeeUpdateVO employeeUpdateVO) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        Employee self = findBySid(WebUtils.getUserId());
+        if (Objects.isNull(self)) {
+            throw new ServiceException("你的个人信息不存在，完善信息失败");
+        }
+
+        Employee example = new Employee();
+        example.setSid(self.getSid());
+        example.setRealName(employeeUpdateVO.getRealName());
+        example.setTitle(employeeUpdateVO.getTitle());
+        example.setGender(EnumUtil.codeOf(Gender.class, employeeUpdateVO.getGender()));
+
+        example.setUpdatedBy(WebUtils.getLoginName());
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(self.getVersionNum());
+
+        int updatedRows = updateEmployee(example);
+        if (updatedRows == 0) {
+            throw new ServiceException("你的个人信息正在被其他人修改，请稍后再试");
+        }
+    }
+
     public void updateEmployee(Long employeeSid, EmployeeUpdateVO employeeUpdateVO) {
         if (!WebUtils.isEmployee()) {
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
+        if (WebUtils.getUserId().equals(employeeSid)) {
+            throw new ServiceException("当前登录" + Role.Category.EMPLOYEE.getName() + "不能修改自己的" + Role.Category.EMPLOYEE.getName() + "信息");
+        }
+
         Employee editingEmployee = findBySid(employeeSid);
         if (Objects.isNull(editingEmployee)) {
             throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
+        }
+
+        if (loginNameExist(employeeUpdateVO.getLoginName())) {
+            throw new ServiceException("用户名[" + employeeUpdateVO.getLoginName() + "]已被占用");
+        }
+
+        if (mobileExist(employeeUpdateVO.getMobile())) {
+            throw new ServiceException("手机[" + employeeUpdateVO.getMobile() + "]已被占用");
+        }
+
+        if (emailExist(employeeUpdateVO.getMobile())) {
+            throw new ServiceException("邮箱[" + employeeUpdateVO.getEmail() + "]已被占用");
         }
 
         Employee employee = new Employee();
@@ -224,6 +277,10 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
+        if (WebUtils.getUserId().equals(employeeSid)) {
+            throw new ServiceException("当前登录" + Role.Category.EMPLOYEE.getName() + "不能重置自己的密码");
+        }
+
         Employee employee = findBySid(employeeSid);
         if (Objects.isNull(employee)) {
             throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
@@ -247,8 +304,7 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
-        Long employeeId = WebUtils.getUserId();
-        Employee employee = findBySid(employeeId);
+        Employee employee = findBySid(WebUtils.getUserId());
         if (Objects.isNull(employee)) {
             throw new ServiceException(Role.Category.EMPLOYEE.getName() + "不存在，修改密码失败");
         }
@@ -283,6 +339,10 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
         }
 
+        if (WebUtils.getUserId().equals(employeeSid)) {
+            throw new ServiceException("当前登录" + Role.Category.EMPLOYEE.getName() + "不能修改自己的" + Role.Category.EMPLOYEE.getName() + "状态");
+        }
+
         Employee employee = findBySid(employeeSid);
         if (Objects.isNull(employee)) {
             throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
@@ -302,14 +362,21 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
     }
 
     @Transactional
-    public void addRolesToGivenEmployee(Long employeeSid, List<Long> roleSids) {
+    public void addRolesToEmployee(Long employeeSid, List<Long> roleSids) {
         if (!WebUtils.isEmployee()) {
             throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        if (WebUtils.getUserId().equals(employeeSid)) {
+            throw new ServiceException("当前登录" + Role.Category.EMPLOYEE.getName() + "不能给自己分配角色");
         }
         List<Role> rolesToAdd = roleService.findBySids(roleSids);
         if (Objects.isNull(rolesToAdd) || rolesToAdd.isEmpty() || rolesToAdd.size() != roleSids.size()) {
             throw new ServiceException("分配给" + Role.Category.EMPLOYEE.getName() + "的某些角色不存在，分配失败");
         }
+        addRolesToGivenEmployee(employeeSid, roleSids);
+    }
+
+    public void addRolesToGivenEmployee(Long employeeSid, List<Long> roleSids) {
         List<EmployeeRoleRelationship> originEmployeeRoleRelationships = employeeRoleRelationshipService.findByEmployeeSid(employeeSid);
         List<Long> originRoleSids = originEmployeeRoleRelationships.stream()
                 .map(originEmployeeRoleRelationship -> originEmployeeRoleRelationship.getRoleSid())
@@ -367,6 +434,21 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             return matchedEmployees.get(0);
         }
         return null;
+    }
+
+    private boolean loginNameExist(String loginName) {
+        Employee employee = findByLoginName(loginName);
+        return Objects.nonNull(employee);
+    }
+
+    private boolean emailExist(String email) {
+        Employee employee = findByEmail(email);
+        return Objects.nonNull(employee);
+    }
+
+    private boolean mobileExist(String mobile) {
+        Employee employee = findByMobile(mobile);
+        return Objects.nonNull(employee);
     }
 
     public int countByParams(Map<String, Object> params) {

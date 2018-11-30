@@ -19,10 +19,12 @@ public interface EmployeeService {
                                                       Integer pageSize);
     EmployeeVO loadDetail(Long sid);
     Employee createEmployee(EmployeeCreationVO employeeCreationVO);
+    void supplementSelfInfo(EmployeeUpdateVO employeeUpdateVO);
     void updateEmployee(Long employeeSid, EmployeeUpdateVO employeeUpdateVO);
     void resetPassword(Long employeeSid);
     void changePassword(ChangePasswordRequest changePasswordRequest);
     void updateEmployeeStatus(Long employeeSid, UpdateStatusRequest updateStatusRequest);
+    void addRolesToEmployee(Long employeeSid, List<Long> roleSids);
     void addRolesToGivenEmployee(Long employeeSid, List<Long> roleSids);
     Employee findByLoginName(String loginName);
     Employee findByMobile(String mobile);

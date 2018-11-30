@@ -41,16 +41,18 @@ public class AjaxAwareAuthenticationFailureHandler implements AuthenticationFail
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
+        ErrorResponse errorResponse;
         if (e instanceof BadCredentialsException) {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of("Invalid username or password", ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED));
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof JwtExpiredTokenException) {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of("Token has expired", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+            errorResponse = ErrorResponse.of("Token已过期", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof UsernameNotFoundException) {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of("User does not exist", ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED));
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
         } else if (e instanceof DisabledException) {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of("User is not in active status", ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED));
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED);
         } else {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED);
         }
+        mapper.writeValue(response.getWriter(), errorResponse);
     }
 }
