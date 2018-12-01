@@ -18,9 +18,9 @@ public interface CompanyInfoService {
     CompanyInfoVO loadDetail(Long sid);
     CompanyInfoVO getCompanyInfo(String loginName);
     CompanyInfoVO getCompanyInfoOfAccount();
-    void joinCompany(String processCode, JoinCompanyRequest joinCompanyRequest);
-    CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO);
-    CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO, boolean isDirect);
+    void joinCompany(JoinCompanyRequest joinCompanyRequest);
+    CompanyInfo uploadCompanyInfo(UploadCompanyInfoRequest uploadCompanyInfoRequest);
+    CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO);
     void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO);
     void updateCompanyInfoStatus(Long sid, String status);
     void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest);

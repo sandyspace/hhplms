@@ -1,20 +1,12 @@
 package com.haihua.hhplms.ana.vo;
 
 public class AccountUpdateVO {
-    private String loginName;
     private String nickName;
     private String realName;
     private String mobile;
     private String email;
     private String gender;
-
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
+    private Long companyId;
 
     public String getNickName() {
         return nickName;
@@ -54,5 +46,13 @@ public class AccountUpdateVO {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 }

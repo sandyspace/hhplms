@@ -1,6 +1,7 @@
 package com.haihua.hhplms.common.service;
 
 import com.haihua.hhplms.common.exception.ServiceException;
+import com.haihua.hhplms.common.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 
 @Service("imageService")
 public class ImageServiceImpl implements ImageService {
@@ -19,9 +21,10 @@ public class ImageServiceImpl implements ImageService {
             return null;
         }
         String fileName = file.getOriginalFilename();
-        String suffixName = fileName.substring(fileName.lastIndexOf("."));
-        fileName = Calendar.getInstance().getTimeInMillis() + suffixName;
-        String filePath = imgUploadPath + subDir + File.pathSeparator + fileName;
+        String extendedName = fileName.substring(fileName.lastIndexOf("."));
+        fileName = Calendar.getInstance().getTimeInMillis() + extendedName;
+        String currentDateStr = DateUtil.format(new Date(System.currentTimeMillis()), DateUtil.DATE_PATTERN_YYYY_MM_DD);
+        String filePath = imgUploadPath + subDir + File.separator + currentDateStr + File.separator + fileName;
         File dest = new File(filePath);
         if (!dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();
@@ -33,6 +36,6 @@ public class ImageServiceImpl implements ImageService {
         } catch (IOException e) {
             throw new ServiceException(e);
         }
-        return  subDir + File.pathSeparator + fileName;
+        return  subDir + File.separator + currentDateStr + File.separator + fileName;
     }
 }

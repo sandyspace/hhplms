@@ -16,6 +16,7 @@ public class AccountVO {
     private String headImgUrl;
     private String type;
     private String status;
+    private Long companyId;
     private Integer versionNum;
     private List<RoleVO> grantedRoles;
     private List<PermissionVO> grantedPermissions;
@@ -32,6 +33,7 @@ public class AccountVO {
         this.headImgUrl = account.getHeadImgUrl();
         this.type = account.getType().getCode();
         this.status = account.getStatus().getCode();
+        this.companyId = account.getCompanyInfoSid();
         this.versionNum = account.getVersionNum();
     }
 
@@ -113,6 +115,14 @@ public class AccountVO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public Integer getVersionNum() {

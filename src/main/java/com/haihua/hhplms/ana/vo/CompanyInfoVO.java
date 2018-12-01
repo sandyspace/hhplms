@@ -9,8 +9,9 @@ public class CompanyInfoVO {
     private String type;
     private String address;
     private String contactName;
-    private String contactMobile;
+    private String contactPhone;
     private String status;
+    private String createdBy;
 
     public CompanyInfoVO(Long id, String name) {
         this.id = id;
@@ -24,8 +25,9 @@ public class CompanyInfoVO {
         this.type = companyInfo.getType().getCode();
         this.address = companyInfo.getAddress();
         this.contactName = companyInfo.getContactName();
-        this.contactMobile = companyInfo.getContactMobile();
+        this.contactPhone = companyInfo.getContactPhone();
         this.status = companyInfo.getStatus().getCode();
+        this.createdBy = companyInfo.getCreatedBy();
     }
 
     public Long getId() {
@@ -76,12 +78,12 @@ public class CompanyInfoVO {
         this.contactName = contactName;
     }
 
-    public String getContactMobile() {
-        return contactMobile;
+    public String getContactPhone() {
+        return contactPhone;
     }
 
-    public void setContactMobile(String contactMobile) {
-        this.contactMobile = contactMobile;
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     public String getStatus() {
@@ -90,5 +92,13 @@ public class CompanyInfoVO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

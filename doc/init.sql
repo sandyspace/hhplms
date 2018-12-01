@@ -132,7 +132,7 @@ CREATE TABLE `ana_company_info` (
   `type` VARCHAR(20) NULL,
   `address` VARCHAR(400) NULL,
   `contact_name` VARCHAR(60) NULL,
-  `contact_mobile` VARCHAR(11) NULL,
+  `contact_phone` VARCHAR(15) NULL,
   `status` VARCHAR(20) NULL,
   `created_by` VARCHAR(30) NOT NULL,
   `created_time` DATETIME NOT NULL,

@@ -219,34 +219,33 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
             throw new ServiceException("ID为[" + employeeSid + "]的" + Role.Category.EMPLOYEE.getName() + "不存在");
         }
 
-        if (loginNameExist(employeeUpdateVO.getLoginName())) {
-            throw new ServiceException("用户名[" + employeeUpdateVO.getLoginName() + "]已被占用");
+        if (!Objects.equals(editingEmployee.getMobile(), employeeUpdateVO.getMobile())) {
+            if (mobileExist(employeeUpdateVO.getMobile())) {
+                throw new ServiceException("手机[" + employeeUpdateVO.getMobile() + "]已被占用");
+            }
         }
 
-        if (mobileExist(employeeUpdateVO.getMobile())) {
-            throw new ServiceException("手机[" + employeeUpdateVO.getMobile() + "]已被占用");
+        if (!Objects.equals(editingEmployee.getEmail(), employeeUpdateVO.getMobile())) {
+            if (emailExist(employeeUpdateVO.getMobile())) {
+                throw new ServiceException("邮箱[" + employeeUpdateVO.getEmail() + "]已被占用");
+            }
         }
 
-        if (emailExist(employeeUpdateVO.getMobile())) {
-            throw new ServiceException("邮箱[" + employeeUpdateVO.getEmail() + "]已被占用");
-        }
+        Employee example = new Employee();
+        example.setSid(employeeSid);
+        example.setRealName(employeeUpdateVO.getRealName());
+        example.setEmail(employeeUpdateVO.getEmail());
+        example.setMobile(employeeUpdateVO.getMobile());
+        example.setTel(employeeUpdateVO.getTel());
+        example.setGender(EnumUtil.codeOf(Gender.class, employeeUpdateVO.getGender()));
+        example.setIdCard(employeeUpdateVO.getIdCard());
+        example.setTitle(employeeUpdateVO.getTitle());
 
-        Employee employee = new Employee();
-        employee.setSid(employeeSid);
-        employee.setLoginName(employeeUpdateVO.getLoginName());
-        employee.setRealName(employeeUpdateVO.getRealName());
-        employee.setEmail(employeeUpdateVO.getEmail());
-        employee.setMobile(employeeUpdateVO.getMobile());
-        employee.setTel(employeeUpdateVO.getTel());
-        employee.setGender(EnumUtil.codeOf(Gender.class, employeeUpdateVO.getGender()));
-        employee.setIdCard(employeeUpdateVO.getIdCard());
-        employee.setTitle(employeeUpdateVO.getTitle());
+        example.setUpdatedBy(WebUtils.getLoginName());
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(editingEmployee.getVersionNum());
 
-        employee.setUpdatedBy(WebUtils.getLoginName());
-        employee.setUpdatedTime(new Date(System.currentTimeMillis()));
-        employee.setVersionNum(editingEmployee.getVersionNum());
-
-        int updatedRows = updateEmployee(employee);
+        int updatedRows = updateEmployee(example);
         if (updatedRows == 0) {
             throw new ServiceException("此" + Role.Category.EMPLOYEE.getName() + "正在被其他人修改，请稍后再试");
         }

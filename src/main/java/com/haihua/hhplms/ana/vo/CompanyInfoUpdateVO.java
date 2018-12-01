@@ -6,7 +6,7 @@ public class CompanyInfoUpdateVO {
     private String type;
     private String address;
     private String contactName;
-    private String contactMobile;
+    private String contactPhone;
 
     public String getCode() {
         return code;
@@ -48,11 +48,11 @@ public class CompanyInfoUpdateVO {
         this.contactName = contactName;
     }
 
-    public String getContactMobile() {
-        return contactMobile;
+    public String getContactPhone() {
+        return contactPhone;
     }
 
-    public void setContactMobile(String contactMobile) {
-        this.contactMobile = contactMobile;
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 }

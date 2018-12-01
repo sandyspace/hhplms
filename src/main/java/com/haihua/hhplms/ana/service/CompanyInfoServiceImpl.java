@@ -82,7 +82,9 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
 
     public List<CompanyInfoVO> getAvailableCompanyInfos() {
         Map<String, Object> params = new HashMap<>();
-        params.put("status", CompanyInfo.Status.APPROVED.getCode());
+        if (!WebUtils.isEmployee()) {
+            params.put("status", CompanyInfo.Status.APPROVED.getCode());
+        }
         List<CompanyInfo> availableCompanyInfos = findByParams(params);
         if (Objects.nonNull(availableCompanyInfos) && !availableCompanyInfos.isEmpty()) {
             return availableCompanyInfos.stream()
@@ -130,31 +132,31 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     public void updateCompanyInfo(Long sid, CompanyInfoUpdateVO companyInfoUpdateVO) {
-        if (WebUtils.isMember()) {
-            if (!WebUtils.getCompanyId().equals(sid)) {
-                throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改他人的企业信息");
-            }
-        } else {
-            if (WebUtils.isCompany()) {
-                throw new ServiceException(Account.Type.COMPANY.getName() + "暂时无法更新数据");
-            }
+        if (WebUtils.isCompany()) {
+            throw new ServiceException(Account.Type.COMPANY.getName() + "请联系系统管理员更新企业信息");
         }
         CompanyInfo editingCompanyInfo = findBySid(sid);
         if (Objects.isNull(editingCompanyInfo)) {
             throw new ServiceException("ID为[" + sid + "]的企业信息不存在");
         }
-        CompanyInfo companyInfo = new CompanyInfo();
-        companyInfo.setSid(sid);
-        companyInfo.setCode(companyInfoUpdateVO.getCode());
-        companyInfo.setName(companyInfoUpdateVO.getName());
-        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.Type.class, companyInfoUpdateVO.getType()));
-        companyInfo.setContactName(companyInfoUpdateVO.getContactName());
-        companyInfo.setContactMobile(companyInfoUpdateVO.getContactMobile());
-        companyInfo.setUpdatedBy(WebUtils.getLoginName());
-        companyInfo.setUpdatedTime(new Date(System.currentTimeMillis()));
-        companyInfo.setVersionNum(editingCompanyInfo.getVersionNum());
+        if (WebUtils.isMember()) {
+            if (!WebUtils.getLoginName().equals(editingCompanyInfo.getCreatedBy())) {
+                throw new ServiceException("只有企业主才能更新企业信息");
+            }
+        }
 
-        int updatedRows = updateCompanyInfo(companyInfo);
+        CompanyInfo example = new CompanyInfo();
+        example.setSid(sid);
+        example.setCode(companyInfoUpdateVO.getCode());
+        example.setName(companyInfoUpdateVO.getName());
+        example.setType(EnumUtil.codeOf(CompanyInfo.Type.class, companyInfoUpdateVO.getType()));
+        example.setContactName(companyInfoUpdateVO.getContactName());
+        example.setContactPhone(companyInfoUpdateVO.getContactPhone());
+        example.setUpdatedBy(WebUtils.getLoginName());
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(editingCompanyInfo.getVersionNum());
+
+        int updatedRows = updateCompanyInfo(example);
         if (updatedRows == 0) {
             throw new ServiceException("此企业信息正在被其他人修改，请稍后再试");
         }
@@ -211,7 +213,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     }
 
     @Transactional
-    public void joinCompany(String processCode, JoinCompanyRequest joinCompanyRequest) {
+    public void joinCompany(JoinCompanyRequest joinCompanyRequest) {
         if (WebUtils.isEmployee()) {
             throw new ServiceException(Role.Category.EMPLOYEE.getName() + "不能够加入企业");
         }
@@ -219,30 +221,44 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         if (Objects.isNull(companyInfo)) {
             throw new ServiceException("要加入的企业不存在");
         }
-        accountService.associateWithCompanyInfo(companyInfo.getSid());
-        processExecutionService.initProcess(processCode, companyInfo.getSid());
+        accountService.associateWithCompanyInfo(joinCompanyRequest);
+        processExecutionService.initProcess("P-JRQY", companyInfo.getSid());
     }
 
     @Transactional
-    public CompanyInfo uploadCompanyInfo(String processCode, CompanyInfoCreationVO companyInfoCreationVO) {
+    public CompanyInfo uploadCompanyInfo(UploadCompanyInfoRequest uploadCompanyInfoRequest) {
         if (!WebUtils.isMember()) {
             throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传企业信息");
         }
-        CompanyInfo companyInfo = createCompanyInfo(companyInfoCreationVO, false);
-        accountService.associateWithCompanyInfo(companyInfo.getSid());
-        processExecutionService.initProcess(processCode, null);
+
+        CompanyInfo companyInfo = new CompanyInfo();
+        if (StringUtils.isBlank(uploadCompanyInfoRequest.getCode())) {
+            companyInfo.setCode(UUID.randomUUID().toString());
+        } else {
+            companyInfo.setCode(uploadCompanyInfoRequest.getCode());
+        }
+        companyInfo.setName(uploadCompanyInfoRequest.getName());
+        companyInfo.setType(EnumUtil.codeOf(CompanyInfo.Type.class, uploadCompanyInfoRequest.getType()));
+        companyInfo.setAddress(uploadCompanyInfoRequest.getAddress());
+        companyInfo.setContactName(uploadCompanyInfoRequest.getContactName());
+        companyInfo.setContactPhone(uploadCompanyInfoRequest.getContactPhone());
+        companyInfo.setStatus(CompanyInfo.Status.VERIFYING);
+        companyInfo.setCreatedBy(WebUtils.getLoginName());
+        companyInfo.setCreatedTime(new Date(System.currentTimeMillis()));
+        companyInfo.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
+        createCompanyInfo(companyInfo);
+
+        accountService.associateWithCompanyInfo(new JoinCompanyRequest(companyInfo.getSid(),
+                uploadCompanyInfoRequest.getCompanyOwnerName(), uploadCompanyInfoRequest.getCompanyOwnerSex()));
+        processExecutionService.initProcess("P-QYXXSQ", null);
         return companyInfo;
     }
 
-    public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO, boolean isDirect) {
-        if (isDirect) {
-            if (!WebUtils.isEmployee()) {
-                throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限创建企业信息");
-            }
+    public CompanyInfo createCompanyInfo(CompanyInfoCreationVO companyInfoCreationVO) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限创建企业信息");
         }
-        if (WebUtils.isMember()) {
-            companyInfoCreationVO.setStatus(CompanyInfo.Status.VERIFYING.getCode());
-        }
+
         CompanyInfo companyInfo = new CompanyInfo();
         if (StringUtils.isBlank(companyInfoCreationVO.getCode())) {
             companyInfo.setCode(UUID.randomUUID().toString());
@@ -253,7 +269,7 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         companyInfo.setType(EnumUtil.codeOf(CompanyInfo.Type.class, companyInfoCreationVO.getType()));
         companyInfo.setAddress(companyInfoCreationVO.getAddress());
         companyInfo.setContactName(companyInfoCreationVO.getContactName());
-        companyInfo.setContactMobile(companyInfoCreationVO.getContactMobile());
+        companyInfo.setContactPhone(companyInfoCreationVO.getContactPhone());
         companyInfo.setStatus(EnumUtil.codeOf(CompanyInfo.Status.class, companyInfoCreationVO.getStatus()));
         companyInfo.setCreatedBy(WebUtils.getLoginName());
         companyInfo.setCreatedTime(new Date(System.currentTimeMillis()));

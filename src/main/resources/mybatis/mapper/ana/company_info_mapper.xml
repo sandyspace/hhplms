@@ -10,7 +10,7 @@
     <result column="type" property="type" />
     <result column="address" property="address" />
     <result column="contact_name" property="contactName" />
-    <result column="contact_mobile" property="contactMobile" />
+    <result column="contact_phone" property="contactPhone" />
     <result column="status" property="status" />
     <result column="created_by" property="createdBy" />
     <result column="created_time" property="createdTime" />
@@ -20,14 +20,14 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, code, name, type, address, contact_name, contact_mobile, status, created_by, created_time, updated_by, updated_time, version_num
+    sid, code, name, type, address, contact_name, contact_phone, status, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <insert id="create" parameterType="com.haihua.hhplms.ana.entity.CompanyInfo" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
     insert into ana_company_info
-    (code, name, type, address, contact_name, contact_mobile, status, created_by, created_time, version_num)
+    (code, name, type, address, contact_name, contact_phone, status, created_by, created_time, version_num)
     values
-    (#{code}, #{name}, #{type}, #{address}, #{contactName}, #{contactMobile}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{code}, #{name}, #{type}, #{address}, #{contactName}, #{contactPhone}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
@@ -74,8 +74,8 @@
       <if test="contactName != null">
         contact_name = #{contactName},
       </if>
-      <if test="contactMobile != null">
-        contact_mobile = #{contactMobile},
+      <if test="contactPhone != null">
+        contact_phone = #{contactPhone},
       </if>
       <if test="updatedBy != null">
         updated_by = #{updatedBy},
@@ -125,8 +125,8 @@
       <if test="contactNameLike != null">
         and contact_name like concat(#{contactNameLike},'%')
       </if>
-      <if test="contactMobileLike != null">
-        and contact_mobile like concat(#{contactMobileLike},'%')
+      <if test="contactPhoneLike != null">
+        and contact_phone like concat(#{contactPhoneLike},'%')
       </if>
       <if test="status != null">
         and status = #{status}
@@ -150,8 +150,8 @@
       <if test="contactNameLike != null">
         and contact_name like concat(#{contactNameLike},'%')
       </if>
-      <if test="contactMobileLike != null">
-        and contact_mobile like concat(#{contactMobileLike},'%')
+      <if test="contactPhoneLike != null">
+        and contact_phone like concat(#{contactPhoneLike},'%')
       </if>
       <if test="status != null">
         and status = #{status}

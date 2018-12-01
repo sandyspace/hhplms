@@ -230,20 +230,30 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return insertedRows;
     }
 
-    public void associateWithCompanyInfo(Long companyInfoSid) {
+    public void associateWithCompanyInfo(JoinCompanyRequest joinCompanyRequest) {
+        if (StringUtils.isBlank(joinCompanyRequest.getJoinPersonName())) {
+            throw new ServiceException("请务必提供企业人的姓名信息");
+        }
+
+        if (StringUtils.isBlank(joinCompanyRequest.getJoinPersonSex())) {
+            throw new ServiceException("请务必提供企业人的性别信息");
+        }
+
         Account selfAccount = findBySid(WebUtils.getUserId());
         if (Objects.isNull(selfAccount)) {
             throw new ServiceException("账号不存在，关联企业信息失败");
         }
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("companyInfoSid", companyInfoSid);
-        params.put("updatedBy", WebUtils.getLoginName());
-        params.put("updatedTime", new Date(System.currentTimeMillis()));
-        params.put("versionNum", selfAccount.getVersionNum());
-        params.put("sid", selfAccount.getSid());
+        Account example = new Account();
+        example.setSid(selfAccount.getSid());
+        example.setRealName(joinCompanyRequest.getJoinPersonName());
+        example.setGender(EnumUtil.codeOf(Gender.class, joinCompanyRequest.getJoinPersonSex()));
 
-        int updatedRows = updateAccount(params);
+        example.setUpdatedBy(WebUtils.getLoginName());
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(selfAccount.getVersionNum());
+
+        int updatedRows = updateAccount(example);
         if (updatedRows == 0) {
             throw new ServiceException("此账号正在被其他人修改，请稍后再试");
         }
@@ -283,37 +293,40 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             if (WebUtils.getUserId().equals(accountSid)) {
                 throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能修改自己的" + Account.Type.COMPANY.getName() + "信息");
             }
-        }
-
-        if (loginNameExist(accountUpdateVO.getLoginName())) {
-            throw new ServiceException("用户名[" + accountUpdateVO.getLoginName() + "]已被占用");
-        }
-
-        if (mobileExist(accountUpdateVO.getMobile())) {
-            throw new ServiceException("手机[" + accountUpdateVO.getMobile() + "]已被占用");
-        }
-
-        if (emailExist(accountUpdateVO.getMobile())) {
-            throw new ServiceException("邮箱[" + accountUpdateVO.getEmail() + "]已被占用");
+            accountUpdateVO.setCompanyId(null);
         }
 
         Account editingAccount = findBySid(accountSid);
         if (Objects.isNull(editingAccount)) {
             throw new ServiceException("ID为[" + accountSid + "]的账号不存在");
         }
+
         if (WebUtils.isCompany()) {
             if (!WebUtils.getCompanyId().equals(editingAccount.getCompanyInfoSid())) {
                 throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "的账号信息");
             }
         }
+
+        if (!Objects.equals(editingAccount.getMobile(), accountUpdateVO.getMobile())) {
+            if (mobileExist(accountUpdateVO.getMobile())) {
+                throw new ServiceException("手机[" + accountUpdateVO.getMobile() + "]已被占用");
+            }
+        }
+
+        if (!Objects.equals(editingAccount.getEmail(), accountUpdateVO.getMobile())) {
+            if (emailExist(accountUpdateVO.getMobile())) {
+                throw new ServiceException("邮箱[" + accountUpdateVO.getEmail() + "]已被占用");
+            }
+        }
+
         Account account = new Account();
         account.setSid(accountSid);
-        account.setLoginName(accountUpdateVO.getLoginName());
         account.setNickName(accountUpdateVO.getNickName());
         account.setRealName(accountUpdateVO.getRealName());
         account.setMobile(accountUpdateVO.getMobile());
         account.setEmail(accountUpdateVO.getEmail());
         account.setGender(EnumUtil.codeOf(Gender.class, accountUpdateVO.getGender()));
+        account.setCompanyInfoSid(accountUpdateVO.getCompanyId());
 
         account.setUpdatedBy(WebUtils.getLoginName());
         account.setUpdatedTime(new Date(System.currentTimeMillis()));

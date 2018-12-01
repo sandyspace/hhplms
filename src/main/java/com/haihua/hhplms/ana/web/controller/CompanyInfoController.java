@@ -5,6 +5,7 @@ import com.haihua.hhplms.ana.service.CompanyInfoService;
 import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.model.ResultBean;
+import com.haihua.hhplms.common.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -48,7 +49,7 @@ public class CompanyInfoController {
 
     @PostMapping(path = "/api/ana/companyInfos", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> createCompanyInfo(@RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
-        CompanyInfo companyInfo = companyInfoService.createCompanyInfo(companyInfoCreationVO, true);
+        CompanyInfo companyInfo = companyInfoService.createCompanyInfo(companyInfoCreationVO);
         return ResultBean.Success.of(companyInfo.getSid(), "");
     }
 
@@ -65,15 +66,21 @@ public class CompanyInfoController {
         return ResultBean.Success.of(sid, "");
     }
 
+    @PutMapping(path = "/api/ana/account/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> updateSelfCompanyInfo(@RequestBody CompanyInfoUpdateVO companyInfoUpdateVO) {
+        companyInfoService.updateCompanyInfo(WebUtils.getCompanyId(), companyInfoUpdateVO);
+        return ResultBean.Success.of(WebUtils.getCompanyId(), "");
+    }
+
     @PostMapping(path = "/api/ana/account/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> uploadCompanyInfo(@RequestParam("process") String processCode, @RequestBody CompanyInfoCreationVO companyInfoCreationVO) {
-        CompanyInfo companyInfo = companyInfoService.uploadCompanyInfo(processCode, companyInfoCreationVO);
+    public ResultBean.Success<Long> uploadCompanyInfo(@RequestBody UploadCompanyInfoRequest uploadCompanyInfoRequest) {
+        CompanyInfo companyInfo = companyInfoService.uploadCompanyInfo(uploadCompanyInfoRequest);
         return ResultBean.Success.of(companyInfo.getSid(), "");
     }
 
-    @PostMapping(path = "/api/ana/account/joinCompany", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<Long> joinCompany(@RequestParam("process") String processCode, @RequestBody JoinCompanyRequest joinCompanyRequest) {
-        companyInfoService.joinCompany(processCode, joinCompanyRequest);
+    @PatchMapping(path = "/api/ana/account/joinCompany", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> joinCompany(@RequestBody JoinCompanyRequest joinCompanyRequest) {
+        companyInfoService.joinCompany(joinCompanyRequest);
         return ResultBean.Success.of(joinCompanyRequest.getCompanyId(), "");
     }
 
@@ -83,7 +90,7 @@ public class CompanyInfoController {
     }
 
     @GetMapping(path = "/api/ana/account/companyInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResultBean.Success<CompanyInfoVO> getCompanyInfoOfSelf() {
+    public ResultBean.Success<CompanyInfoVO> getSelfCompanyInfo() {
         return ResultBean.Success.of(companyInfoService.getCompanyInfoOfAccount(), "");
     }
 }

@@ -1,7 +1,6 @@
 package com.haihua.hhplms.ana.vo;
 
 public class EmployeeUpdateVO {
-    private String loginName;
     private String realName;
     private String email;
     private String mobile;
@@ -9,14 +8,6 @@ public class EmployeeUpdateVO {
     private String gender;
     private String idCard;
     private String title;
-
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
 
     public String getRealName() {
         return realName;

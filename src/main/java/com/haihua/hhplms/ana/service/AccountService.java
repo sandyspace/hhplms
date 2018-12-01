@@ -22,7 +22,7 @@ public interface AccountService {
     AccountVO getAccount(String loginName);
     Account createAccount(AccountCreationVO accountCreationVO);
     int createAccount(Account account);
-    void associateWithCompanyInfo(Long companyInfoSid);
+    void associateWithCompanyInfo(JoinCompanyRequest joinCompanyRequest);
     void supplementSelfInfo(AccountUpdateVO accountUpdateVO);
     void updateAccount(Long accountSid, AccountUpdateVO accountUpdateVO);
     void resetPassword(Long accountSid);

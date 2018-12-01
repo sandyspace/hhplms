@@ -1,13 +1,14 @@
 package com.haihua.hhplms.ana.vo;
 
-public class CompanyInfoCreationVO {
+public class UploadCompanyInfoRequest {
     private String code;
     private String name;
     private String type;
     private String address;
     private String contactName;
     private String contactPhone;
-    private String status;
+    private String companyOwnerName;
+    private String companyOwnerSex;
 
     public String getCode() {
         return code;
@@ -57,11 +58,19 @@ public class CompanyInfoCreationVO {
         this.contactPhone = contactPhone;
     }
 
-    public String getStatus() {
-        return status;
+    public String getCompanyOwnerName() {
+        return companyOwnerName;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setCompanyOwnerName(String companyOwnerName) {
+        this.companyOwnerName = companyOwnerName;
+    }
+
+    public String getCompanyOwnerSex() {
+        return companyOwnerSex;
+    }
+
+    public void setCompanyOwnerSex(String companyOwnerSex) {
+        this.companyOwnerSex = companyOwnerSex;
     }
 }
