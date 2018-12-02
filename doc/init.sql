@@ -24,8 +24,8 @@ CREATE TABLE `ana_account` (
 
 CREATE TABLE `ana_account_r2_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
-  `account_sid` bigint(15) DEFAULT '-1',
-  `role_sid` bigint(15) DEFAULT '-1',
+  `account_sid` bigint(15) DEFAULT NULL,
+  `role_sid` bigint(15) DEFAULT NULL,
   `created_by` varchar(30) NOT NULL,
   `created_time` datetime NOT NULL,
   `updated_by` varchar(30) DEFAULT NULL,

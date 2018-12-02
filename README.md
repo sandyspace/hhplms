@@ -8,4 +8,4 @@
 docker build --rm -t hhplms:1.0.0 .
 
 ##部署
-docker run -tid --rm -v /root/devops/hhplms/logs:/root/logs -v /root/devops/hhplms/static/img:/root/static/img --env ACTIVE_PROFILE=test -p 12345:8080 --name hhplms hhplms:1.0.0
+docker run -tid --rm -v /root/devops/hhplms/logs:/root/logs -v /usr/share/nginx/html/upload:/root/static/img --env ACTIVE_PROFILE=test -p 12345:8080 --name hhplms hhplms:1.0.0
