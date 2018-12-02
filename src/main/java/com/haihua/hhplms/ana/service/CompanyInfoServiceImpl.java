@@ -214,9 +214,13 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
 
     @Transactional
     public void joinCompany(JoinCompanyRequest joinCompanyRequest) {
-        if (WebUtils.isEmployee()) {
-            throw new ServiceException(Role.Category.EMPLOYEE.getName() + "不能够加入企业");
+        if (!WebUtils.isMember()) {
+            throw new ServiceException("只有" + Account.Type.MEMBER + "才能加入企业");
         }
+        if (processExecutionService.existExecutingProcess("P-JRQY", joinCompanyRequest.getCompanyId(), WebUtils.getLoginName())) {
+            throw new ServiceException("加入企业的请求正在审核中，请耐心等待");
+        }
+
         CompanyInfo companyInfo = findBySid(joinCompanyRequest.getCompanyId());
         if (Objects.isNull(companyInfo)) {
             throw new ServiceException("要加入的企业不存在");
@@ -229,6 +233,10 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     public CompanyInfo uploadCompanyInfo(UploadCompanyInfoRequest uploadCompanyInfoRequest) {
         if (!WebUtils.isMember()) {
             throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传企业信息");
+        }
+
+        if (processExecutionService.existExecutingProcess("P-QYXXSQ", null, WebUtils.getLoginName())) {
+            throw new ServiceException("正在审核你上传的企业信息，请耐心等待");
         }
 
         CompanyInfo companyInfo = new CompanyInfo();

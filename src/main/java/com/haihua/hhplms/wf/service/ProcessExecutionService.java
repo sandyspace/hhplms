@@ -19,6 +19,7 @@ public interface ProcessExecutionService {
                                                                       Integer pageNo,
                                                                       Integer pageSize);
     List<ProcessExecutionVO> getProcessExecutionsLaunchedByAccount(Long processSid);
+    boolean existExecutingProcess(String processCode, Long ownSid, String initBy);
     void checkProcessExecution(Long processExecutionSid);
     ProcessExecution initProcess(String processCode, Long ownerSid);
 }

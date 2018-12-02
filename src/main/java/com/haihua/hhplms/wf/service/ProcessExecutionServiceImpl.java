@@ -131,6 +131,24 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         return pageOfProcessExecutions;
     }
 
+    public boolean existExecutingProcess(String processCode, Long ownSid, String initBy) {
+        ProcessInfo processInfo = processInfoService.findByCode(processCode);
+        if (Objects.nonNull(processInfo)) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("processSid", processInfo.getSid());
+            params.put("processOwner", processInfo.getOwner());
+            if (processInfo.getOwner() == Role.Category.ACCOUNT) {
+                params.put("ownerSid", ownSid);
+            }
+            params.put("processStatus", ProcessExecution.ProcessStatus.PROCESSING.getCode());
+            params.put("activeFlag", GlobalConstant.FLAG_YES_VALUE);
+            params.put("initBy", initBy);
+            List<ProcessExecution> executingProcesses = findByParams(params);
+            return Objects.nonNull(executingProcesses) && !executingProcesses.isEmpty();
+        }
+        return false;
+    }
+
     public List<ProcessExecutionVO> getProcessExecutionsLaunchedByAccount(Long processSid) {
         String processInstanceId = null;
         final ProcessExecution currentStepOfExecutingProcess = getCurrentStepOfExecutingProcess(processSid);
