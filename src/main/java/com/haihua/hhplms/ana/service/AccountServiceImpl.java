@@ -248,6 +248,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         example.setSid(selfAccount.getSid());
         example.setRealName(joinCompanyRequest.getJoinPersonName());
         example.setGender(EnumUtil.codeOf(Gender.class, joinCompanyRequest.getJoinPersonSex()));
+        example.setCompanyInfoSid(joinCompanyRequest.getCompanyId());
 
         example.setUpdatedBy(WebUtils.getLoginName());
         example.setUpdatedTime(new Date(System.currentTimeMillis()));
@@ -434,12 +435,25 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public void updateAccountType(Long accountSid, UpdateTypeRequest updateTypeRequest) {
-        if (!WebUtils.isEmployee()) {
-            throw new ServiceException("只有" + Role.Category.EMPLOYEE.getName() + "才有权限修改账号的类型");
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限修改账号的类型");
         }
+
+        if (WebUtils.isCompany()) {
+            if (WebUtils.getUserId().equals(accountSid)) {
+                throw new ServiceException("当前登录" + Account.Type.COMPANY.getName() + "不能修改自己的账号类型");
+            }
+        }
+
         Account account = findBySid(accountSid);
         if (Objects.isNull(account)) {
             throw new ServiceException("账号不存在，更新账号类型失败");
+        }
+
+        if (WebUtils.isCompany()) {
+            if (!WebUtils.getCompanyId().equals(account.getCompanyInfoSid())) {
+                throw new ServiceException(Account.Type.COMPANY.getName() + "没有权限修改其他" + Account.Type.COMPANY.getName() + "账号的类型");
+            }
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -738,6 +752,20 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         List<GrantedRole> grantedRoles = loadGrantedRolesByUserBasicInfo(userBasicInfo);
         List<GrantedPermission> grantedApiList = loadGrantedApiListByGrantedRoles(grantedRoles);
         List<GrantedPermission> grantedPermissions = loadGrantedPermissionsByGrantedRoles(grantedRoles);
+
+        if (Objects.nonNull(grantedPermissions) && !grantedPermissions.isEmpty()) {
+            for (GrantedPermission grantedPermission : grantedPermissions) {
+                if (GlobalConstant.PENDING_ITEM_MGMT_MENU_NAME.equals(grantedPermission.getName())) {
+                    grantedRoles.add(new GrantedRole.Builder()
+                            .id(GlobalConstant.COMPANY_PROCESS_CHECK_ROLE_ID)
+                            .code(GlobalConstant.COMPANY_PROCESS_CHECK_ROLE_CODE)
+                            .name(GlobalConstant.COMPANY_PROCESS_CHECK_ROLE_NAME)
+                            .build());
+                    break;
+                }
+            }
+        }
+
         UserProfile userProfile = new UserProfile.Builder()
                 .basicInfo(userBasicInfo)
                 .roles(grantedRoles)
@@ -758,15 +786,15 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             throw new ServiceException("密码不能为空");
         }
         if (emailExist(registerRequest.getEmail())) {
-            throw new ServiceException("邮箱已经被占用，请使用其他邮箱注册");
+            throw new ServiceException("邮箱已被占用，请使用其他邮箱注册");
         }
         if (mobileExist(registerRequest.getMobile())) {
-            throw new ServiceException("手机号已经被占用，请使用其他手机号注册");
+            throw new ServiceException("手机号已被占用，请使用其他手机号注册");
         }
         Account account = new Account();
         account.setLoginName(registerRequest.getMobile());
         account.setMobile(registerRequest.getMobile());
-        account.setEmail(registerRequest.getMobile());
+        account.setEmail(registerRequest.getEmail());
         account.setGender(Gender.UNKNOWN);
         account.setType(Account.Type.MEMBER);
         account.setStatus(Account.Status.ACTIVE);

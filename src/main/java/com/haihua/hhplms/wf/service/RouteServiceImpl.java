@@ -1,5 +1,6 @@
 package com.haihua.hhplms.wf.service;
 
+import com.haihua.hhplms.ana.entity.Account;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
@@ -21,9 +22,8 @@ public class RouteServiceImpl implements RouteService {
     private RouteMapper routeMapper;
 
     public RouteVO getRouteFragment(Long processSid, Long fromStepSid) {
-        String userType = WebUtils.getUserType();
-        if (Role.Category.ACCOUNT.getCode().equals(userType)) {
-            throw new ServiceException("You have insufficient right to get info of route");
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看，请立刻停止非法操作");
         }
         Route routeFragment = findRouteFragment(processSid, fromStepSid);
         return new RouteVO(routeFragment);
@@ -31,15 +31,15 @@ public class RouteServiceImpl implements RouteService {
 
     public Route findFirstRouteFragment(Long processSid) {
         Map<String, Object> params = new HashMap<>();
-        params.put("process_sid", processSid);
+        params.put("processSid", processSid);
         params.put("startFlag", GlobalConstant.FLAG_YES_VALUE);
         return findSingle(params);
     }
 
     public Route findRouteFragment(Long processSid, Long fromStepSid) {
         Map<String, Object> params = new HashMap<>();
-        params.put("process_sid", processSid);
-        params.put("from_step_sid", fromStepSid);
+        params.put("processSid", processSid);
+        params.put("fromStepSid", fromStepSid);
         return findSingle(params);
     }
 
@@ -53,7 +53,7 @@ public class RouteServiceImpl implements RouteService {
 
     public List<Route> findByProcessSid(Long processSid) {
         Map<String, Object> params = new HashMap<>();
-        params.put("process_sid", processSid);
+        params.put("processSid", processSid);
         return findByParams(params);
     }
 

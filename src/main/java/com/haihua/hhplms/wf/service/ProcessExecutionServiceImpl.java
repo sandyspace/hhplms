@@ -176,8 +176,8 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
 
     @Transactional
     public void checkProcessExecution(Long processExecutionSid) {
-        if (!WebUtils.isEmployee()) {
-            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限审核，请立刻停止非法操作");
         }
 
         ProcessExecution processExecution = findBySid(processExecutionSid);

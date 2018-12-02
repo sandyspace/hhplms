@@ -1,12 +1,12 @@
 insert into hhplms.ana_employee
 (login_name, real_name, password, email, mobile, gender, title, status, created_by, created_time, version_num)
 values
-('boss', '大老板', '$2a$10$XY3C1DFdd69ndPdUYoupJe4ffFwjs3E/Lho6Af8Bcs.G.8Lj2tc.u', '19009790@qq.com', '13971560750', 'male', '董事长', 'active', 'default', now(), 1);
+('cbgj', '船舶国际', '$2a$10$XY3C1DFdd69ndPdUYoupJe4ffFwjs3E/Lho6Af8Bcs.G.8Lj2tc.u', 'shansong@outlook.com', '18502701010', 'male', '超级用户', 'active', 'default', now(), 1);
 
 insert into hhplms.ana_role
-(code, name, category, type, company_info_sid, status, created_by, created_time, version_num)
+(code, name, category, type, company_info_sid, status, memo, created_by, created_time, version_num)
 values
-('admin', '管理员', 'employee', 'pre-assigned', -1, 'enabled', 'default', now(), '1');
+('super_admin', '超级管理员', 'employee', 'pre-assigned', null, 'enabled', '拥有最高系统权限的角色', 'default', now(), '1');
 
 insert into hhplms.ana_permission
 (name, title, path, redirect_path, component_url, no_cache_flag, hidden_flag, always_show_flag, icon, level, type, status, parent_sid, created_by, created_time, version_num)
@@ -98,13 +98,13 @@ insert into hhplms.wf_process
 (code, name, `desc`, created_by, created_time, version_num)
 values
 ('P-QYXXSQ', '企业信息上传流程', '企业信息上传流程', 'default', now(), 1),
-('P-JRQY', '加入企业流程', '加入企业流程', 'default', now(), 1),
+('P-JRQY', '加入企业流程', '加入企业流程', 'default', now(), 1);
 
 insert into hhplms.wf_step
 (code, name, `desc`, created_by, created_time, version_num)
 values
 ('S-CJQYXX', '创建企业信息', '创建企业信息', 'default', now(), 1),
-('S-SHAJYH', '审核加入用户', '审核加入用户', 'default', now(), 1),
+('S-SHAJYH', '审核加入用户', '审核加入用户', 'default', now(), 1);
 
 insert into hhplms.wf_route
 (process_sid, from_step_sid, to_step_sid, assigned_type, assigned_to, start_flag, related_view, view_on_checking, attached_biz, created_by, created_time, version_num)

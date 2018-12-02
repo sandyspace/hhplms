@@ -587,6 +587,18 @@ public class EmployeeServiceImpl implements EmployeeService, AjaxAuthenticationS
         List<GrantedRole> grantedRoles = loadGrantedRolesByUserBasicInfo(userBasicInfo);
         List<GrantedPermission> grantedApiList = loadGrantedApiListByGrantedRoles(grantedRoles);
         List<GrantedPermission> grantedPermissions = loadGrantedPermissionsByGrantedRoles(grantedRoles);
+
+        for (GrantedPermission grantedPermission : grantedPermissions) {
+            if (GlobalConstant.PENDING_ITEM_MGMT_MENU_NAME.equals(grantedPermission.getName())) {
+                grantedRoles.add(new GrantedRole.Builder()
+                        .id(GlobalConstant.PROCESS_CHECK_ROLE_ID)
+                        .code(GlobalConstant.PROCESS_CHECK_ROLE_CODE)
+                        .name(GlobalConstant.PROCESS_CHECK_ROLE_NAME)
+                        .build());
+                break;
+            }
+        }
+
         UserProfile userProfile = new UserProfile.Builder()
                 .basicInfo(userBasicInfo)
                 .roles(grantedRoles)
