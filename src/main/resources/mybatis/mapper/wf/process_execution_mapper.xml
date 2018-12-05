@@ -137,6 +137,9 @@
       <if test="currentStepSid != null">
         and current_step_sid = #{currentStepSid}
       </if>
+      <if test="stepStatus != null">
+        and step_status = #{stepStatus}
+      </if>
       <if test="assignedToRoles != null and assignedToRoles.size > 0">
         and assigned_to in
         (<foreach collection="assignedToRoles" item="assignedToRole" separator="," open="" close="">
@@ -187,6 +190,9 @@
       </if>
       <if test="currentStepSid != null">
         and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="stepStatus != null">
+        and step_status = #{stepStatus}
       </if>
       <if test="assignedToIndividual != null">
         and assigned_to = #{assignedToIndividual}
@@ -239,6 +245,9 @@
       <if test="currentStepSid != null">
         and current_step_sid = #{currentStepSid}
       </if>
+      <if test="stepStatus != null">
+        and step_status = #{stepStatus}
+      </if>
       <if test="assignedToRoles != null and assignedToRoles.size > 0">
         and assigned_to in
         (<foreach collection="assignedToRoles" item="assignedToRole" separator="," open="" close="">
@@ -289,6 +298,9 @@
       </if>
       <if test="currentStepSid != null">
         and current_step_sid = #{currentStepSid}
+      </if>
+      <if test="stepStatus != null">
+        and step_status = #{stepStatus}
       </if>
       <if test="assignedToIndividual != null">
         and assigned_to = #{assignedToIndividual}

@@ -45,7 +45,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
 
     public PageWrapper<List<ProcessExecutionVO>> loadProcessExecutionsByPage(Long processSid,
                                                                              String processStatus,
-                                                                             String currentStepSid,
+                                                                             Long currentStepSid,
                                                                              String stepStatus,
                                                                              String activeFlag,
                                                                              Long checkedTimeFrom,
@@ -192,6 +192,41 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         return findSingle(params);
     }
 
+    public void terminateProcessExecution(Long processExecutionSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限终止该待办事项，请立刻停止非法操作");
+        }
+
+        ProcessExecution processExecution = findBySid(processExecutionSid);
+        if (Objects.isNull(processExecution)) {
+            throw new ServiceException("该待办事项不存在");
+        }
+
+        if (processExecution.getProcessOwner() != EnumUtil.codeOf(Role.Category.class, WebUtils.getUserType())) {
+            throw new ServiceException("你没有权限权限终止该待办事项");
+        }
+
+        terminateProcess(processExecution);
+    }
+
+    private void terminateProcess(ProcessExecution processExecution) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("sid", processExecution.getSid());
+        params.put("processStatus", ProcessExecution.ProcessStatus.REJECTED.getCode());
+        params.put("stepStatus", ProcessExecution.StepStatus.ERROR.getCode());
+        params.put("activeFlag", GlobalConstant.FLAG_NO_VALUE);
+        params.put("checkedBy", WebUtils.getLoginName());
+        params.put("checkedTime", new Date(System.currentTimeMillis()));
+        params.put("updatedBy", WebUtils.getLoginName());
+        params.put("updatedTime", new Date(System.currentTimeMillis()));
+        params.put("versionNum", processExecution.getVersionNum());
+
+        int updatedRows = updateProcessExecution(params);
+        if (updatedRows == 0) {
+            throw new ServiceException("此待办事项正在被其他人审核，请稍后在试");
+        }
+    }
+
     @Transactional
     public void checkProcessExecution(Long processExecutionSid) {
         if (WebUtils.isMember()) {
@@ -202,6 +237,11 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
         if (Objects.isNull(processExecution)) {
             throw new ServiceException("该待办事项不存在");
         }
+
+        if (processExecution.getProcessOwner() != EnumUtil.codeOf(Role.Category.class, WebUtils.getUserType())) {
+            throw new ServiceException("你没有权限审核该待办事项");
+        }
+
         if (!GlobalConstant.FLAG_YES_VALUE.equals(processExecution.getActiveFlag())) {
             throw new ServiceException("该待办事项已经被审核");
         }

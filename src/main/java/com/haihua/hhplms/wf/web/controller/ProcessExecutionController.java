@@ -21,7 +21,7 @@ public class ProcessExecutionController {
     @GetMapping(path = "/api/wf/processExecutions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<PageWrapper<List<ProcessExecutionVO>>> loadProcessExecutions(@RequestParam(name = "processId", required = false) Long processSid,
                                                                                            @RequestParam(name = "processStatus", required = false) String processStatus,
-                                                                                           @RequestParam(name = "currentStepId", required = false) String currentStepSid,
+                                                                                           @RequestParam(name = "currentStepId", required = false) Long currentStepSid,
                                                                                            @RequestParam(name = "stepStatus", required = false) String stepStatus,
                                                                                            @RequestParam(name = "activeFlag", required = false) String activeFlag,
                                                                                            @RequestParam(name = "checkedTimeFrom", required = false) Long checkedTimeFrom,
@@ -40,6 +40,12 @@ public class ProcessExecutionController {
     @PostMapping(path = "/api/wf/processExecutions/{id}/check", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> checkProcessExecution(@PathVariable("id") Long processExecutionSid) {
         processExecutionService.checkProcessExecution(processExecutionSid);
+        return ResultBean.Success.of(processExecutionSid, "");
+    }
+
+    @PatchMapping(path = "/api/wf/processExecutions/{id}/terminate", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> terminateProcessExecution(@PathVariable("id") Long processExecutionSid) {
+        processExecutionService.terminateProcessExecution(processExecutionSid);
         return ResultBean.Success.of(processExecutionSid, "");
     }
 }
