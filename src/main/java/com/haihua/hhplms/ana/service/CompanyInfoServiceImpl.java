@@ -217,7 +217,12 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         if (!WebUtils.isMember()) {
             throw new ServiceException("只有" + Account.Type.MEMBER + "才能加入企业");
         }
-        if (processExecutionService.existExecutingProcess("P-JRQY", joinCompanyRequest.getCompanyId(), WebUtils.getLoginName())) {
+
+        if (processExecutionService.existExecutingProcess("P-QYXXSQ", null, WebUtils.getLoginName())) {
+            throw new ServiceException("你已经上传了企业信息，在审核期间不能在加入其它企业");
+        }
+
+        if (processExecutionService.existExecutingProcess("P-JRQY", null, WebUtils.getLoginName())) {
             throw new ServiceException("加入企业的请求正在审核中，请耐心等待");
         }
 
@@ -233,6 +238,10 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     public CompanyInfo uploadCompanyInfo(UploadCompanyInfoRequest uploadCompanyInfoRequest) {
         if (!WebUtils.isMember()) {
             throw new ServiceException("只有" + Account.Type.MEMBER + "才有权限上传企业信息");
+        }
+
+        if (processExecutionService.existExecutingProcess("P-JRQY", null, WebUtils.getLoginName())) {
+            throw new ServiceException("你已经提交过加入企业的申请，在审核期间不能提交企业信息");
         }
 
         if (processExecutionService.existExecutingProcess("P-QYXXSQ", null, WebUtils.getLoginName())) {
