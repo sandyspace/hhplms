@@ -1,5 +1,7 @@
 package com.haihua.hhplms.security.endpoint;
 
+import com.haihua.hhplms.security.exception.JwtBadTokenException;
+import com.haihua.hhplms.security.exception.JwtInvalidatedTokenException;
 import com.haihua.hhplms.security.model.UserBasicInfo;
 import com.haihua.hhplms.security.model.token.JwtToken;
 import com.haihua.hhplms.security.model.token.JwtTokenFactory;
@@ -11,12 +13,6 @@ import com.haihua.hhplms.security.auth.jwt.extractor.TokenExtractor;
 import com.haihua.hhplms.security.auth.jwt.verifier.TokenVerifier;
 import com.haihua.hhplms.security.config.JwtSettings;
 import com.haihua.hhplms.security.config.WebSecurityConfig;
-import com.haihua.hhplms.security.exception.InvalidJwtToken;
-import com.haihua.hhplms.security.model.UserBasicInfo;
-import com.haihua.hhplms.security.model.token.JwtToken;
-import com.haihua.hhplms.security.model.token.JwtTokenFactory;
-import com.haihua.hhplms.security.model.token.RawAccessJwtToken;
-import com.haihua.hhplms.security.model.token.RefreshToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -56,11 +52,11 @@ public class RefreshTokenEndpoint {
         String tokenPayload = tokenExtractor.extract(request.getHeader(WebSecurityConfig.AUTHENTICATION_HEADER_NAME));
 
         RawAccessJwtToken rawToken = new RawAccessJwtToken(tokenPayload);
-        RefreshToken refreshToken = RefreshToken.create(rawToken, jwtSettings.getTokenSigningKey()).orElseThrow(() -> new InvalidJwtToken());
+        RefreshToken refreshToken = RefreshToken.create(rawToken, jwtSettings.getRefreshTokenSigningKey()).orElseThrow(() -> new JwtBadTokenException(rawToken, "Token无效"));
 
         String jti = refreshToken.getJti();
         if (!tokenVerifier.verify(jti)) {
-            throw new InvalidJwtToken();
+            throw new JwtInvalidatedTokenException(refreshToken, "Token已作废");
         }
 
         String username = refreshToken.getClaims().getBody().getSubject();

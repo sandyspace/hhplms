@@ -143,7 +143,7 @@ public class ProcessExecutionServiceImpl implements ProcessExecutionService {
             params.put("processStatus", ProcessExecution.ProcessStatus.PROCESSING.getCode());
             params.put("activeFlag", GlobalConstant.FLAG_YES_VALUE);
             params.put("initBy", initBy);
-            List<ProcessExecution> executingProcesses = findByParams(params);
+            List<ProcessExecution> executingProcesses = getByParams(params);
             return Objects.nonNull(executingProcesses) && !executingProcesses.isEmpty();
         }
         return false;

@@ -10,6 +10,7 @@ public enum ErrorCode {
     AUTHENTICATION(10),
     BAD_CREDENTIAL(99),
     JWT_TOKEN_EXPIRED(11),
+    JWT_TOKEN_BAD(44),
     USER_NOT_FOUND(12),
     USER_DISABLED(20);
 

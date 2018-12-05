@@ -85,6 +85,12 @@
       <if test="processSid != null">
         and process_sid = #{processSid}
       </if>
+      <if test="processOwner != null">
+        and process_owner = #{processOwner}
+      </if>
+      <if test="ownerSid != null">
+        and owner_sid = #{ownerSid}
+      </if>
       <if test="processInstanceId != null">
         and process_inst_id = #{processInstanceId}
       </if>

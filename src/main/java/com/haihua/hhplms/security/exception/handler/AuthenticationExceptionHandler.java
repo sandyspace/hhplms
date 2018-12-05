@@ -2,6 +2,7 @@ package com.haihua.hhplms.security.exception.handler;
 
 import com.haihua.hhplms.common.model.ErrorCode;
 import com.haihua.hhplms.common.model.ErrorResponse;
+import com.haihua.hhplms.security.exception.JwtBadTokenException;
 import com.haihua.hhplms.security.exception.JwtExpiredTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +23,21 @@ public class AuthenticationExceptionHandler {
     public ResponseEntity<ErrorResponse> handlerServiceException(AuthenticationException e) {
         log.error(e.getMessage(), e);
 
-        ErrorResponse errorResponse;
+        ErrorCode errorCode;
         if (e instanceof BadCredentialsException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.BAD_CREDENTIAL;
         } else if (e instanceof JwtExpiredTokenException) {
-            errorResponse = ErrorResponse.of("Token已过期", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.JWT_TOKEN_EXPIRED;
+        } else if (e instanceof JwtBadTokenException) {
+            errorCode = ErrorCode.JWT_TOKEN_BAD;
         } else if (e instanceof UsernameNotFoundException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.USER_NOT_FOUND;
         } else if (e instanceof DisabledException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.USER_DISABLED;
         } else {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.AUTHENTICATION;
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.of(e.getMessage(), errorCode, HttpStatus.UNAUTHORIZED));
     }
 }

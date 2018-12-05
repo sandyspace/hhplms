@@ -1,7 +1,6 @@
 package com.haihua.hhplms.security.config;
 
 import com.haihua.hhplms.security.model.token.JwtToken;
-import com.haihua.hhplms.security.model.token.JwtToken;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,9 +18,14 @@ public class JwtSettings {
     private String tokenIssuer;
 
     /**
-     * Key is used to sign {@link JwtToken}.
+     * Key is used to sign {@link com.haihua.hhplms.security.model.token.AccessJwtToken}.
      */
     private String tokenSigningKey;
+
+    /**
+     * Key is used to sign {@link com.haihua.hhplms.security.model.token.RefreshToken}.
+     */
+    private String refreshTokenSigningKey;
 
     /**
      * {@link JwtToken} can be refreshed during this timeframe.
@@ -47,6 +51,7 @@ public class JwtSettings {
     public String getTokenIssuer() {
         return tokenIssuer;
     }
+
     public void setTokenIssuer(String tokenIssuer) {
         this.tokenIssuer = tokenIssuer;
     }
@@ -57,5 +62,13 @@ public class JwtSettings {
 
     public void setTokenSigningKey(String tokenSigningKey) {
         this.tokenSigningKey = tokenSigningKey;
+    }
+
+    public String getRefreshTokenSigningKey() {
+        return refreshTokenSigningKey;
+    }
+
+    public void setRefreshTokenSigningKey(String refreshTokenSigningKey) {
+        this.refreshTokenSigningKey = refreshTokenSigningKey;
     }
 }

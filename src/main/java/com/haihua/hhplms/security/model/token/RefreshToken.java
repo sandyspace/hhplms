@@ -1,11 +1,10 @@
 package com.haihua.hhplms.security.model.token;
 
+import com.haihua.hhplms.security.exception.JwtBadTokenException;
 import com.haihua.hhplms.security.model.Scopes;
 import com.haihua.hhplms.security.exception.JwtExpiredTokenException;
-import com.haihua.hhplms.security.model.Scopes;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,7 @@ public class RefreshToken implements JwtToken {
      * @param token
      * @param signingKey
      *
-     * @throws BadCredentialsException
+     * @throws JwtBadTokenException
      * @throws JwtExpiredTokenException
      *
      * @return

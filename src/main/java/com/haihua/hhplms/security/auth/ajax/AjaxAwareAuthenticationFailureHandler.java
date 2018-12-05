@@ -1,10 +1,10 @@
 package com.haihua.hhplms.security.auth.ajax;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haihua.hhplms.security.exception.JwtBadTokenException;
 import com.haihua.hhplms.security.exception.JwtExpiredTokenException;
 import com.haihua.hhplms.common.model.ErrorCode;
 import com.haihua.hhplms.common.model.ErrorResponse;
-import com.haihua.hhplms.security.exception.JwtExpiredTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,18 +41,20 @@ public class AjaxAwareAuthenticationFailureHandler implements AuthenticationFail
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponse errorResponse;
+        ErrorCode errorCode;
         if (e instanceof BadCredentialsException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.BAD_CREDENTIAL;
         } else if (e instanceof JwtExpiredTokenException) {
-            errorResponse = ErrorResponse.of("Token已过期", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.JWT_TOKEN_EXPIRED;
+        } else if (e instanceof JwtBadTokenException) {
+            errorCode = ErrorCode.JWT_TOKEN_BAD;
         } else if (e instanceof UsernameNotFoundException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.USER_NOT_FOUND;
         } else if (e instanceof DisabledException) {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.USER_DISABLED, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.USER_DISABLED;
         } else {
-            errorResponse = ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED);
+            errorCode = ErrorCode.AUTHENTICATION;
         }
-        mapper.writeValue(response.getWriter(), errorResponse);
+        mapper.writeValue(response.getWriter(), ErrorResponse.of(e.getMessage(), errorCode, HttpStatus.UNAUTHORIZED));
     }
 }
