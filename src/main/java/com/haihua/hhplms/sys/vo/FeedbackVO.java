@@ -2,6 +2,8 @@ package com.haihua.hhplms.sys.vo;
 
 import com.haihua.hhplms.sys.entity.Feedback;
 
+import java.util.Objects;
+
 public class FeedbackVO {
     private Long id;
     private String title;
@@ -11,7 +13,12 @@ public class FeedbackVO {
     private Long createdTime;
 
     public FeedbackVO(Feedback feedback) {
-
+        this.id = feedback.getSid();
+        this.title = feedback.getTitle();
+        this.content = feedback.getContent();
+        this.contact = feedback.getContact();
+        this.contactMobile = feedback.getContactMobile();
+        this.createdTime = Objects.isNull(feedback.getCreatedTime()) ? null : feedback.getCreatedTime().getTime();
     }
 
     public Long getId() {
