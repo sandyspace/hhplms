@@ -29,9 +29,9 @@
 
   <insert id="create" parameterType="com.haihua.hhplms.ana.entity.Account" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
     insert into ana_account
-    (login_name, nick_name, real_name, mobile, email, password, gender, type, status, created_by, created_time, version_num)
+    (login_name, nick_name, real_name, mobile, email, password, gender, type, status, company_info_sid, created_by, created_time, version_num)
     values
-    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{status}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
