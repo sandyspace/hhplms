@@ -1,7 +1,9 @@
 package com.haihua.hhplms.pm.service;
 
 import com.haihua.hhplms.ana.entity.Account;
+import com.haihua.hhplms.ana.entity.CompanyInfo;
 import com.haihua.hhplms.ana.entity.Role;
+import com.haihua.hhplms.ana.service.CompanyInfoService;
 import com.haihua.hhplms.ana.vo.UpdateStatusRequest;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
@@ -15,6 +17,7 @@ import com.haihua.hhplms.pm.vo.PreferentialMsgUpdateVO;
 import com.haihua.hhplms.pm.vo.PreferentialMsgVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,16 +28,26 @@ public class PreferentialMsgServiceImpl implements PreferentialMsgService {
     @Autowired
     private PreferentialMsgMapper preferentialMsgMapper;
 
+    @Autowired
+    @Qualifier("companyInfoService")
+    private CompanyInfoService companyInfoService;
+
     public List<PreferentialMsgVO> loadLatestPreferentialMsgs() {
-        Map<String, Object> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put("status", PreferentialMsg.Status.RELEASE);
         params.put("offset", 0);
         params.put("limit", 100);
 
-        List<PreferentialMsg> latestPreferentialMsgs = findByParams(params);
+        final List<PreferentialMsg> latestPreferentialMsgs = findByParams(params);
         if (Objects.nonNull(latestPreferentialMsgs) && !latestPreferentialMsgs.isEmpty()) {
+            final List<CompanyInfo> allCompanyInfos = companyInfoService.findByParams(null);
+            final Map<Long, CompanyInfo> companyInfoMap = new HashMap<>();
+            if (Objects.nonNull(allCompanyInfos) && !allCompanyInfos.isEmpty()) {
+                allCompanyInfos.forEach(companyInfo -> companyInfoMap.put(companyInfo.getSid(), companyInfo));
+            }
+
             return latestPreferentialMsgs.stream()
-                    .map(latestPreferentialMsg -> new PreferentialMsgVO(latestPreferentialMsg))
+                    .map(latestPreferentialMsg -> new PreferentialMsgVO(latestPreferentialMsg, companyInfoMap.get(latestPreferentialMsg.getCompanyInfoSid())))
                     .collect(Collectors.toList());
         }
         return null;

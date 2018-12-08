@@ -1,5 +1,6 @@
 package com.haihua.hhplms.pm.vo;
 
+import com.haihua.hhplms.ana.entity.CompanyInfo;
 import com.haihua.hhplms.pm.entity.PreferentialMsg;
 
 import java.util.Objects;
@@ -13,6 +14,14 @@ public class PreferentialMsgVO {
     private Long companyId;
     private Long createdTime;
     private Long updatedTime;
+    private String companyName;
+    private String companyContactPhone;
+
+    public PreferentialMsgVO(PreferentialMsg preferentialMsg, CompanyInfo companyInfo) {
+        this(preferentialMsg);
+        this.companyName = Objects.isNull(companyInfo) ? null : companyInfo.getName();
+        this.companyContactPhone = Objects.isNull(companyInfo) ? null : companyInfo.getContactPhone();
+    }
 
     public PreferentialMsgVO(PreferentialMsg preferentialMsg) {
         this.id = preferentialMsg.getSid();
@@ -87,5 +96,21 @@ public class PreferentialMsgVO {
 
     public void setUpdatedTime(Long updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyContactPhone() {
+        return companyContactPhone;
+    }
+
+    public void setCompanyContactPhone(String companyContactPhone) {
+        this.companyContactPhone = companyContactPhone;
     }
 }

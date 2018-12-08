@@ -5,6 +5,7 @@ import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.common.model.PageWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CompanyInfoService {
     PageWrapper<List<CompanyInfoVO>> loadCompanyInfosByPage(String code,
@@ -26,4 +27,5 @@ public interface CompanyInfoService {
     void updateCompanyInfoStatus(Long sid, UpdateStatusRequest updateStatusRequest);
     CompanyInfo findBySid(Long sid);
     void deleteBySid(Long sid);
+    List<CompanyInfo> findByParams(Map<String, Object> params);
 }

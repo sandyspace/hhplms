@@ -1,7 +1,7 @@
 insert into ana_employee
 (login_name, real_name, password, email, mobile, gender, title, status, created_by, created_time, version_num)
 values
-('13638647765', '陈盼盼', '$2a$10$XY3C1DFdd69ndPdUYoupJe4ffFwjs3E/Lho6Af8Bcs.G.8Lj2tc.u', '1551458713@qq.com', '13638647765', 'female', '超级用户', 'active', 'default', now(), 1);
+('cbgj', '船舶国际', '$2a$10$XY3C1DFdd69ndPdUYoupJe4ffFwjs3E/Lho6Af8Bcs.G.8Lj2tc.u', 'shansong@outlook.com', '18502701010', 'male', '超级用户', 'active', 'default', now(), 1);
 
 insert into ana_role
 (code, name, category, type, company_info_sid, status, memo, created_by, created_time, version_num)

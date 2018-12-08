@@ -7,5 +7,11 @@
 ##构建docker镜像
 docker build --rm -t hhplms:1.0.0 .
 
+##构建生产环境docker镜像
+docker build --rm -t hhplms_prod:1.0.0 .
+
 ##部署
-docker run -tid --rm -v /root/devops/hhplms/logs:/root/logs -v /usr/share/nginx/html/upload:/root/static/img --env ACTIVE_PROFILE=test -p 12345:8080 --name hhplms hhplms:1.0.0
+docker run -tid --rm -v /root/devops/hhplms/logs:/root/logs -v /usr/share/nginx/html/test/upload:/root/static/img --env ACTIVE_PROFILE=test -p 12345:8080 --name hhplms hhplms:1.0.0
+
+##生产部署
+docker run -tid --rm -v /root/devops/hhplms/logs/prod:/root/logs -v /usr/share/nginx/html/upload:/root/static/img --env ACTIVE_PROFILE=prod -p 10086:8080 --name hhplms_prod hhplms_prod:1.0.0
