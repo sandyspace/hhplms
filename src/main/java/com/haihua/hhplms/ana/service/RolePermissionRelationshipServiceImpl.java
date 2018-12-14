@@ -25,6 +25,12 @@ public class RolePermissionRelationshipServiceImpl implements RolePermissionRela
         return insertedRows;
     }
 
+    public int deleteByRoleSid(Long roleSid) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("roleSid", roleSid);
+        return deleteByParams(params);
+    }
+
     public int deleteByRoleSidAndPermissionSid(Long roleSid, Long permissionSid) {
         Map<String, Object> params = new HashMap<>();
         params.put("roleSid", roleSid);

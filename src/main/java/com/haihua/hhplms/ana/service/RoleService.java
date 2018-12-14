@@ -29,6 +29,7 @@ public interface RoleService {
     int createRole(Role role);
     void updateRole(Long roleSid, RoleUpdateVO roleUpdateVO);
     int updateRole(Role role);
+    void removeRole(Long sid);
     int deleteBySid(Long sid);
     int deleteByParams(Map<String, Object> params);
     void addPermissionsToRole(Long roleSid, List<Long> permissionSids);
@@ -39,6 +40,6 @@ public interface RoleService {
     List<Role> findRolesOfGivenPermission(Long permissionSid);
     List<Role> findRolesOfGivenEmployee(Long employeeSid);
     List<Role> findRolesOfGivenAccount(Long accountSid);
-    Role getPreassignedRole(Long companyInfoSid);
-    Role getCompanyTempRole();
+    List<Role> getPreassignedRoles(Long companyInfoSid);
+    List<Role> getTempRoles();
 }

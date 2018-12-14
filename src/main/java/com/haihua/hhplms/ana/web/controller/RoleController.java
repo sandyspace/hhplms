@@ -56,6 +56,12 @@ public class RoleController {
         return ResultBean.Success.of(sid, "");
     }
 
+    @DeleteMapping(path = "/api/ana/roles/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<Long> removeRole(@PathVariable("id") Long sid) {
+        roleService.removeRole(sid);
+        return ResultBean.Success.of(sid, "");
+    }
+
     @PostMapping(path = "/api/ana/roles/{id}/permissions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<Long> addPermissionsToRole(@PathVariable("id") Long roleSid,
                                                          @RequestBody List<Long> permissionSids) {

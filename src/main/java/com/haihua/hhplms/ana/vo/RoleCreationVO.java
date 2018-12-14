@@ -1,5 +1,7 @@
 package com.haihua.hhplms.ana.vo;
 
+import com.haihua.hhplms.common.utils.JsonUtil;
+
 public class RoleCreationVO {
     private String code;
     private String name;
@@ -54,5 +56,9 @@ public class RoleCreationVO {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public String toString() {
+        return JsonUtil.toJson(this);
     }
 }

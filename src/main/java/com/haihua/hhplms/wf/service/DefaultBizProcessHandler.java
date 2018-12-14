@@ -12,6 +12,8 @@ import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.utils.WebUtils;
 import com.haihua.hhplms.wf.entity.ProcessExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ import java.util.stream.Collectors;
 
 @Service("defaultBizProcessHandler")
 public class DefaultBizProcessHandler implements BizProcessHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultBizProcessHandler.class);
+
     @Autowired
     @Qualifier("companyInfoService")
     private CompanyInfoService companyInfoService;
@@ -49,6 +54,10 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
             }
             accountService.updateAccountType(initBy.getSid(), Account.Type.COMPANY.getCode());
 
+            if (log.isInfoEnabled()) {
+                log.info(String.format("update account type to: %s for account: %s", Account.Type.COMPANY.getCode(), initBy.getLoginName()));
+            }
+
             if (bizCode == BizCode.COMPLETE_COMPANY_INFO_CREATION) {
                 CompanyInfo companyInfoOfInitBy = companyInfoService.findBySid(initBy.getCompanyInfoSid());
                 if (Objects.isNull(companyInfoOfInitBy)) {
@@ -56,37 +65,54 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
                 }
                 companyInfoService.updateCompanyInfoStatus(companyInfoOfInitBy.getSid(), CompanyInfo.Status.APPROVED.getCode());
 
-                createAndAssignAdminRoleToAccount(initBy, companyInfoOfInitBy);
+                if (log.isInfoEnabled()) {
+                    log.info(String.format("update status to: %s for company: %s", CompanyInfo.Status.APPROVED.getCode(), companyInfoOfInitBy.getName()));
+                }
+
+                createAndAssignRolesToAccount(initBy, companyInfoOfInitBy);
             }
         }
     }
 
-    private void createAndAssignAdminRoleToAccount(Account initBy, CompanyInfo companyInfoOfInitBy) {
-        Role companyTempRole = roleService.getCompanyTempRole();
-        if (Objects.isNull(companyTempRole)) {
+    private void createAndAssignRolesToAccount(Account initBy, CompanyInfo companyInfoOfInitBy) {
+        List<Role> tempRoles = roleService.getTempRoles();
+        if (Objects.isNull(tempRoles) || tempRoles.isEmpty()) {
             throw new ServiceException("系统中没有配置类型为" + Role.Type.COMPANY_TEMP.getCode() + "的角色");
         }
 
-        Role adminRole = new Role();
-        adminRole.setCode(companyTempRole.getCode() + "_" + companyInfoOfInitBy.getSid());
-        adminRole.setName(companyInfoOfInitBy.getName() + "管理员");
-        adminRole.setType(Role.Type.PRE_ASSIGNED);
-        adminRole.setCategory(Role.Category.ACCOUNT);
-        adminRole.setStatus(Role.Status.ENABLED);
-        adminRole.setCompanyInfoSid(companyInfoOfInitBy.getSid());
+        for (Role tempRole : tempRoles) {
+            Role preassignedRole = new Role();
+            preassignedRole.setCode(tempRole.getCode() + "_" + companyInfoOfInitBy.getSid());
+            preassignedRole.setName(companyInfoOfInitBy.getName() + tempRole.getName());
+            preassignedRole.setType(Role.Type.PRE_ASSIGNED);
+            preassignedRole.setCategory(Role.Category.ACCOUNT);
+            preassignedRole.setStatus(Role.Status.ENABLED);
+            preassignedRole.setCompanyInfoSid(companyInfoOfInitBy.getSid());
 
-        adminRole.setCreatedBy(WebUtils.getLoginName());
-        adminRole.setCreatedTime(new Date(System.currentTimeMillis()));
-        adminRole.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
+            preassignedRole.setCreatedBy(WebUtils.getLoginName());
+            preassignedRole.setCreatedTime(new Date(System.currentTimeMillis()));
+            preassignedRole.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
+            roleService.createRole(preassignedRole);
 
-        roleService.createRole(adminRole);
+            if (log.isInfoEnabled()) {
+                log.info(String.format("create role: %s for company owner: %s", preassignedRole, initBy.getLoginName()));
+            }
 
-        List<Permission> permissions = permissionService.findPermissionsOfGivenRoles(Arrays.asList(companyTempRole.getSid()), Permission.Type.PAGE);
-        roleService.addPermissionsToGivenRole(adminRole.getSid(),
-                permissions.stream()
-                        .map(permission -> permission.getSid())
-                        .collect(Collectors.toList()));
+            List<Permission> permissions = permissionService.findPermissionsOfGivenRoles(Arrays.asList(tempRole.getSid()), Permission.Type.PAGE);
+            roleService.addPermissionsToGivenRole(preassignedRole.getSid(),
+                    permissions.stream()
+                            .map(permission -> permission.getSid())
+                            .collect(Collectors.toList()));
 
-        accountService.addRolesToGivenAccount(initBy.getSid(), Arrays.asList(adminRole.getSid()));
+            if (log.isInfoEnabled()) {
+                log.info("assign menus: [%s] to role: %s", permissions.stream().map(permission -> permission.getName()).collect(Collectors.joining(", ")), preassignedRole.getCode());
+            }
+
+            accountService.addRolesToGivenAccount(initBy.getSid(), Arrays.asList(preassignedRole.getSid()));
+
+            if (log.isInfoEnabled()) {
+                log.info(String.format("add role: %s to company owner: %s", preassignedRole.getCode(), initBy.getLoginName()));
+            }
+        }
     }
 }

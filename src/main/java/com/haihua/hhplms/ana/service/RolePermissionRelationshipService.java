@@ -7,6 +7,7 @@ import java.util.Map;
 
 public interface RolePermissionRelationshipService {
     int createRolePermissionRelationship(RolePermissionRelationship rolePermissionRelationship);
+    int deleteByRoleSid(Long roleSid);
     int deleteByRoleSidAndPermissionSid(Long roleSid, Long permissionSid);
     int deleteByParams(Map<String, Object> params);
     List<RolePermissionRelationship> findByRoleSids(List<Long> roleSids);

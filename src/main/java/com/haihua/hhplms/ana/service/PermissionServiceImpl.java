@@ -6,7 +6,6 @@ import com.haihua.hhplms.ana.entity.Permission;
 import com.haihua.hhplms.ana.entity.Role;
 import com.haihua.hhplms.ana.entity.RolePermissionRelationship;
 import com.haihua.hhplms.ana.mapper.PermissionMapper;
-import com.haihua.hhplms.ana.vo.PermissionVO;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,22 +58,26 @@ public class PermissionServiceImpl implements PermissionService {
     private List<Permission> availablePermissions(Long refRoleSid, Permission.Type type) {
         List<Permission> availablePermissions;
         if (WebUtils.isCompany()) {
-            Role preassignedRole = roleService.getPreassignedRole(WebUtils.getCompanyId());
-            if (Objects.isNull(preassignedRole)) {
+            List<Role> preassignedRoles = roleService.getPreassignedRoles(WebUtils.getCompanyId());
+            if (Objects.isNull(preassignedRoles) || preassignedRoles.isEmpty()) {
                 throw new ServiceException("请联系系统管理员创建" + Role.Type.PRE_ASSIGNED.getName() + "类型角色");
             }
-            availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
+            availablePermissions = findPermissionsOfGivenRoles(preassignedRoles.stream()
+                    .map(preassignedRole -> preassignedRole.getSid())
+                    .collect(Collectors.toList()), type);
         } else {
             Role refRole = roleService.findBySid(refRoleSid);
             if (Objects.isNull(refRole)) {
                 throw new ServiceException("无法获取可分配菜单或API");
             }
             if (Role.Category.ACCOUNT == refRole.getCategory() && Role.Type.CREATED == refRole.getType()) {
-                Role preassignedRole = roleService.getPreassignedRole(refRole.getCompanyInfoSid());
-                if (Objects.isNull(preassignedRole)) {
+                List<Role> preassignedRoles = roleService.getPreassignedRoles(refRole.getCompanyInfoSid());
+                if (Objects.isNull(preassignedRoles) || preassignedRoles.isEmpty()) {
                     throw new ServiceException("ID为[" + refRole.getCompanyInfoSid() + "]企业没有对应的" + Role.Type.PRE_ASSIGNED.getName() + "类型角色，请先创建");
                 }
-                availablePermissions = findPermissionsOfGivenRoles(Arrays.asList(preassignedRole.getSid()), type);
+                availablePermissions = findPermissionsOfGivenRoles(preassignedRoles.stream()
+                        .map(preassignedRole -> preassignedRole.getSid())
+                        .collect(Collectors.toList()), type);
             } else {
                 availablePermissions = findByType(type);
             }
