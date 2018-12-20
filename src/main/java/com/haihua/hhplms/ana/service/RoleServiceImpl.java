@@ -350,7 +350,8 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void addPermissionsToRole(Long roleSid, List<Long> permissionSids) {
         if (log.isInfoEnabled()) {
-            log.info(String.format("roleSid: %d, permissionSids: %s, addedBy: {loginName: %s, userType: %s, subType: %s}", roleSid, StringUtils.join(permissionSids, ",")), WebUtils.getLoginName(), WebUtils.getUserType(), WebUtils.getSubType());
+            log.info(String.format("roleSid: %d, permissionSids: %s, addedBy: {loginName: %s, userType: %s, subType: %s}",
+                    roleSid, StringUtils.join(permissionSids, ","), WebUtils.getLoginName(), WebUtils.getUserType(), WebUtils.getSubType()));
         }
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限给角色分配菜单或者API");
