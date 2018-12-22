@@ -7,7 +7,9 @@ insert into ana_role
 (code, name, category, type, company_info_sid, status, memo, created_by, created_time, version_num)
 values
 ('super_admin', '超级管理员', 'employee', 'pre-assigned', null, 'enabled', '拥有最高系统权限的角色', 'default', now(), '1'),
-('company_admin', '企业管理员模板', 'employee', 'company-temp', null, 'enabled', '企业管理员角色模板，用于在企业信息审批通过以后自动创建企业的管理员角色', 'default', now(), '1');
+('company_admin', '企业主', 'employee', 'company-temp', null, 'enabled', '企业主角色模板，用于在企业信息审批通过以后自动创建企业的企业主角色', 'default', now(), '1'),
+('company_manager', '经理', 'employee', 'company-temp', null, 'enabled', '经理角色模板，用于在企业信息审批通过以后自动创建企业的经理角色', 'default', now(), '1'),
+('company_employee', '员工', 'employee', 'company-temp', null, 'enabled', '员工角色模板，用于在企业信息审批通过以后自动创建企业的员工角色', 'default', now(), '1');
 
 insert into ana_permission
 (name, title, path, redirect_path, component_url, no_cache_flag, hidden_flag, always_show_flag, icon, level, type, status, parent_sid, created_by, created_time, version_num)
@@ -91,6 +93,21 @@ values
 (2, 23, 'default', now(), '1'),
 (2, 24, 'default', now(), '1'),
 (2, 25, 'default', now(), '1');
+
+insert into ana_role_r2_permission
+(role_sid, permission_sid, created_by, created_time, version_num)
+values
+(3, 2, 'default', now(), '1'),
+(3, 5, 'default', now(), '1'),
+(3, 6, 'default', now(), '1'),
+(3, 12, 'default', now(), '1'),
+(3, 13, 'default', now(), '1'),
+(3, 14, 'default', now(), '1'),
+(3, 15, 'default', now(), '1'),
+(3, 22, 'default', now(), '1'),
+(3, 23, 'default', now(), '1'),
+(3, 24, 'default', now(), '1'),
+(3, 25, 'default', now(), '1');
 
 insert into ana_employee_r2_role
 (employee_sid, role_sid, created_by, created_time, version_num)

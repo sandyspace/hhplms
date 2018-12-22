@@ -83,7 +83,7 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
         for (Role tempRole : tempRoles) {
             Role preassignedRole = new Role();
             preassignedRole.setCode(tempRole.getCode() + "_" + companyInfoOfInitBy.getSid());
-            preassignedRole.setName(companyInfoOfInitBy.getName() + tempRole.getName());
+            preassignedRole.setName(tempRole.getName());
             preassignedRole.setType(Role.Type.PRE_ASSIGNED);
             preassignedRole.setCategory(Role.Category.ACCOUNT);
             preassignedRole.setStatus(Role.Status.ENABLED);
@@ -99,19 +99,23 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
             }
 
             List<Permission> permissions = permissionService.findPermissionsOfGivenRoles(Arrays.asList(tempRole.getSid()), Permission.Type.PAGE);
-            roleService.addPermissionsToGivenRole(preassignedRole.getSid(),
-                    permissions.stream()
-                            .map(permission -> permission.getSid())
-                            .collect(Collectors.toList()));
+            if (Objects.nonNull(permissions) && !permissions.isEmpty()) {
+                roleService.addPermissionsToGivenRole(preassignedRole.getSid(),
+                        permissions.stream()
+                                .map(permission -> permission.getSid())
+                                .collect(Collectors.toList()));
 
-            if (log.isInfoEnabled()) {
-                log.info("assign menus: [%s] to role: %s", permissions.stream().map(permission -> permission.getName()).collect(Collectors.joining(", ")), preassignedRole.getCode());
+                if (log.isInfoEnabled()) {
+                    log.info("assign menus: [%s] to role: %s", permissions.stream().map(permission -> permission.getName()).collect(Collectors.joining(", ")), preassignedRole.getCode());
+                }
             }
 
-            accountService.addRolesToGivenAccount(initBy.getSid(), Arrays.asList(preassignedRole.getSid()));
+            if ("company_admin".equals(tempRole.getCode())) {
+                accountService.addRolesToGivenAccount(initBy.getSid(), Arrays.asList(preassignedRole.getSid()));
 
-            if (log.isInfoEnabled()) {
-                log.info(String.format("add role: %s to company owner: %s", preassignedRole.getCode(), initBy.getLoginName()));
+                if (log.isInfoEnabled()) {
+                    log.info(String.format("add role: %s to company owner: %s", preassignedRole.getCode(), initBy.getLoginName()));
+                }
             }
         }
     }

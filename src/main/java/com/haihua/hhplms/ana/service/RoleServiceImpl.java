@@ -297,13 +297,17 @@ public class RoleServiceImpl implements RoleService {
             throw new ServiceException(String.format("ID为[%d]的角色不存在", sid));
         }
         if (WebUtils.isEmployee()) {
-            if (Role.Category.EMPLOYEE == role.getCategory() && Role.Type.PRE_ASSIGNED == role.getType()) {
-                throw new ServiceException(String.format("不能删除%s类型角色", Role.Type.PRE_ASSIGNED.getName()));
+            if (Role.Category.EMPLOYEE == role.getCategory() && Role.Type.CREATED != role.getType()) {
+                throw new ServiceException("不能删除此类型角色");
             }
         }
         if (WebUtils.isCompany()) {
-            if (Role.Type.CREATED != role.getType()) {
-                throw new ServiceException("不能删除此类型角色");
+            if (Role.Category.EMPLOYEE == role.getCategory()) {
+                throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+            } else {
+                if (Role.Type.CREATED != role.getType()) {
+                    throw new ServiceException("不能删除此类型角色");
+                }
             }
             if (!WebUtils.getCompanyId().equals(role.getCompanyInfoSid())) {
                 throw new ServiceException(String.format("%s没有权限删除其他%s的角色信息", Account.Type.COMPANY.getName(), Account.Type.COMPANY.getName()));

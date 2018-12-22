@@ -162,16 +162,18 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             }
 
             List<Permission> assignedPermissions = permissionService.findPermissionsOfGivenRoles(assignedRoleSids, Permission.Type.PAGE);
-            final Map<Long, PermissionVO> grantedPermissionMap = new HashMap<>();
-            assignedPermissions.forEach(assignedPermission -> grantedPermissionMap.put(assignedPermission.getSid(), new PermissionVO(assignedPermission)));
-            grantedPermissionMap.values().forEach(grantedPermission -> {
-                if (Objects.nonNull(grantedPermission.getPid())) {
-                    grantedPermissionMap.get(grantedPermission.getPid()).addSubPermission(grantedPermission);
-                }
-            });
-            accountDetail.setGrantedPermissions(grantedPermissionMap.values().stream()
-                    .filter(grantedPermission -> Permission.LEVEL_TOP == grantedPermission.getLevel())
-                    .collect(Collectors.toList()));
+            if (Objects.nonNull(assignedPermissions) && !assignedPermissions.isEmpty()) {
+                final Map<Long, PermissionVO> grantedPermissionMap = new HashMap<>();
+                assignedPermissions.forEach(assignedPermission -> grantedPermissionMap.put(assignedPermission.getSid(), new PermissionVO(assignedPermission)));
+                grantedPermissionMap.values().forEach(grantedPermission -> {
+                    if (Objects.nonNull(grantedPermission.getPid())) {
+                        grantedPermissionMap.get(grantedPermission.getPid()).addSubPermission(grantedPermission);
+                    }
+                });
+                accountDetail.setGrantedPermissions(grantedPermissionMap.values().stream()
+                        .filter(grantedPermission -> Permission.LEVEL_TOP == grantedPermission.getLevel())
+                        .collect(Collectors.toList()));
+            }
         }
         return accountDetail;
     }
