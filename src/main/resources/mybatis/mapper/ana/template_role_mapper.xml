@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haihua.hhplms.ana.mapper.TemplateRoleMapper">
+  <resultMap id="templateRoleMap" type="com.haihua.hhplms.ana.entity.TemplateRole">
+    <id column="sid" property="sid" />
+    <result column="code" property="code" />
+    <result column="name" property="name" />
+    <result column="memo" property="memo" />
+    <result column="type" property="type" />
+    <result column="status" property="status" />
+    <result column="created_by" property="createdBy" />
+    <result column="created_time" property="createdTime" />
+    <result column="updated_by" property="updatedBy" />
+    <result column="updated_time" property="updatedTime" />
+    <result column="version_num" property="versionNum" />
+  </resultMap>
+
+  <sql id="columnClause">
+    sid, code, name, memo, type, status, created_by, created_time, updated_by, updated_time, version_num
+  </sql>
+
+  <insert id="create" parameterType="com.haihua.hhplms.ana.entity.TemplateRole" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
+    insert into ana_template_role
+    (code, name, memo, type, status, created_by, created_time, version_num)
+    values
+    (#{code}, #{name}, #{memo}, #{type}, #{status}, #{createdBy}, #{createdTime}, #{versionNum})
+  </insert>
+
+  <update id="updateByParams" parameterType="map" statementType="PREPARED">
+    update ana_template_role
+    <set>
+      <if test="status != null">
+        status = #{status},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <update id="updateByExample" parameterType="com.haihua.hhplms.ana.entity.TemplateRole" statementType="PREPARED">
+    update ana_template_role
+    <set>
+      <if test="code != null">
+        code = #{code},
+      </if>
+      <if test="name != null">
+        name = #{name},
+      </if>
+      <if test="type != null">
+        type = #{type},
+      </if>
+      <if test="memo != null">
+        memo = #{memo},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy},
+      </if>
+      <if test="updatedTime != null">
+        updated_time = #{updatedTime},
+      </if>
+      <if test="versionNum != null">
+        version_num = #{versionNum} + 1
+      </if>
+    </set>
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="versionNum != null">
+        and version_num = #{versionNum}
+      </if>
+    </where>
+  </update>
+
+  <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
+    delete from ana_template_role
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+    </where>
+  </delete>
+
+  <select id="countByParams" resultType="int" parameterType="map" statementType="PREPARED">
+    select count(1)
+    from ana_template_role
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="type != null">
+        and type = #{type}
+      </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="code != null">
+        and code = #{code}
+      </if>
+      <if test="codeLike != null">
+        and code like concat(concat('%',#{codeLike}),'%')
+      </if>
+      <if test="nameLike != null">
+        and name like concat(concat('%',#{nameLike}),'%')
+      </if>
+      <if test="searchingSids != null and searchingSids.size > 0">
+        and sid in
+        (<foreach collection="searchingSids" item="searchingSid" separator="," open="" close="">
+        #{searchingSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+  </select>
+
+  <select id="findByParams" resultMap="templateRoleMap" parameterType="map" statementType="PREPARED">
+    select <include refid="columnClause" />
+    from ana_template_role
+    <where>
+      <if test="sid != null">
+        sid = #{sid}
+      </if>
+      <if test="type != null">
+        and type = #{type}
+      </if>
+      <if test="status != null">
+        and status = #{status}
+      </if>
+      <if test="code != null">
+        and code = #{code}
+      </if>
+      <if test="codeLike != null">
+        and code like concat(concat('%',#{codeLike}),'%')
+      </if>
+      <if test="nameLike != null">
+        and name like concat(concat('%',#{nameLike}),'%')
+      </if>
+      <if test="searchingSids != null and searchingSids.size > 0">
+        and sid in
+        (<foreach collection="searchingSids" item="searchingSid" separator="," open="" close="">
+        #{searchingSid, jdbcType=BIGINT}
+      </foreach>)
+      </if>
+    </where>
+    <if test="limit != null and offset != null">
+      limit #{offset}, #{limit}
+    </if>
+  </select>
+</mapper>

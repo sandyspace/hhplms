@@ -40,4 +40,24 @@ public class PermissionController {
     public ResultBean.Success<List<PermissionVO>> getApiListOfRole(@PathVariable("id") Long roleSid) {
         return ResultBean.Success.of(permissionService.getApiListOfGivenRole(roleSid), "");
     }
+
+    @GetMapping(path = "/api/ana/tempRoles/permissions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<PermissionVO>> permissionsAvailableToAssignTempRole() {
+        return ResultBean.Success.of(permissionService.permissionsAvailableToAssignTempRole(), "");
+    }
+
+    @GetMapping(path = "/api/ana/tempRoles/apis", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<PermissionVO>> apisAvailableToAssignTempRole() {
+        return ResultBean.Success.of(permissionService.apisAvailableToAssignTempRole(), "");
+    }
+
+    @GetMapping(path = "/api/ana/tempRoles/{id}/permissions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<PermissionVO>> getPermissionsOfTempRole(@PathVariable("id") Long tempRoleSid) {
+        return ResultBean.Success.of(permissionService.getPermissionsOfTempRole(tempRoleSid), "");
+    }
+
+    @GetMapping(path = "/api/ana/tempRoles/{id}/apis", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<PermissionVO>> getApiListOfTempRole(@PathVariable("id") Long tempRoleSid) {
+        return ResultBean.Success.of(permissionService.getApiListOfTempRole(tempRoleSid), "");
+    }
 }

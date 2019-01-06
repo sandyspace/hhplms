@@ -1,13 +1,7 @@
 package com.haihua.hhplms.wf.service;
 
-import com.haihua.hhplms.ana.entity.Account;
-import com.haihua.hhplms.ana.entity.CompanyInfo;
-import com.haihua.hhplms.ana.entity.Permission;
-import com.haihua.hhplms.ana.entity.Role;
-import com.haihua.hhplms.ana.service.AccountService;
-import com.haihua.hhplms.ana.service.CompanyInfoService;
-import com.haihua.hhplms.ana.service.PermissionService;
-import com.haihua.hhplms.ana.service.RoleService;
+import com.haihua.hhplms.ana.entity.*;
+import com.haihua.hhplms.ana.service.*;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.utils.WebUtils;
@@ -36,6 +30,10 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
     @Autowired
     @Qualifier("accountService")
     private AccountService accountService;
+
+    @Autowired
+    @Qualifier("templateRoleService")
+    private TemplateRoleService templateRoleService;
 
     @Autowired
     @Qualifier("roleService")
@@ -75,12 +73,12 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
     }
 
     private void createAndAssignRolesToAccount(Account initBy, CompanyInfo companyInfoOfInitBy) {
-        List<Role> tempRoles = roleService.getTempRoles();
+        List<TemplateRole> tempRoles = templateRoleService.getAvailableTempRoles();
         if (Objects.isNull(tempRoles) || tempRoles.isEmpty()) {
-            throw new ServiceException("系统中没有配置类型为" + Role.Type.COMPANY_TEMP.getCode() + "的角色");
+            throw new ServiceException("系统中没有配置模板角色");
         }
 
-        for (Role tempRole : tempRoles) {
+        for (TemplateRole tempRole : tempRoles) {
             Role preassignedRole = new Role();
             preassignedRole.setCode(tempRole.getCode() + "_" + companyInfoOfInitBy.getSid());
             preassignedRole.setName(tempRole.getName());
@@ -98,7 +96,7 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
                 log.info(String.format("create role: %s for company owner: %s", preassignedRole, initBy.getLoginName()));
             }
 
-            List<Permission> permissions = permissionService.findPermissionsOfGivenRoles(Arrays.asList(tempRole.getSid()), Permission.Type.PAGE);
+            List<Permission> permissions = permissionService.findPermissionsOfTempRoles(Arrays.asList(tempRole.getSid()), Permission.Type.PAGE);
             if (Objects.nonNull(permissions) && !permissions.isEmpty()) {
                 roleService.addPermissionsToGivenRole(preassignedRole.getSid(),
                         permissions.stream()
@@ -110,7 +108,7 @@ public class DefaultBizProcessHandler implements BizProcessHandler {
                 }
             }
 
-            if ("company_admin".equals(tempRole.getCode())) {
+            if (TemplateRole.Type.OWNER == tempRole.getType()) {
                 accountService.addRolesToGivenAccount(initBy.getSid(), Arrays.asList(preassignedRole.getSid()));
 
                 if (log.isInfoEnabled()) {

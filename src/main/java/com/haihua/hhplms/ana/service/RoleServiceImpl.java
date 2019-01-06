@@ -189,10 +189,6 @@ public class RoleServiceImpl implements RoleService {
                     throw new ServiceException(String.format("不能创建类型为%s的角色", Role.Type.PRE_ASSIGNED.getName()));
                 }
                 roleCreationVO.setCompanyId(null);
-            } else {
-                if (Role.Type.COMPANY_TEMP == EnumUtil.codeOf(Role.Type.class, roleCreationVO.getType())) {
-                    throw new ServiceException(String.format("不能为%s创建类型为%s的角色", Account.Type.COMPANY.getName(), Role.Type.COMPANY_TEMP.getName()));
-                }
             }
         } else {
             if (WebUtils.isMember()) {
@@ -481,14 +477,6 @@ public class RoleServiceImpl implements RoleService {
             throw new ServiceException(e);
         }
         return matchedRoles;
-    }
-
-    public List<Role> getTempRoles() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("category", Role.Category.EMPLOYEE.getCode());
-        params.put("type", Role.Type.COMPANY_TEMP.getCode());
-        params.put("status", Role.Status.ENABLED.getCode());
-        return findByParams(params);
     }
 
     public List<Role> getPreassignedRoles(Long companyInfoSid) {

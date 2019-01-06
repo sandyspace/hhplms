@@ -88,6 +88,22 @@ public class DictController {
         return ResultBean.Success.of(roleStatuses, "");
     }
 
+    @GetMapping(path = "/api/sys/tempRole/types", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadTempRoleTypes() {
+        List<DictEntry> tempRoleTypes = Arrays.stream(TemplateRole.Type.values())
+                .map(tempRoleType -> new DictEntry(tempRoleType.getCode(), tempRoleType.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(tempRoleTypes, "");
+    }
+
+    @GetMapping(path = "/api/sys/tempRole/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResultBean.Success<List<DictEntry>> loadTempRoleStatuses() {
+        List<DictEntry> tempRoleStatuses = Arrays.stream(TemplateRole.Status.values())
+                .map(tempRoleStatus -> new DictEntry(tempRoleStatus.getCode(), tempRoleStatus.getName()))
+                .collect(Collectors.toList());
+        return ResultBean.Success.of(tempRoleStatuses, "");
+    }
+
     @GetMapping(path = "/api/sys/process/statuses", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultBean.Success<List<DictEntry>> loadProcessStatuses() {
         List<DictEntry> processStatuses = Arrays.stream(ProcessExecution.ProcessStatus.values())

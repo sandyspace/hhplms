@@ -114,6 +114,21 @@ CREATE TABLE `ana_role` (
   UNIQUE KEY `code_UNIQUE` (`code`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `ana_template_role` (
+  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(30) NOT NULL,
+  `name` VARCHAR(150) NOT NULL,
+  `memo` VARCHAR(200) NULL DEFAULT NULL,
+  `type` VARCHAR(20) NOT NULL,
+  `status` VARCHAR(20) NOT NULL,
+  `created_by` VARCHAR(64) NOT NULL,
+  `created_time` DATETIME NOT NULL,
+  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
+  `updated_time` DATETIME NULL DEFAULT NULL,
+  `version_num` INT(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC));
+
 CREATE TABLE `ana_role_r2_permission` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
   `role_sid` bigint(15) DEFAULT NULL,
@@ -125,6 +140,17 @@ CREATE TABLE `ana_role_r2_permission` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
 ) ENGINE=InnoDB;
+
+CREATE TABLE `ana_template_role_r2_permission` (
+  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
+  `template_role_sid` BIGINT(15) NOT NULL,
+  `permission_sid` BIGINT(15) NOT NULL,
+  `created_by` VARCHAR(64) NOT NULL,
+  `created_time` DATETIME NOT NULL,
+  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
+  `updated_time` DATETIME NULL DEFAULT NULL,
+  `version_num` INT(9) NOT NULL,
+  PRIMARY KEY (`sid`));
 
 CREATE TABLE `ana_company_info` (
   `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,

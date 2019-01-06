@@ -1,10 +1,7 @@
 package com.haihua.hhplms.ana.service;
 
-import com.haihua.hhplms.ana.entity.Account;
+import com.haihua.hhplms.ana.entity.*;
 import com.haihua.hhplms.ana.vo.PermissionVO;
-import com.haihua.hhplms.ana.entity.Permission;
-import com.haihua.hhplms.ana.entity.Role;
-import com.haihua.hhplms.ana.entity.RolePermissionRelationship;
 import com.haihua.hhplms.ana.mapper.PermissionMapper;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.utils.WebUtils;
@@ -25,14 +22,21 @@ public class PermissionServiceImpl implements PermissionService {
     private RoleService roleService;
 
     @Autowired
+    @Qualifier("templateRoleService")
+    private TemplateRoleService templateRoleService;
+
+    @Autowired
     @Qualifier("rolePermissionRelationshipService")
     private RolePermissionRelationshipService rolePermissionRelationshipService;
 
-    public List<PermissionVO> permissionsAvailableToAssign(Long refRoleSid) {
-        if (WebUtils.isMember()) {
-            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+    @Autowired
+    @Qualifier("templateRolePermissionRelationshipService")
+    private TemplateRolePermissionRelationshipService templateRolePermissionRelationshipService;
+
+    private List<PermissionVO> toPermissionTree(final List<Permission> availablePermissions) {
+        if (Objects.isNull(availablePermissions) || availablePermissions.isEmpty()) {
+            return null;
         }
-        final List<Permission> availablePermissions = availablePermissions(refRoleSid, Permission.Type.PAGE);
         final Map<Long, PermissionVO> availablePermissionMap = new HashMap<>();
         availablePermissions.forEach(availablePermission -> availablePermissionMap.put(availablePermission.getSid(), new PermissionVO(availablePermission)));
         availablePermissionMap.values().forEach(permission -> {
@@ -43,6 +47,34 @@ public class PermissionServiceImpl implements PermissionService {
         return availablePermissionMap.values().stream()
                 .filter(availablePermission -> Permission.LEVEL_TOP == availablePermission.getLevel())
                 .collect(Collectors.toList());
+    }
+
+    public List<PermissionVO> permissionsAvailableToAssignTempRole() {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        final List<Permission> availablePermissions = findByType(Permission.Type.PAGE);
+
+        return toPermissionTree(availablePermissions);
+    }
+
+    public List<PermissionVO> apisAvailableToAssignTempRole() {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        final List<Permission> availableApis = findByType(Permission.Type.API);
+        return availableApis.stream()
+                .map(api -> new PermissionVO(api))
+                .collect(Collectors.toList());
+    }
+
+    public List<PermissionVO> permissionsAvailableToAssign(Long refRoleSid) {
+        if (WebUtils.isMember()) {
+            throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
+        }
+        final List<Permission> availablePermissions = availablePermissions(refRoleSid, Permission.Type.PAGE);
+
+        return toPermissionTree(availablePermissions);
     }
 
     public List<PermissionVO> apisAvailableToAssign(Long refRoleSid) {
@@ -85,6 +117,35 @@ public class PermissionServiceImpl implements PermissionService {
         return availablePermissions;
     }
 
+    public List<PermissionVO> getPermissionsOfTempRole(Long tempRoleSid) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        TemplateRole tempRole = templateRoleService.findBySid(tempRoleSid);
+        if (Objects.isNull(tempRole)) {
+            throw new ServiceException("ID为[" + tempRoleSid + "]的模板角色不存在");
+        }
+        List<Permission> permissions = findPermissionsOfTempRoles(Arrays.asList(tempRoleSid), Permission.Type.PAGE);
+        return toPermissionTree(permissions);
+    }
+
+    public List<PermissionVO> getApiListOfTempRole(Long tempRoleSid) {
+        if (!WebUtils.isEmployee()) {
+            throw new ServiceException("你不是" + Role.Category.EMPLOYEE.getName() + "，请立刻停止非法操作");
+        }
+        TemplateRole tempRole = templateRoleService.findBySid(tempRoleSid);
+        if (Objects.isNull(tempRole)) {
+            throw new ServiceException("ID为[" + tempRoleSid + "]的模板角色不存在");
+        }
+        List<Permission> apiList = findPermissionsOfTempRoles(Arrays.asList(tempRoleSid), Permission.Type.API);
+        if (Objects.nonNull(apiList) && !apiList.isEmpty()) {
+            return apiList.stream()
+                    .map(api -> new PermissionVO(api))
+                    .collect(Collectors.toList());
+        }
+        return null;
+    }
+
     public List<PermissionVO> getPermissionsOfGivenRole(Long roleSid) {
         if (WebUtils.isMember()) {
             throw new ServiceException(Account.Type.MEMBER.getName() + "没有权限查看");
@@ -100,19 +161,7 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         List<Permission> permissions = findPermissionsOfGivenRoles(Arrays.asList(roleSid), Permission.Type.PAGE);
-        if (Objects.nonNull(permissions) && !permissions.isEmpty()) {
-            final Map<Long, PermissionVO> permissionMap = new HashMap<>();
-            permissions.forEach(permission -> permissionMap.put(permission.getSid(), new PermissionVO(permission)));
-            permissionMap.values().forEach(permission -> {
-                if (Objects.nonNull(permission.getPid())) {
-                    permissionMap.get(permission.getPid()).addSubPermission(permission);
-                }
-            });
-            return permissionMap.values().stream()
-                    .filter(grantedPermission -> Permission.LEVEL_TOP == grantedPermission.getLevel())
-                    .collect(Collectors.toList());
-        }
-        return null;
+        return toPermissionTree(permissions);
     }
 
     public List<PermissionVO> getApiListOfGivenRole(Long roleSid) {
@@ -134,6 +183,22 @@ public class PermissionServiceImpl implements PermissionService {
             return apiList.stream()
                         .map(api -> new PermissionVO(api))
                         .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public List<Permission> findPermissionsOfTempRoles(List<Long> tempRoleSids, Permission.Type type) {
+        List<TemplateRolePermissionRelationship> matchedTempRolePermissionRelationships = templateRolePermissionRelationshipService.findByTempRoleSids(tempRoleSids);
+        if (Objects.nonNull(matchedTempRolePermissionRelationships) && !matchedTempRolePermissionRelationships.isEmpty()) {
+            Map<String, Object> params = new HashMap<>();
+            if (Objects.nonNull(type)) {
+                params.put("type", type.getCode());
+            }
+            params.put("searchingSids", matchedTempRolePermissionRelationships
+                    .stream()
+                    .map(matchedTempRolePermissionRelationship -> matchedTempRolePermissionRelationship.getPermissionSid())
+                    .collect(Collectors.toList()));
+            return findByParams(params);
         }
         return null;
     }
