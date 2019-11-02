@@ -20,7 +20,7 @@ CREATE TABLE `ana_account` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `mobile_UNIQUE` (`mobile`),
   UNIQUE KEY `login_name_UNIQUE` (`login_name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_account_r2_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -33,8 +33,25 @@ CREATE TABLE `ana_account_r2_role` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `UNIQUE` (`account_sid`,`role_sid`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `ana_company_info` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `code` varchar(64) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `type` varchar(20) DEFAULT NULL,
+  `address` varchar(400) DEFAULT NULL,
+  `contact_name` varchar(60) DEFAULT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `created_by` varchar(30) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_employee` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -58,7 +75,7 @@ CREATE TABLE `ana_employee` (
   UNIQUE KEY `login_name_UNIQUE` (`login_name`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `mobile_UNIQUE` (`mobile`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_employee_r2_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -70,7 +87,7 @@ CREATE TABLE `ana_employee_r2_role` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_permission` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -94,7 +111,7 @@ CREATE TABLE `ana_permission` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_role` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -112,22 +129,7 @@ CREATE TABLE `ana_role` (
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `ana_template_role` (
-  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(30) NOT NULL,
-  `name` VARCHAR(150) NOT NULL,
-  `memo` VARCHAR(200) NULL DEFAULT NULL,
-  `type` VARCHAR(20) NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
-  `created_by` VARCHAR(64) NOT NULL,
-  `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
-  `updated_time` DATETIME NULL DEFAULT NULL,
-  `version_num` INT(9) NOT NULL,
-  PRIMARY KEY (`sid`),
-  UNIQUE INDEX `code_UNIQUE` (`code` ASC));
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_role_r2_permission` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -139,48 +141,35 @@ CREATE TABLE `ana_role_r2_permission` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ana_template_role` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `code` varchar(30) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `memo` varchar(200) DEFAULT NULL,
+  `type` varchar(20) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `created_by` varchar(64) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ana_template_role_r2_permission` (
-  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
-  `template_role_sid` BIGINT(15) NOT NULL,
-  `permission_sid` BIGINT(15) NOT NULL,
-  `created_by` VARCHAR(64) NOT NULL,
-  `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(64) NULL DEFAULT NULL,
-  `updated_time` DATETIME NULL DEFAULT NULL,
-  `version_num` INT(9) NOT NULL,
-  PRIMARY KEY (`sid`));
-
-CREATE TABLE `ana_company_info` (
-  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(64) NULL,
-  `name` VARCHAR(100) NULL,
-  `type` VARCHAR(20) NULL,
-  `address` VARCHAR(400) NULL,
-  `contact_name` VARCHAR(60) NULL,
-  `contact_phone` VARCHAR(15) NULL,
-  `status` VARCHAR(20) NULL,
-  `created_by` VARCHAR(30) NOT NULL,
-  `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(30) NULL DEFAULT NULL,
-  `updated_time` DATETIME NULL DEFAULT NULL,
-  `version_num` INT(9) NOT NULL,
-  UNIQUE INDEX `code_UNIQUE` (`code` ASC),
-  PRIMARY KEY (`sid`));
-
-CREATE TABLE `sys_feedback` (
-  `sid` BIGINT(15) NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(160) NOT NULL,
-  `content` VARCHAR(600) NULL,
-  `contact` VARCHAR(60) NOT NULL,
-  `contact_mobile` VARCHAR(11) NOT NULL,
-  `created_by` VARCHAR(30) NOT NULL,
-  `created_time` DATETIME NOT NULL,
-  `updated_by` VARCHAR(30) NULL DEFAULT NULL,
-  `updated_time` DATETIME NULL DEFAULT NULL,
-  `version_num` INT(9) NOT NULL,
-  PRIMARY KEY (`sid`));
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `template_role_sid` bigint(15) NOT NULL,
+  `permission_sid` bigint(15) NOT NULL,
+  `created_by` varchar(64) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `pm_preferential_msg` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
@@ -195,79 +184,93 @@ CREATE TABLE `pm_preferential_msg` (
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `sys_feedback` (
+  `sid` bigint(15) NOT NULL AUTO_INCREMENT,
+  `title` varchar(160) NOT NULL,
+  `content` varchar(600) DEFAULT NULL,
+  `contact` varchar(60) NOT NULL,
+  `contact_mobile` varchar(11) NOT NULL,
+  `created_by` varchar(30) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_by` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `version_num` int(9) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `wf_process` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
-  `code` varchar(30)   DEFAULT NULL,
-  `name` varchar(90)   DEFAULT NULL,
-  `desc` varchar(300)   DEFAULT NULL,
-  `owner` varchar(20)   DEFAULT NULL,
-  `created_by` varchar(64)   NOT NULL,
+  `code` varchar(30) DEFAULT NULL,
+  `name` varchar(90) DEFAULT NULL,
+  `desc` varchar(300) DEFAULT NULL,
+  `owner` varchar(20) DEFAULT NULL,
+  `created_by` varchar(64) NOT NULL,
   `created_time` datetime NOT NULL,
-  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `wf_step` (
+CREATE TABLE `wf_process_execution` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
-  `code` varchar(30)   DEFAULT NULL,
-  `name` varchar(90)   DEFAULT NULL,
-  `desc` varchar(300)   DEFAULT NULL,
-  `created_by` varchar(64)   NOT NULL,
+  `process_sid` bigint(15) NOT NULL,
+  `process_owner` varchar(20) NOT NULL,
+  `owner_sid` bigint(15) DEFAULT NULL,
+  `process_inst_id` varchar(64) NOT NULL,
+  `process_status` varchar(20) DEFAULT NULL,
+  `current_step_sid` bigint(15) NOT NULL,
+  `assigned_type` varchar(20) DEFAULT NULL,
+  `assigned_to` varchar(30) DEFAULT NULL,
+  `step_status` varchar(20) DEFAULT NULL,
+  `active_flag` char(1) DEFAULT NULL,
+  `checked_by` varchar(30) DEFAULT NULL,
+  `checked_time` datetime DEFAULT NULL,
+  `init_by` varchar(30) DEFAULT NULL,
+  `init_time` datetime DEFAULT NULL,
+  `created_by` varchar(64) NOT NULL,
   `created_time` datetime NOT NULL,
-  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
-  UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB;
+  UNIQUE KEY `UNIQUE_row` (`process_sid`,`process_inst_id`,`current_step_sid`),
+  KEY `IDX_assigned_type` (`assigned_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `wf_route` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
   `process_sid` bigint(15) DEFAULT NULL,
   `from_step_sid` bigint(15) DEFAULT NULL,
   `to_step_sid` bigint(15) DEFAULT NULL,
-  `assigned_type` varchar(20)   DEFAULT NULL,
-  `assigned_to` varchar(30)   DEFAULT NULL,
-  `start_flag` char(1)   DEFAULT NULL,
-  `related_view` varchar(128)   DEFAULT NULL,
+  `assigned_type` varchar(20) DEFAULT NULL,
+  `assigned_to` varchar(30) DEFAULT NULL,
+  `start_flag` char(1) DEFAULT NULL,
+  `related_view` varchar(128) DEFAULT NULL,
   `view_on_checking` varchar(128) DEFAULT NULL,
   `attached_biz` varchar(20) DEFAULT NULL,
-  `created_by` varchar(64)   NOT NULL,
+  `created_by` varchar(64) NOT NULL,
   `created_time` datetime NOT NULL,
-  `updated_by` varchar(64)   DEFAULT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
   UNIQUE KEY `proc_step_unique` (`process_sid`,`from_step_sid`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `wf_process_execution` (
+CREATE TABLE `wf_step` (
   `sid` bigint(15) NOT NULL AUTO_INCREMENT,
-  `process_sid` bigint(15) NOT NULL,
-  `process_owner` varchar(20)  NOT NULL,
-  `owner_sid` bigint(15) NULL,
-  `process_inst_id` varchar(64)  NOT NULL,
-  `process_status` varchar(20)  DEFAULT NULL,
-  `current_step_sid` bigint(15) NOT NULL,
-  `assigned_type` varchar(20)  DEFAULT NULL,
-  `assigned_to` varchar(30)  DEFAULT NULL,
-  `step_status` varchar(20)  DEFAULT NULL,
-  `active_flag` char(1)  DEFAULT NULL,
-  `checked_by` varchar(30)  DEFAULT NULL,
-  `checked_time` datetime DEFAULT NULL,
-  `init_by` varchar(30)  DEFAULT NULL,
-  `init_time` datetime DEFAULT NULL,
-  `created_by` varchar(64)  NOT NULL,
+  `code` varchar(30) DEFAULT NULL,
+  `name` varchar(90) DEFAULT NULL,
+  `desc` varchar(300) DEFAULT NULL,
+  `created_by` varchar(64) NOT NULL,
   `created_time` datetime NOT NULL,
-  `updated_by` varchar(64)  DEFAULT NULL,
+  `updated_by` varchar(64) DEFAULT NULL,
   `updated_time` datetime DEFAULT NULL,
   `version_num` int(9) NOT NULL,
   PRIMARY KEY (`sid`),
-  UNIQUE KEY `UNIQUE_row` (`process_sid`,`process_inst_id`,`current_step_sid`),
-  KEY `IDX_assigned_type` (`assigned_type`)
-) ENGINE=InnoDB;
+  UNIQUE KEY `code_UNIQUE` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
