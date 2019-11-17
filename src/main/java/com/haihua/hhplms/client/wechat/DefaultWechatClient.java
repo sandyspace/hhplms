@@ -5,11 +5,12 @@ import com.haihua.hhplms.client.wechat.model.UserInfoWrapper;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -20,13 +21,15 @@ import java.util.Objects;
 @Component("wechatClient")
 public class DefaultWechatClient implements WechatClient {
 
+    private static final Logger log = LoggerFactory.getLogger(DefaultWechatClient.class);
+
     @Autowired
     private RestTemplate restTemplate;
 
     @Value("${wechat.oauth.accessToken.retrieve.url:}")
     private String wechatOauthAccessTokenRetrieveUrl;
 
-    @Value("${wechat.user.info.retrieve.url}")
+    @Value("${wechat.user.info.retrieve.url:}")
     private String wechatUserInfoRetrieveUrl;
 
     //appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
@@ -34,29 +37,30 @@ public class DefaultWechatClient implements WechatClient {
         final String url = String.format("%s?appid=%s&secret=%s&code=%s&grant_type=%s", wechatOauthAccessTokenRetrieveUrl,
                 appId, appSecret, code, grantType);
 
-        ResponseEntity<AccessTokenWrapper> response;
+        if (log.isInfoEnabled()) {
+            log.info(String.format("retrieveAccessToken -------> url: %s", url));
+        }
+
+        ResponseEntity<String> response;
         try {
-            response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<AccessTokenWrapper>() {});
+            response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<String>() {});
         } catch (RestClientException e) {
             throw new ServiceException("获取AccessToken失败");
         }
 
-        final HttpStatus.Series series = HttpStatus.Series.valueOf(response.getStatusCode());
-        if (HttpStatus.Series.CLIENT_ERROR == series || HttpStatus.Series.SERVER_ERROR == series) {
-            if (Objects.nonNull(response.getBody())) {
-                throw new ServiceException(response.getBody().getErrMsg());
-            } else {
-                throw new ServiceException(response.getStatusCode().getReasonPhrase());
-            }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("retrieveAccessToken ------> raw response: %s", JsonUtil.toJson(response)));
         }
 
-        final AccessTokenWrapper accessTokenWrapper = response.getBody();
+        final AccessTokenWrapper accessTokenWrapper = JsonUtil.parse(response.getBody(), AccessTokenWrapper.class);
         if (Objects.isNull(accessTokenWrapper)) {
             throw new ServiceException("获取AccessToken失败");
         }
+
         if (StringUtils.isNotBlank(accessTokenWrapper.getErrCode())) {
             throw new ServiceException(accessTokenWrapper.getErrMsg());
         }
+
         return accessTokenWrapper;
     }
 
@@ -65,29 +69,31 @@ public class DefaultWechatClient implements WechatClient {
         final String url = String.format("%s?access_token=%s&openid=%s&lang=%s", wechatUserInfoRetrieveUrl,
                 accessToken, openId, lang);
 
-        ResponseEntity<UserInfoWrapper> response;
+        if (log.isInfoEnabled()) {
+            log.info(String.format("retrieveUserInfo -------> url: %s", url));
+        }
+
+        ResponseEntity<String> response;
         try {
-            response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<UserInfoWrapper>() {});
+            response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<String>() {});
         } catch (RestClientException e) {
             throw new ServiceException("获取用户信息失败");
         }
 
-        final HttpStatus.Series series = HttpStatus.Series.valueOf(response.getStatusCode());
-        if (HttpStatus.Series.CLIENT_ERROR == series || HttpStatus.Series.SERVER_ERROR == series) {
-            if (Objects.nonNull(response.getBody())) {
-                throw new ServiceException(response.getBody().getErrMsg());
-            } else {
-                throw new ServiceException(response.getStatusCode().getReasonPhrase());
-            }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("retrieveUserInfo ------> raw response: %s", JsonUtil.toJson(response)));
         }
 
-        final UserInfoWrapper userInfoWrapper = response.getBody();
+        final UserInfoWrapper userInfoWrapper = JsonUtil.parse(response.getBody(), UserInfoWrapper.class);
+
         if (Objects.isNull(userInfoWrapper)) {
             throw new ServiceException("获取用户信息失败");
         }
+
         if (StringUtils.isNotBlank(userInfoWrapper.getErrCode())) {
             throw new ServiceException(userInfoWrapper.getErrMsg());
         }
+
         return userInfoWrapper;
     }
 }

@@ -29,6 +29,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -884,8 +886,14 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             log.error(e.getMessage(), e);
             final String errorCode = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrCode()) ? "-99999" : accessTokenWrapper.getErrCode();
             final String errorMsg = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrMsg()) ? "未知错误" : accessTokenWrapper.getErrMsg();
+            String encodedErrorMsg;
+            try {
+                encodedErrorMsg = URLEncoder.encode(errorMsg, "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                encodedErrorMsg = "unknownError";
+            }
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
-                    errorCode, errorMsg);
+                    errorCode, encodedErrorMsg);
         }
         UserInfoWrapper userInfoWrapper = null;
         try {
@@ -894,8 +902,14 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             log.error(e.getMessage(), e);
             final String errorCode = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrCode()) ? "-99999" : userInfoWrapper.getErrCode();
             final String errorMsg = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrMsg()) ? "未知错误" : userInfoWrapper.getErrMsg();
+            String encodedErrorMsg;
+            try {
+                encodedErrorMsg = URLEncoder.encode(errorMsg, "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                encodedErrorMsg = "unknownError";
+            }
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
-                    errorCode, errorMsg);
+                    errorCode, encodedErrorMsg);
         }
         final Account existAccount = findByOpenId(userInfoWrapper.getOpenId());
         if (Objects.isNull(existAccount)) {

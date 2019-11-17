@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AccessTokenWrapper extends ErrorInfoWrapper{
+public class AccessTokenWrapper {
     /**
      * {
      *   "access_token":"ACCESS_TOKEN",
@@ -16,14 +16,24 @@ public class AccessTokenWrapper extends ErrorInfoWrapper{
      */
     @JsonProperty("access_token")
     private String accessToken;
+
     @JsonProperty("expires_in")
     private Long expiresIn;
+
     @JsonProperty("refresh_token")
     private String refreshToken;
+
     @JsonProperty("openid")
     private String openId;
+
     @JsonProperty("scope")
     private String scope;
+
+    @JsonProperty("errcode")
+    private String errCode;
+
+    @JsonProperty("errmsg")
+    private String errMsg;
 
     public String getAccessToken() {
         return accessToken;
@@ -63,5 +73,21 @@ public class AccessTokenWrapper extends ErrorInfoWrapper{
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public void setErrCode(String errCode) {
+        this.errCode = errCode;
+    }
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
     }
 }

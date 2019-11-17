@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserInfoWrapper extends ErrorInfoWrapper {
+public class UserInfoWrapper {
     /**
      *   "openid":" OPENID",
      *   "nickname": NICKNAME,
@@ -40,6 +40,12 @@ public class UserInfoWrapper extends ErrorInfoWrapper {
 
     @JsonProperty("unionid")
     private String unionId;
+
+    @JsonProperty("errcode")
+    private String errCode;
+
+    @JsonProperty("errmsg")
+    private String errMsg;
 
     public String getOpenId() {
         return openId;
@@ -103,5 +109,21 @@ public class UserInfoWrapper extends ErrorInfoWrapper {
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public void setErrCode(String errCode) {
+        this.errCode = errCode;
+    }
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
     }
 }
