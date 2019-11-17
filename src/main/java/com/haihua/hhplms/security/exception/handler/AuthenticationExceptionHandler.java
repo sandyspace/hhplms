@@ -4,6 +4,7 @@ import com.haihua.hhplms.common.model.ErrorCode;
 import com.haihua.hhplms.common.model.ErrorResponse;
 import com.haihua.hhplms.security.exception.JwtBadTokenException;
 import com.haihua.hhplms.security.exception.JwtExpiredTokenException;
+import com.haihua.hhplms.security.exception.UserMobileNotBindingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,8 @@ public class AuthenticationExceptionHandler {
             errorCode = ErrorCode.USER_NOT_FOUND;
         } else if (e instanceof DisabledException) {
             errorCode = ErrorCode.USER_DISABLED;
+        } else if (e instanceof UserMobileNotBindingException) {
+            errorCode = ErrorCode.USER_MOBILE_NOT_BINDING;
         } else {
             errorCode = ErrorCode.AUTHENTICATION;
         }

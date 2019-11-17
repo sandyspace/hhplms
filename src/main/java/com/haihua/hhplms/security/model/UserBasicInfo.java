@@ -9,6 +9,8 @@ public class UserBasicInfo {
     private String loginName;
     private String email;
     private String mobile;
+    private String openId;
+    private String unionId;
     private String type;
     private String subType;
     @JsonIgnore
@@ -28,6 +30,8 @@ public class UserBasicInfo {
         this.loginName = userBasicInfoBuilder.loginName;
         this.email = userBasicInfoBuilder.email;
         this.mobile = userBasicInfoBuilder.mobile;
+        this.openId = userBasicInfoBuilder.openId;
+        this.unionId = userBasicInfoBuilder.unionId;
         this.type = userBasicInfoBuilder.type;
         this.subType = userBasicInfoBuilder.subType;
         this.password = userBasicInfoBuilder.password;
@@ -58,6 +62,14 @@ public class UserBasicInfo {
 
     public String getType() {
         return type;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public String getUnionId() {
+        return unionId;
     }
 
     public String getSubType() {
@@ -105,6 +117,8 @@ public class UserBasicInfo {
         private String loginName;
         private String email;
         private String mobile;
+        private String openId;
+        private String unionId;
         private String type;
         private String subType;
         private String password;
@@ -133,6 +147,16 @@ public class UserBasicInfo {
 
         public Builder mobile(String mobile) {
             this.mobile = mobile;
+            return this;
+        }
+
+        public Builder openId(String openId) {
+            this.openId = openId;
+            return this;
+        }
+
+        public Builder unionId(String unionId) {
+            this.unionId = unionId;
             return this;
         }
 

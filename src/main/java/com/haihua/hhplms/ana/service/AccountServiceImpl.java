@@ -7,6 +7,9 @@ import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.ana.entity.*;
 import com.haihua.hhplms.ana.mapper.AccountMapper;
 import com.haihua.hhplms.ana.vo.*;
+import com.haihua.hhplms.client.wechat.WechatClient;
+import com.haihua.hhplms.client.wechat.model.AccessTokenWrapper;
+import com.haihua.hhplms.client.wechat.model.UserInfoWrapper;
 import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.model.PageWrapper;
@@ -15,10 +18,12 @@ import com.haihua.hhplms.common.utils.ListUtils;
 import com.haihua.hhplms.common.utils.WebUtils;
 import com.haihua.hhplms.security.auth.ajax.RegisterRequest;
 import com.haihua.hhplms.security.auth.ajax.WebBasedAjaxAuthenticationService;
+import com.haihua.hhplms.security.exception.UserMobileNotBindingException;
 import com.haihua.hhplms.security.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -32,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service("accountService")
 public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthenticationService {
+
     @Autowired
     private BCryptPasswordEncoder encoder;
 
@@ -49,6 +55,19 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     @Autowired
     @Qualifier("accountRoleRelationshipService")
     private AccountRoleRelationshipService accountRoleRelationshipService;
+
+    @Autowired
+    @Qualifier("wechatClient")
+    private WechatClient wechatClient;
+
+    @Value("${wechat.app.id}")
+    private String appId;
+
+    @Value("${wechat.app.secret}")
+    private String appSecret;
+
+    @Value("${wechat.login.redirect.base.url}")
+    private String wechatLoginRedirectBaseUrl;
 
     public PageWrapper<List<AccountVO>> loadAccountsByPage(String loginNameLike,
                                                            String realNameLike,
@@ -587,6 +606,10 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return findSingle("mobile", mobile);
     }
 
+    public Account findByOpenId(String phoneId) {
+        return findSingle("phoneId", phoneId);
+    }
+
     public Account findByEmail(String email) {
         return findSingle("email", email);
     }
@@ -627,6 +650,8 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .loginName(account.getLoginName())
                 .mobile(account.getMobile())
                 .email(account.getEmail())
+                .openId(account.getOpenId())
+                .unionId(account.getUnionId())
                 .type(Role.Category.ACCOUNT.getCode())
                 .subType(account.getType().getCode())
                 .password(account.getPassword())
@@ -639,6 +664,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 .build();
     }
 
+    @Override
     public UserBasicInfo loadUserBasicInfoByMobile(String mobile) {
         Account account = findByMobile(mobile);
         if (Objects.isNull(account)) {
@@ -647,8 +673,21 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return toUserBasicInfo(account);
     }
 
+    @Override
+    public UserBasicInfo loadUserBasicInfoByOpenId(final String openId) {
+        final Account account = findByOpenId(openId);
+        if (Objects.isNull(account)) {
+            throw new UsernameNotFoundException("OpenId[" + openId + "]不存在");
+        }
+        return toUserBasicInfo(account);
+    }
+
+    @Override
     public UserBasicInfo loadUserBasicInfoByUserName(String username) {
         Account account = findByLoginName(username);
+        if (Objects.isNull(account)) {
+            account = findByOpenId(username);
+        }
         if (Objects.isNull(account)) {
             account = findByMobile(username);
         }
@@ -824,6 +863,78 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return Objects.nonNull(account);
     }
 
+    @Override
+    public UserBasicInfo wechatLogin(final String openId) {
+        final UserBasicInfo userBasicInfo = loadUserBasicInfoByOpenId(openId);
+        if (StringUtils.isBlank(userBasicInfo.getMobile())) {
+            throw new UserMobileNotBindingException("用户还未绑定手机号");
+        }
+        return userBasicInfo;
+    }
+
+    /**
+     * 微信授权回调接口
+     * @param code 换取access_token的票据
+     */
+    @Override
+    public String wechatAuthCallback(String code) {
+        AccessTokenWrapper accessTokenWrapper = null;
+        try {
+            accessTokenWrapper = wechatClient.retrieveAccessToken(appId, appSecret, code, "authorization_code");
+        } catch (ServiceException e) {
+            final String errorCode = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrCode()) ? "-99999" : accessTokenWrapper.getErrCode();
+            final String errorMsg = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrMsg()) ? "未知错误" : accessTokenWrapper.getErrMsg();
+            return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
+                    errorCode, errorMsg);
+        }
+        UserInfoWrapper userInfoWrapper = null;
+        try {
+            userInfoWrapper = wechatClient.retrieveUserInfo(accessTokenWrapper.getAccessToken(), accessTokenWrapper.getOpenId(), "zh_CN");
+        } catch (ServiceException e) {
+            final String errorCode = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrCode()) ? "-99999" : userInfoWrapper.getErrCode();
+            final String errorMsg = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrMsg()) ? "未知错误" : userInfoWrapper.getErrMsg();
+            return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
+                    errorCode, errorMsg);
+        }
+        final Account existAccount = findByOpenId(userInfoWrapper.getOpenId());
+        if (Objects.isNull(existAccount)) {
+            createAccount(toNewAccount(userInfoWrapper));
+        } else {
+            updateAccount(toUpdatedInfo(existAccount, userInfoWrapper));
+        }
+
+        return String.format("%s/openIdBack?openId=%s", wechatLoginRedirectBaseUrl, userInfoWrapper.getOpenId());
+    }
+
+    private Account toNewAccount(final UserInfoWrapper userInfoWrapper) {
+        final Account newAccount = new Account();
+        newAccount.setOpenId(userInfoWrapper.getOpenId());
+        newAccount.setUnionId(userInfoWrapper.getUnionId());
+        newAccount.setNickName(userInfoWrapper.getNickName());
+        newAccount.setHeadImgUrl(userInfoWrapper.getHeadImgUrl());
+        newAccount.setGender(Gender.getById(userInfoWrapper.getSex()));
+        newAccount.setType(Account.Type.MEMBER);
+        newAccount.setStatus(Account.Status.ACTIVE);
+        newAccount.setCreatedBy("default");
+        newAccount.setCreatedTime(new Date(System.currentTimeMillis()));
+        newAccount.setVersionNum(GlobalConstant.INIT_VERSION_NUM_VALUE);
+        return newAccount;
+    }
+
+    private Account toUpdatedInfo(final Account existAccount, final UserInfoWrapper userInfoWrapper) {
+        final Account updatedInfo = new Account();
+        updatedInfo.setSid(existAccount.getSid());
+        updatedInfo.setGender(Gender.getById(userInfoWrapper.getSex()));
+        updatedInfo.setNickName(userInfoWrapper.getNickName());
+        updatedInfo.setHeadImgUrl(userInfoWrapper.getHeadImgUrl());
+
+        updatedInfo.setUpdatedBy("default");
+        updatedInfo.setUpdatedTime(new Date(System.currentTimeMillis()));
+        updatedInfo.setVersionNum(existAccount.getVersionNum());
+        return updatedInfo;
+    }
+
+    @Override
     public UserBasicInfo login(String username, String password) {
         UserBasicInfo userBasicInfo = loadUserBasicInfoByUserName(username);
         if (!encoder.matches(password, userBasicInfo.getPassword())) {

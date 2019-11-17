@@ -12,7 +12,8 @@ public enum ErrorCode {
     JWT_TOKEN_EXPIRED(11),
     JWT_TOKEN_BAD(44),
     USER_NOT_FOUND(12),
-    USER_DISABLED(20);
+    USER_DISABLED(20),
+    USER_MOBILE_NOT_BINDING(60);
 
     private int errorCode;
 

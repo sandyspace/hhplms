@@ -1,9 +1,6 @@
 package com.haihua.hhplms.security.endpoint;
 
-import com.haihua.hhplms.security.model.UserBasicInfo;
 import com.haihua.hhplms.security.auth.ajax.*;
-import com.haihua.hhplms.security.model.GrantedPermission;
-import com.haihua.hhplms.security.model.GrantedRole;
 import com.haihua.hhplms.security.model.UserBasicInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
 public class AjaxLoginEndpoint {
+
     @Autowired
     @Qualifier("employeeService")
     private AjaxAuthenticationService ajaxAuthenticationService;
@@ -38,7 +35,7 @@ public class AjaxLoginEndpoint {
             throw new AuthenticationServiceException("用户名密码不能为空");
         }
         UserBasicInfo basicInfo = ajaxAuthenticationService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(loginRequest.getUsername(), basicInfo.getType()));
+        return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(basicInfo.getLoginName(), basicInfo.getType()));
     }
 
     @PostMapping(path = "/api/auth/account/login", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -47,7 +44,16 @@ public class AjaxLoginEndpoint {
             throw new AuthenticationServiceException("用户名密码不能为空");
         }
         UserBasicInfo basicInfo = webBasedAjaxAuthenticationService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(loginRequest.getUsername(), basicInfo.getType()));
+        return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(basicInfo.getLoginName(), basicInfo.getType()));
+    }
+
+    @PostMapping(path = "/api/auth/account/wechatLogin", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, Object>> wechatLogin(@RequestBody final WechatLoginRequest wechatLoginRequest) {
+        if (StringUtils.isBlank(wechatLoginRequest.getOpenId())) {
+            throw new AuthenticationServiceException("OpenId不能为空");
+        }
+        final UserBasicInfo basicInfo = webBasedAjaxAuthenticationService.wechatLogin(wechatLoginRequest.getOpenId());
+        return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(basicInfo.getLoginName(), basicInfo.getType()));
     }
 
     @PostMapping(path = "/api/auth/account/fastLogin", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

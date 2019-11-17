@@ -27,6 +27,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String AUTHENTICATION_HEADER_NAME = "Authorization";
     public static final String AUTHENTICATION_URL = "/api/auth/login";
     public static final String ACCOUNT_AUTHENTICATION_URL = "/api/auth/account/login";
+    public static final String ACCOUNT_WECHAT_AUTHENTICATION_URL = "/api/auth/account/wechatLogin";
+    public static final String ACCOUNT_WECHAT_AUTH_CALLBACK_URL = "/api/auth/account/wechatAuthCallback";
     public static final String ACCOUNT_FAST_AUTHENTICATION_URL = "/api/auth/account/fastLogin";
     public static final String REFRESH_TOKEN_URL = "/api/auth/token";
     public static final String FEEDBACK_CREATION_URL = "/api/sys/feedbacks";
@@ -66,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, ACCOUNT_REGISTER_URL, LATEST_PREFERENTIAL_MSG_URL, "/console");
+        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTH_CALLBACK_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, ACCOUNT_REGISTER_URL, LATEST_PREFERENTIAL_MSG_URL, "/console");
 
         http.csrf().disable() // We don't need CSRF for JWT based authentication
                 .exceptionHandling()

@@ -14,6 +14,8 @@
     <result column="gender" property="gender" />
     <result column="head_img_url" property="headImgUrl" />
     <result column="type" property="type" />
+    <result column="open_id" property="openId" />
+    <result column="union_id" property="unionId" />
     <result column="status" property="status" />
     <result column="company_info_sid" property="companyInfoSid" />
     <result column="created_by" property="createdBy" />
@@ -24,14 +26,14 @@
   </resultMap>
 
   <sql id="columnClause">
-    sid, login_name, nick_name, real_name, mobile, email, password, gender, head_img_url, type, status, company_info_sid, created_by, created_time, updated_by, updated_time, version_num
+    sid, login_name, nick_name, real_name, mobile, email, password, gender, head_img_url, type, open_id, union_id, status, company_info_sid, created_by, created_time, updated_by, updated_time, version_num
   </sql>
 
   <insert id="create" parameterType="com.haihua.hhplms.ana.entity.Account" statementType="PREPARED" useGeneratedKeys="true" keyProperty="sid">
     insert into ana_account
-    (login_name, nick_name, real_name, mobile, email, password, gender, type, status, company_info_sid, created_by, created_time, version_num)
+    (login_name, nick_name, real_name, mobile, email, password, gender, type, status, open_id, union_id, company_info_sid, created_by, created_time, version_num)
     values
-    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{status}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{openId}, #{unionId}, #{status}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
@@ -66,6 +68,21 @@
       <if test="sid != null">
         sid = #{sid}
       </if>
+      <if test="mobile != null">
+        and mobile = #{mobile}
+      </if>
+      <if test="mobile != null">
+        and mobile = #{mobile}
+      </if>
+      <if test="email != null">
+        and email = #{email}
+      </if>
+      <if test="openId != null">
+        and open_id = #{openId}
+      </if>
+      <if test="unionId != null">
+        and union_id = #{unionId}
+      </if>
       <if test="versionNum != null">
         and version_num = #{versionNum}
       </if>
@@ -75,6 +92,7 @@
   <update id="updateByExample" parameterType="com.haihua.hhplms.ana.entity.Account" statementType="PREPARED">
     update ana_account
     <set>
+      version_num = #{versionNum} + 1,
       <if test="loginName != null">
         login_name = #{loginName},
       </if>
@@ -93,6 +111,12 @@
       <if test="gender != null">
         gender = #{gender},
       </if>
+      <if test="openId != null">
+        open_id = #{openId},
+      </if>
+      <if test="unionId != null">
+        union_id = #{unionId},
+      </if>
       <if test="companyInfoSid != null">
         company_info_sid = #{companyInfoSid},
       </if>
@@ -100,20 +124,10 @@
         updated_by = #{updatedBy},
       </if>
       <if test="updatedTime != null">
-        updated_time = #{updatedTime},
-      </if>
-      <if test="versionNum != null">
-        version_num = #{versionNum} + 1
+        updated_time = #{updatedTime}
       </if>
     </set>
-    <where>
-      <if test="sid != null">
-        sid = #{sid}
-      </if>
-      <if test="versionNum != null">
-        and version_num = #{versionNum}
-      </if>
-    </where>
+    where sid = #{sid} and version_num = #{versionNum}
   </update>
 
   <delete id="deleteByParams" parameterType="map" statementType="PREPARED">
@@ -130,6 +144,12 @@
       </if>
       <if test="email != null">
         and email = #{email}
+      </if>
+      <if test="openId != null">
+        and open_id = #{openId}
+      </if>
+      <if test="unionId != null">
+        and union_id = #{unionId}
       </if>
     </where>
   </delete>
@@ -164,6 +184,12 @@
       </if>
       <if test="type != null">
         and type = #{type}
+      </if>
+      <if test="openId != null">
+        and open_id = #{openId}
+      </if>
+      <if test="unionId != null">
+        and union_id = #{unionId}
       </if>
       <if test="status != null">
         and status = #{status}
@@ -210,6 +236,12 @@
       </if>
       <if test="type != null">
         and type = #{type}
+      </if>
+      <if test="openId != null">
+        and open_id = #{openId}
+      </if>
+      <if test="unionId != null">
+        and union_id = #{unionId}
       </if>
       <if test="status != null">
         and status = #{status}

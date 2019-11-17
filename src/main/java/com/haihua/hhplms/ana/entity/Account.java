@@ -15,6 +15,8 @@ public class Account extends BaseEntity {
     private Gender gender;
     private String headImgUrl;
     private Type type;
+    private String openId;
+    private String unionId;
     private Status status;
     private Long companyInfoSid;
 
@@ -88,6 +90,22 @@ public class Account extends BaseEntity {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
+
+    public String getUnionId() {
+        return unionId;
+    }
+
+    public void setUnionId(String unionId) {
+        this.unionId = unionId;
     }
 
     public Status getStatus() {
