@@ -1,9 +1,5 @@
 package com.haihua.hhplms.ana.service;
 
-import com.haihua.hhplms.ana.entity.Permission;
-import com.haihua.hhplms.ana.entity.Role;
-import com.haihua.hhplms.ana.mapper.AccountMapper;
-import com.haihua.hhplms.ana.vo.*;
 import com.haihua.hhplms.ana.entity.*;
 import com.haihua.hhplms.ana.mapper.AccountMapper;
 import com.haihua.hhplms.ana.vo.*;
@@ -21,12 +17,13 @@ import com.haihua.hhplms.security.auth.ajax.WebBasedAjaxAuthenticationService;
 import com.haihua.hhplms.security.exception.UserMobileNotBindingException;
 import com.haihua.hhplms.security.model.*;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +34,8 @@ import java.util.stream.Collectors;
 
 @Service("accountService")
 public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthenticationService {
+
+    private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -882,6 +881,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         try {
             accessTokenWrapper = wechatClient.retrieveAccessToken(appId, appSecret, code, "authorization_code");
         } catch (ServiceException e) {
+            log.error(e.getMessage(), e);
             final String errorCode = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrCode()) ? "-99999" : accessTokenWrapper.getErrCode();
             final String errorMsg = Objects.isNull(accessTokenWrapper) || StringUtils.isBlank(accessTokenWrapper.getErrMsg()) ? "未知错误" : accessTokenWrapper.getErrMsg();
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
@@ -891,6 +891,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         try {
             userInfoWrapper = wechatClient.retrieveUserInfo(accessTokenWrapper.getAccessToken(), accessTokenWrapper.getOpenId(), "zh_CN");
         } catch (ServiceException e) {
+            log.error(e.getMessage(), e);
             final String errorCode = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrCode()) ? "-99999" : userInfoWrapper.getErrCode();
             final String errorMsg = Objects.isNull(userInfoWrapper) || StringUtils.isBlank(userInfoWrapper.getErrMsg()) ? "未知错误" : userInfoWrapper.getErrMsg();
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
