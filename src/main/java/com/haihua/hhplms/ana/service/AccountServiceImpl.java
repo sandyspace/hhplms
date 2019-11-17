@@ -607,8 +607,8 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return findSingle("mobile", mobile);
     }
 
-    public Account findByOpenId(String phoneId) {
-        return findSingle("phoneId", phoneId);
+    public Account findByOpenId(String openId) {
+        return findSingle("openId", openId);
     }
 
     public Account findByEmail(String email) {

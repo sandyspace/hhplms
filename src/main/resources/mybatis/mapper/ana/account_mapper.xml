@@ -33,7 +33,7 @@
     insert into ana_account
     (login_name, nick_name, real_name, mobile, email, password, gender, type, status, open_id, union_id, company_info_sid, created_by, created_time, version_num)
     values
-    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{openId}, #{unionId}, #{status}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
+    (#{loginName}, #{nickName}, #{realName}, #{mobile}, #{email}, #{password}, #{gender}, #{type}, #{status}, #{openId}, #{unionId}, #{companyInfoSid}, #{createdBy}, #{createdTime}, #{versionNum})
   </insert>
 
   <update id="updateByParams" parameterType="map" statementType="PREPARED">
