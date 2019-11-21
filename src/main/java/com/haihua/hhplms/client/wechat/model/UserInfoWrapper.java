@@ -42,7 +42,7 @@ public class UserInfoWrapper {
     private String unionId;
 
     @JsonProperty("errcode")
-    private String errCode;
+    private Integer errCode;
 
     @JsonProperty("errmsg")
     private String errMsg;
@@ -111,11 +111,11 @@ public class UserInfoWrapper {
         this.unionId = unionId;
     }
 
-    public String getErrCode() {
+    public Integer getErrCode() {
         return errCode;
     }
 
-    public void setErrCode(String errCode) {
+    public void setErrCode(Integer errCode) {
         this.errCode = errCode;
     }
 

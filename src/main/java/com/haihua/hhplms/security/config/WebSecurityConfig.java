@@ -29,11 +29,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String ACCOUNT_AUTHENTICATION_URL = "/api/auth/account/login";
     public static final String ACCOUNT_WECHAT_AUTHENTICATION_URL = "/api/auth/account/wechatLogin";
     public static final String ACCOUNT_WECHAT_AUTH_CALLBACK_URL = "/api/auth/account/wechatAuthCallback";
+    public static final String WECHAT_MOBILE_BINDING_URL = "/api/auth/account/wechat-mobile/binding";
+    public static final String ACCOUNT_PWD_SETTING_URL = "/api/auth/account/pwd/setting";
     public static final String ACCOUNT_FAST_AUTHENTICATION_URL = "/api/auth/account/fastLogin";
     public static final String REFRESH_TOKEN_URL = "/api/auth/token";
     public static final String FEEDBACK_CREATION_URL = "/api/sys/feedbacks";
     public static final String ACCOUNT_REGISTER_URL = "/api/auth/account/register";
     public static final String LATEST_PREFERENTIAL_MSG_URL = "/api/pm/preferentialMsgs/latest";
+    public static final String DYNAMIC_CODE_RETRIEVE_URL = "/api/sys/dynamicCodes/retrieve";
     public static final String API_ROOT_URL = "/api/**";
 
     @Autowired
@@ -68,7 +71,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTH_CALLBACK_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, ACCOUNT_REGISTER_URL, LATEST_PREFERENTIAL_MSG_URL, "/console");
+        List<String> permitAllEndpointList = Arrays.asList(AUTHENTICATION_URL, ACCOUNT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTHENTICATION_URL, ACCOUNT_WECHAT_AUTH_CALLBACK_URL,
+                WECHAT_MOBILE_BINDING_URL, ACCOUNT_PWD_SETTING_URL, ACCOUNT_FAST_AUTHENTICATION_URL, REFRESH_TOKEN_URL, FEEDBACK_CREATION_URL, ACCOUNT_REGISTER_URL, LATEST_PREFERENTIAL_MSG_URL,
+                DYNAMIC_CODE_RETRIEVE_URL, "/console");
 
         http.csrf().disable() // We don't need CSRF for JWT based authentication
                 .exceptionHandling()

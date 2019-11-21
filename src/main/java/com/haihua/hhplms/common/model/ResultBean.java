@@ -27,17 +27,17 @@ public class ResultBean {
             return msg;
         }
 
-        public static <T> Success of(T content, String msg) {
-            return new Success(content, msg);
+        public static <T> Success<T> of(T content, String msg) {
+            return new Success<>(content, msg);
         }
     }
 
     public static class Failure {
         private int status = GlobalConstant.STATUS_FAILURE;
-        private int errorCode;
+        private Integer errorCode;
         private String errorMsg;
 
-        private Failure(int errorCode, String errorMsg) {
+        private Failure(Integer errorCode, String errorMsg) {
             this.errorCode = errorCode;
             this.errorMsg = errorMsg;
         }
@@ -46,7 +46,7 @@ public class ResultBean {
             return status;
         }
 
-        public int getErrorCode() {
+        public Integer getErrorCode() {
             return errorCode;
         }
 
@@ -54,7 +54,7 @@ public class ResultBean {
             return errorMsg;
         }
 
-        public static Failure of(int errorCode, String errorMsg) {
+        public static Failure of(Integer errorCode, String errorMsg) {
             return new Failure(errorCode, errorMsg);
         }
     }

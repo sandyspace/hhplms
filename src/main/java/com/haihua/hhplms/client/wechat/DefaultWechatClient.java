@@ -45,7 +45,7 @@ public class DefaultWechatClient implements WechatClient {
         try {
             response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<String>() {});
         } catch (RestClientException e) {
-            throw new ServiceException("获取AccessToken失败");
+            throw new ServiceException(-9999, "获取AccessToken失败");
         }
 
         if (log.isInfoEnabled()) {
@@ -54,11 +54,11 @@ public class DefaultWechatClient implements WechatClient {
 
         final AccessTokenWrapper accessTokenWrapper = JsonUtil.parse(response.getBody(), AccessTokenWrapper.class);
         if (Objects.isNull(accessTokenWrapper)) {
-            throw new ServiceException("获取AccessToken失败");
+            throw new ServiceException(-9999, "获取AccessToken失败");
         }
 
-        if (StringUtils.isNotBlank(accessTokenWrapper.getErrCode())) {
-            throw new ServiceException(accessTokenWrapper.getErrMsg());
+        if (Objects.nonNull(accessTokenWrapper.getErrCode())) {
+            throw new ServiceException(accessTokenWrapper.getErrCode(), accessTokenWrapper.getErrMsg());
         }
 
         return accessTokenWrapper;
@@ -77,7 +77,7 @@ public class DefaultWechatClient implements WechatClient {
         try {
             response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<String>() {});
         } catch (RestClientException e) {
-            throw new ServiceException("获取用户信息失败");
+            throw new ServiceException(-9999, "获取用户信息失败");
         }
 
         if (log.isInfoEnabled()) {
@@ -87,11 +87,11 @@ public class DefaultWechatClient implements WechatClient {
         final UserInfoWrapper userInfoWrapper = JsonUtil.parse(response.getBody(), UserInfoWrapper.class);
 
         if (Objects.isNull(userInfoWrapper)) {
-            throw new ServiceException("获取用户信息失败");
+            throw new ServiceException(-9999, "获取用户信息失败");
         }
 
-        if (StringUtils.isNotBlank(userInfoWrapper.getErrCode())) {
-            throw new ServiceException(userInfoWrapper.getErrMsg());
+        if (Objects.nonNull(userInfoWrapper.getErrCode())) {
+            throw new ServiceException(userInfoWrapper.getErrCode(), userInfoWrapper.getErrMsg());
         }
 
         return userInfoWrapper;

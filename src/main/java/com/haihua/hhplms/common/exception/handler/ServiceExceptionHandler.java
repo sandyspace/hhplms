@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Objects;
+
 @ControllerAdvice
 public class ServiceExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionHandler.class);
@@ -18,6 +20,8 @@ public class ServiceExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ResultBean.Failure> handlerServiceException(ServiceException e) {
         log.error(e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultBean.Failure.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResultBean.Failure.of(Objects.isNull(e.getCode()) ? HttpStatus.INTERNAL_SERVER_ERROR.value() : e.getCode(), e.getMessage()));
     }
 }

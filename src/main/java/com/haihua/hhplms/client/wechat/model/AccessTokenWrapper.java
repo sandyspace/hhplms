@@ -30,7 +30,7 @@ public class AccessTokenWrapper {
     private String scope;
 
     @JsonProperty("errcode")
-    private String errCode;
+    private Integer errCode;
 
     @JsonProperty("errmsg")
     private String errMsg;
@@ -75,11 +75,11 @@ public class AccessTokenWrapper {
         this.scope = scope;
     }
 
-    public String getErrCode() {
+    public Integer getErrCode() {
         return errCode;
     }
 
-    public void setErrCode(String errCode) {
+    public void setErrCode(Integer errCode) {
         this.errCode = errCode;
     }
 
