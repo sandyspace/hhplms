@@ -9,5 +9,7 @@ public interface WebBasedAjaxAuthenticationService extends AjaxAuthenticationSer
     UserBasicInfo loadUserBasicInfoByOpenId(final String openId);
     UserBasicInfo wechatLogin(final String openId);
     String wechatAuthCallback(String code);
+    void bindingMobileWithWechat(final WechatMobileBindingRequest wechatMobileBindingRequest);
+    void settingPassword(final PwdSettingRequest pwdSettingRequest);
     UserBasicInfo fastLogin(String mobile, String dynamicCode);
 }

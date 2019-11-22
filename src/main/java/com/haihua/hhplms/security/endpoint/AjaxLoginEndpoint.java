@@ -1,5 +1,6 @@
 package com.haihua.hhplms.security.endpoint;
 
+import com.haihua.hhplms.common.model.ResultBean;
 import com.haihua.hhplms.security.auth.ajax.*;
 import com.haihua.hhplms.security.model.UserBasicInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -65,5 +66,17 @@ public class AjaxLoginEndpoint {
 
         UserBasicInfo basicInfo = webBasedAjaxAuthenticationService.loadUserBasicInfoByMobile(fastLoginRequest.getMobile());
         return ResponseEntity.status(HttpStatus.OK).body(ajaxAuthenticationResultHandler.handleOnSuccess(fastLoginRequest.getMobile(), basicInfo.getType()));
+    }
+
+    @PostMapping(path = "/api/auth/account/wechat-mobile/binding", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<ResultBean.Success<String>> bindingMobileWithWechat(@RequestBody final WechatMobileBindingRequest wechatMobileBindingRequest) {
+        webBasedAjaxAuthenticationService.bindingMobileWithWechat(wechatMobileBindingRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(ResultBean.Success.of("", "绑定成功"));
+    }
+
+    @PostMapping(path = "/api/auth/account/pwd/setting", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<ResultBean.Success<String>> settingPassword(@RequestBody final PwdSettingRequest pwdSettingRequest) {
+        webBasedAjaxAuthenticationService.settingPassword(pwdSettingRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(ResultBean.Success.of("", "密码设置成功"));
     }
 }

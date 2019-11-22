@@ -10,12 +10,16 @@ import com.haihua.hhplms.common.constant.GlobalConstant;
 import com.haihua.hhplms.common.exception.ServiceException;
 import com.haihua.hhplms.common.model.PageWrapper;
 import com.haihua.hhplms.common.utils.EnumUtil;
+import com.haihua.hhplms.common.utils.JsonUtil;
 import com.haihua.hhplms.common.utils.ListUtils;
 import com.haihua.hhplms.common.utils.WebUtils;
+import com.haihua.hhplms.security.auth.ajax.PwdSettingRequest;
 import com.haihua.hhplms.security.auth.ajax.RegisterRequest;
 import com.haihua.hhplms.security.auth.ajax.WebBasedAjaxAuthenticationService;
+import com.haihua.hhplms.security.auth.ajax.WechatMobileBindingRequest;
 import com.haihua.hhplms.security.exception.UserMobileNotBindingException;
 import com.haihua.hhplms.security.model.*;
+import com.haihua.hhplms.sys.service.SmsService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +60,10 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     @Autowired
     @Qualifier("accountRoleRelationshipService")
     private AccountRoleRelationshipService accountRoleRelationshipService;
+
+    @Autowired
+    @Qualifier("smsService")
+    private SmsService smsService;
 
     @Autowired
     @Qualifier("wechatClient")
@@ -645,6 +653,22 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return matchedAccounts;
     }
 
+    public int deleteByOpenId(final String openId) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("openId", openId);
+        return deleteByParams(params);
+    }
+
+    public int deleteByParams(final Map<String, Object> params) {
+        int deletedRows;
+        try {
+            deletedRows = accountMapper.deleteByParams(params);
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
+        return deletedRows;
+    }
+
     private UserBasicInfo toUserBasicInfo(Account account) {
         return new UserBasicInfo.Builder()
                 .id(account.getSid())
@@ -773,7 +797,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     public List<GrantedRole> loadGrantedRolesByUserBasicInfo(UserBasicInfo userBasicInfo) {
         final List<Role> roles = roleService.findRolesOfGivenAccount(userBasicInfo.getId());
         if (Objects.isNull(roles) || roles.isEmpty()) {
-            return Arrays.asList(new GrantedRole.Builder()
+            return Collections.singletonList(new GrantedRole.Builder()
                     .id(GlobalConstant.DEFAULT_ACCOUNT_ROLE_ID)
                     .code(GlobalConstant.DEFAULT_ACCOUNT_ROLE_CODE)
                     .name(GlobalConstant.DEFAULT_ACCOUNT_ROLE_NAME)
@@ -873,6 +897,65 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         return userBasicInfo;
     }
 
+    @Override
+    public void bindingMobileWithWechat(final WechatMobileBindingRequest wechatMobileBindingRequest) {
+        if (log.isInfoEnabled()) {
+            log.info(String.format("绑定用户手机号 ==> wechatMobileBindingRequest: %s", JsonUtil.toJson(wechatMobileBindingRequest)));
+        }
+        smsService.verifyDynamicCode(wechatMobileBindingRequest.getMobile(), wechatMobileBindingRequest.getDynamicCode());
+        final Account existAccount = findByMobile(wechatMobileBindingRequest.getMobile());
+        if (Objects.isNull(existAccount)) {
+            final Account wechatAccount = findByOpenId(wechatMobileBindingRequest.getOpenId());
+            if (Objects.isNull(wechatAccount)) {
+                throw new ServiceException("用户不存在, 绑定手机号失败");
+            }
+            final Account example = new Account();
+            example.setSid(wechatAccount.getSid());
+            example.setMobile(wechatMobileBindingRequest.getMobile());
+            example.setUpdatedBy("default");
+            example.setUpdatedTime(new Date(System.currentTimeMillis()));
+            example.setVersionNum(wechatAccount.getVersionNum());
+            final int updatedRows = updateAccount(example);
+            if (0 == updatedRows) {
+                throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
+            }
+        } else {
+            deleteByOpenId(wechatMobileBindingRequest.getOpenId());
+            final Account example = new Account();
+            example.setSid(existAccount.getSid());
+            example.setOpenId(wechatMobileBindingRequest.getOpenId());
+            example.setUpdatedBy("default");
+            example.setUpdatedTime(new Date(System.currentTimeMillis()));
+            example.setVersionNum(existAccount.getVersionNum());
+            final int updatedRows = updateAccount(example);
+            if (0 == updatedRows) {
+                throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
+            }
+        }
+    }
+
+    @Override
+    public void settingPassword(final PwdSettingRequest pwdSettingRequest) {
+        if (log.isInfoEnabled()) {
+            log.info(String.format("设置用户密码 ==> pwdSettingRequest: %s", JsonUtil.toJson(pwdSettingRequest)));
+        }
+        smsService.verifyDynamicCode(pwdSettingRequest.getMobile(), pwdSettingRequest.getDynamicCode());
+        final Account existAccount = findByMobile(pwdSettingRequest.getMobile());
+        if (Objects.isNull(existAccount)) {
+            throw new ServiceException("用户不存在, 设置密码失败");
+        }
+        final Account example = new Account();
+        example.setSid(existAccount.getSid());
+        example.setPassword(encoder.encode(pwdSettingRequest.getPassword()));
+        example.setUpdatedBy("default");
+        example.setUpdatedTime(new Date(System.currentTimeMillis()));
+        example.setVersionNum(existAccount.getVersionNum());
+        final int updatedRows = updateAccount(example);
+        if (0 == updatedRows) {
+            throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
+        }
+    }
+
     /**
      * 微信授权回调接口
      * @param code 换取access_token的票据
@@ -893,6 +976,10 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
                     e.getCode(), encodedErrorMsg);
         }
+        if (log.isInfoEnabled())  {
+            log.info(String.format("微信AccessToken信息 ==> accessTokenWrapper: %s", JsonUtil.toJson(accessTokenWrapper)));
+        }
+
         UserInfoWrapper userInfoWrapper = null;
         try {
             userInfoWrapper = wechatClient.retrieveUserInfo(accessTokenWrapper.getAccessToken(), accessTokenWrapper.getOpenId(), "zh_CN");
@@ -907,6 +994,10 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             return String.format("%s/error?errorCode=%s&errorMsg=%s", wechatLoginRedirectBaseUrl,
                     e.getCode(), encodedErrorMsg);
         }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("微信用户信息 ==> userInfoWrapper: %s", JsonUtil.toJson(userInfoWrapper)));
+        }
+
         final Account existAccount = findByOpenId(userInfoWrapper.getOpenId());
         if (Objects.isNull(existAccount)) {
             createAccount(toNewAccount(userInfoWrapper));

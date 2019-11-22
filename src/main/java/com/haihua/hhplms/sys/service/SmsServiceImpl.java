@@ -37,6 +37,23 @@ public class SmsServiceImpl implements SmsService {
         return dynamicCode.toString();
     }
 
+    @Override
+    public void verifyDynamicCode(final String mobile, final String dynamicCode) {
+        final DynamicCodeHolder dynamicCodeHolder = dynamicCodeCache.get(mobile);
+        if (Objects.isNull(dynamicCodeHolder)) {
+            throw new ServiceException("无效的验证码");
+        }
+        if (!Objects.equals(dynamicCodeHolder.getDynamicCode(), dynamicCode)) {
+            throw new ServiceException("验证码错误");
+        }
+        final long expireTime = dynamicCodeHolder.getExpireTime();
+        if (System.currentTimeMillis() > expireTime) {
+            throw new ServiceException("验证码已过期");
+        }
+        dynamicCodeCache.remove(mobile);
+    }
+
+    @Override
     public void sendDynamicCode(final String mobile) {
         final DynamicCodeHolder dynamicCodeHolder = dynamicCodeCache.get(mobile);
         if (Objects.isNull(dynamicCodeHolder)) {
@@ -49,7 +66,7 @@ public class SmsServiceImpl implements SmsService {
             dynamicCodeCache.put(mobile, new DynamicCodeHolder(dynamicCode, System.currentTimeMillis() + TWO_MIN_IN_MINI_SECOND));
             tencentSmsClient.sendDynamicCode(mobile, dynamicCode);
         } else {
-            long expireTime = dynamicCodeHolder.getExpireTime();
+            final long expireTime = dynamicCodeHolder.getExpireTime();
             if (System.currentTimeMillis() > expireTime) {
                 final String dynamicCode = generateDynamicCode();
                 final SmsSingleSenderResult result = tencentSmsClient.sendDynamicCode(mobile, dynamicCode);
