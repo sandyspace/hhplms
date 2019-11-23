@@ -923,16 +923,28 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
                 throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
             }
         } else {
-            deleteByOpenId(wechatMobileBindingRequest.getOpenId());
-            final Account example = new Account();
-            example.setSid(existAccount.getSid());
-            example.setOpenId(wechatMobileBindingRequest.getOpenId());
-            example.setUpdatedBy("default");
-            example.setUpdatedTime(new Date(System.currentTimeMillis()));
-            example.setVersionNum(existAccount.getVersionNum());
-            final int updatedRows = updateAccount(example);
-            if (0 == updatedRows) {
-                throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
+            //待绑定的手机号存在老账号
+
+            //查找openId对应的账号
+            final Account wechatAccount = findByOpenId(wechatMobileBindingRequest.getOpenId());
+
+            if (Objects.equals(existAccount.getSid(), Objects.isNull(wechatAccount) ? -1 : wechatAccount.getSid())) {
+                //老账号和openId对应的账号是同一个
+                if (log.isInfoEnabled()) {
+                    log.info(String.format("用户已经绑定过手机号, 不做任何处理, 用户信息: %s", JsonUtil.toJson(wechatAccount)));
+                }
+            } else {
+                deleteByOpenId(wechatMobileBindingRequest.getOpenId());
+                final Account example = new Account();
+                example.setSid(existAccount.getSid());
+                example.setOpenId(wechatMobileBindingRequest.getOpenId());
+                example.setUpdatedBy("default");
+                example.setUpdatedTime(new Date(System.currentTimeMillis()));
+                example.setVersionNum(existAccount.getVersionNum());
+                final int updatedRows = updateAccount(example);
+                if (0 == updatedRows) {
+                    throw new ServiceException("此用户的信息其他人正在编辑, 绑定手机号失败");
+                }
             }
         }
     }
