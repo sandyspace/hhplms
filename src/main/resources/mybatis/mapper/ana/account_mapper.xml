@@ -99,6 +99,9 @@
       <if test="nickName != null">
         nick_name = #{nickName},
       </if>
+      <if test="headImgUrl != null">
+        head_img_url = #{headImgUrl},
+      </if>
       <if test="realName != null">
         real_name = #{realName},
       </if>
@@ -116,6 +119,9 @@
       </if>
       <if test="unionId != null">
         union_id = #{unionId},
+      </if>
+      <if test="password != null">
+        password = #{password},
       </if>
       <if test="companyInfoSid != null">
         company_info_sid = #{companyInfoSid},
