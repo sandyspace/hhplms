@@ -842,9 +842,6 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
     }
 
     public UserBasicInfo register(RegisterRequest registerRequest) {
-        if (StringUtils.isBlank(registerRequest.getEmail())) {
-            throw new ServiceException("邮箱不能为空");
-        }
         if (StringUtils.isBlank(registerRequest.getMobile())) {
             throw new ServiceException("手机不能为空");
         }
@@ -854,16 +851,12 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (StringUtils.isBlank(registerRequest.getPassword())) {
             throw new ServiceException("密码不能为空");
         }
-        if (emailExist(registerRequest.getEmail())) {
-            throw new ServiceException("邮箱已被占用，请使用其他邮箱注册");
-        }
         if (mobileExist(registerRequest.getMobile())) {
             throw new ServiceException("手机号已被占用，请使用其他手机号注册");
         }
         Account account = new Account();
         account.setLoginName(registerRequest.getMobile());
         account.setMobile(registerRequest.getMobile());
-        account.setEmail(registerRequest.getEmail());
         account.setGender(Gender.UNKNOWN);
         account.setType(Account.Type.MEMBER);
         account.setStatus(Account.Status.ACTIVE);
@@ -914,6 +907,7 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             }
             final Account example = new Account();
             example.setSid(wechatAccount.getSid());
+            example.setLoginName(wechatMobileBindingRequest.getMobile());
             example.setMobile(wechatMobileBindingRequest.getMobile());
             example.setUpdatedBy("default");
             example.setUpdatedTime(new Date(System.currentTimeMillis()));
