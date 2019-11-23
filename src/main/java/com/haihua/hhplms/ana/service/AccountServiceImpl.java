@@ -848,6 +848,9 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
         if (StringUtils.isBlank(registerRequest.getMobile())) {
             throw new ServiceException("手机不能为空");
         }
+
+        smsService.verifyDynamicCode(registerRequest.getMobile(), registerRequest.getDynamicCode());
+
         if (StringUtils.isBlank(registerRequest.getPassword())) {
             throw new ServiceException("密码不能为空");
         }
