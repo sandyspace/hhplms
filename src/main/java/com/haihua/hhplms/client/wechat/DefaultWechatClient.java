@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Component("wechatClient")
@@ -84,7 +86,11 @@ public class DefaultWechatClient implements WechatClient {
             log.info(String.format("retrieveUserInfo ------> raw response: %s", JsonUtil.toJson(response)));
         }
 
-        final UserInfoWrapper userInfoWrapper = JsonUtil.parse(response.getBody(), UserInfoWrapper.class);
+        if (StringUtils.isBlank(response.getBody())) {
+            throw new ServiceException(-9999, "获取用户信息失败");
+        }
+
+        UserInfoWrapper userInfoWrapper = JsonUtil.parse(new String(response.getBody().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8), UserInfoWrapper.class);;
 
         if (Objects.isNull(userInfoWrapper)) {
             throw new ServiceException(-9999, "获取用户信息失败");

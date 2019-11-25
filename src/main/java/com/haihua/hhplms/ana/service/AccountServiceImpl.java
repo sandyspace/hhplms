@@ -1014,7 +1014,11 @@ public class AccountServiceImpl implements AccountService, WebBasedAjaxAuthentic
             updateAccount(toUpdatedInfo(existAccount, userInfoWrapper));
         }
 
-        return String.format("%s/openIdBack?openId=%s", wechatLoginRedirectBaseUrl, userInfoWrapper.getOpenId());
+        final String redirectUrl = String.format("%s/openIdBack?openId=%s", wechatLoginRedirectBaseUrl, userInfoWrapper.getOpenId());
+        if (log.isInfoEnabled()) {
+            log.info(String.format("跳转链接 ==> redirectUrl: %s", redirectUrl));
+        }
+        return redirectUrl;
     }
 
     private Account toNewAccount(final UserInfoWrapper userInfoWrapper) {
