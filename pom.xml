@@ -159,6 +159,9 @@
           <exclude>application-dev.properties</exclude>
           <exclude>application-prod.properties</exclude>
           <exclude>application-test.properties</exclude>
+          <exclude>logback-spring-dev.xml</exclude>
+          <exclude>logback-spring-prod.xml</exclude>
+          <exclude>logback-spring-test.xml</exclude>
         </excludes>
       </resource>
       <resource>
@@ -166,6 +169,7 @@
         <filtering>true</filtering>
         <includes>
           <include>application-${profileActive}.properties</include>
+          <include>logback-spring-${profileActive}.xml</include>
         </includes>
       </resource>
     </resources>
